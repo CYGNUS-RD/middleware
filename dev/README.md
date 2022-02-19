@@ -3,3 +3,8 @@
 * example stand alone sensor reading/plot [readEnvTsensor.ipynb](./readEnvTsensor.ipynb)
 * example and test of MIDAS ODB access form Jupyter [readMidasODB.ipynb](./readMidasODB.ipynb)
 
+command line 
+
+    ~/DAQ/middleware/dev$ source setup.sh
+    
+
