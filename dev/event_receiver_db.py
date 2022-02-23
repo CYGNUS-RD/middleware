@@ -169,6 +169,7 @@ if __name__ == "__main__":
             if ped_flag:
                 
                 if ped_id >= ped_size:
+                    print("[Making Pedestal over {:d} images]".format(pedsize))
                     pedarr_fr, sigarr_fr = makeped(ped_array)
                     ped_flag = False
                 else:
@@ -176,9 +177,11 @@ if __name__ == "__main__":
                     ped_id+=1
             else:
                 #print(image[1:100,1])
+                print("[Starting analysis Image {:d}]".format(event.header.serial_number))
                 runnumber = client.odb_get("/Runinfo/Run number")
                 table_name = "Run{:05d}".format(runnumber)
                 df = run_reco(image,runnumber,event.header.serial_number,pedarr_fr, sigarr_fr)
+                print("[Sending reco variables to SQL]")
                 push_panda_table_sql(connection,table_name, df)
                 #df.to_sql("Run10000", con=connection, if_exists='append', index_label='id')
             
