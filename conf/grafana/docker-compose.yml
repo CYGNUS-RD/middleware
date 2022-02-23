@@ -5,10 +5,10 @@ services:
   mysql:
     image: mysql:5.7
     environment:
-      MYSQL_ROOT_PASSWORD: myRootPassword123
-      MYSQL_DATABASE: myDb
-      MYSQL_USER: myDbUser
-      MYSQL_PASSWORD: myPassword123
+      MYSQL_ROOT_PASSWORD: 9754f510c12f8f1005cdb16dc51834c4
+      MYSQL_DATABASE: cygno_db
+      MYSQL_USER: cygno_producer
+      MYSQL_PASSWORD: e3b46beda9650197978b7b7e80464f73
 
   grafana:
     image: grafana/grafana
