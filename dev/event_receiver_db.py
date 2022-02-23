@@ -51,7 +51,7 @@ def push_panda_table_sql(connection, table_name, df):
         cols = "`,`".join([str(i) for i in df.columns.tolist()])
         db_to_crete = "CREATE TABLE `"+table_name+"` ("+' '.join(["`"+x+"` REAL," for x in df.columns.tolist()])[:-1]+")"
 
-        #print (db_to_crete)
+        print ("[Table %s created into SQL Server]".format(table_name))
         #
         # scommentare per eseguire
         #
