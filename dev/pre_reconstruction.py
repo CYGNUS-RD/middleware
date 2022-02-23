@@ -19,7 +19,7 @@ def pre_reconstruction(arr,runnumber,i,pedmap,pedsigma,printtime=False):
     t_ini = time.time()
 
     ################ analysis cards ################################
-    nsigma       = 1.0         # numero di sigma sopra il piedistallo
+    nsigma       = 1.3         # numero di sigma sopra il piedistallo
     cimax        = 5000       # valori del cut sull'imagine
     rebin        = 4       # binnagio finale immagine (deve essre un sottomultipli della 2**2 risluzione di partenza)
     eps          = 3         # maximum distance for the cluster point
