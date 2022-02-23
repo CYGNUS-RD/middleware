@@ -6,5 +6,5 @@
 
 * SSH: ssh -X cygno@spaip.lnf.infn.it -p 9022
 * CONF: source /home/cygno/DAQ/middleware/dev/setup.sh
-* JUPYTER:  http://spaip.lnf.infn.it:8888/ ( to start nohup jupyter notebook --no-browser& )
+* JUPYTER:  http://spaip.lnf.infn.it:8888/ ( to start: nohup jupyter notebook --no-browser& )
 
