@@ -6,12 +6,79 @@ from matplotlib import pyplot as plt
 import numpy as np
 import os
 from datetime import datetime
+import pre_reconstruction as pr
+import time
 
 
 import midas
 import midas.client
 
 import mysql.connector
+
+
+def makeped(ped_array):
+    #print(np.shape(ped_array))
+    
+    pedarr_fr = np.mean(ped_array, axis=0)
+    sigarr_fr = np.std(ped_array, axis=0)
+    #print(pedarr_fr[1:100,1])
+    return np.array(pedarr_fr), np.array(sigarr_fr)
+
+def run_reco(image,runnumber,ev_number,pedarr_fr, sigarr_fr):
+  
+   
+    #print ("New image arrived")
+    #print ("Analyzing Run%05d Image %04d"% (runnumber,ev_number))
+    ## Load image
+    arr = image
+    ## Include some reconstruction code here
+    #
+    t1 = time.time()
+    variables = pr.pre_reconstruction(arr,runnumber,ev_number,pedarr_fr,sigarr_fr,printtime=True)
+    t2 = time.time()
+
+    df = pr.create_pandas(variables)
+    return df
+
+def push_panda_table_sql(connection, table_name, df):
+    #mycursor = connection.cursor()
+    
+    mycursor=connection.cursor()
+    
+    mycursor.execute("SHOW TABLES LIKE '"+table_name+"'")
+    result = mycursor.fetchone()
+    if not result:
+        cols = "`,`".join([str(i) for i in df.columns.tolist()])
+        db_to_crete = "CREATE TABLE `"+table_name+"` ("+' '.join(["`"+x+"` REAL," for x in df.columns.tolist()])[:-1]+")"
+
+        #print (db_to_crete)
+        #
+        # scommentare per eseguire
+        #
+        mycursor = connection.cursor()
+        mycursor.execute(db_to_crete)
+
+    cols = "`,`".join([str(i) for i in df.columns.tolist()])
+    #print(cols)
+    # Insert DataFrame recrds one by one.
+    for i,row in df.iterrows():
+        sql = "INSERT INTO `"+table_name+"` (`" +cols + "`) VALUES (" + "%s,"*(len(row)-1) + "%s)"
+        #print (sql, tuple(row.astype(str)))
+        mycursor.execute(sql, tuple(row.astype(str)))
+
+        # the connection is not autocommitted by default, so we must commit to save our changes
+        connection.commit()
+    
+    
+    
+#     mycursor.execute("SHOW TABLES LIKE '"+table_name+"'")
+#     result = mycursor.fetchone()
+#     if result:
+#         # there is a table named "tableName"
+#         print("bravo")
+#     else:
+#         print("pippa")
+#     return
 
 connection = mysql.connector.connect(
   host="131.154.96.215",
@@ -72,6 +139,11 @@ if __name__ == "__main__":
     # request_id = client.register_event_request(buffer_handle, event_id = 1)
     request_id = client.register_event_request(buffer_handle)
     
+    ped_array = []
+    ped_size = 1000
+    ped_id = 0
+    ped_flag = True
+    
     while True:
         # If there's an event ready, `event` will contain a `midas.event.Event`
         # object. If not, it will be None. If you want to block waiting for an
@@ -92,6 +164,23 @@ if __name__ == "__main__":
 
             shape = int(event.banks['CAM0'].size_bytes/2**12)
             image = np.reshape(event.banks['CAM0'].data, (shape, shape))
+            
+            image = np.reshape(event.banks['CAM0'].data, (shape, shape))
+            if ped_flag:
+                
+                if ped_id >= ped_size:
+                    pedarr_fr, sigarr_fr = makeped(ped_array)
+                    ped_flag = False
+                else:
+                    ped_array.append(image)
+                    ped_id+=1
+            else:
+                #print(image[1:100,1])
+                runnumber = client.odb_get("/Runinfo/Run number")
+                table_name = "Run{:05d}".format(runnumber)
+                df = run_reco(image,runnumber,event.header.serial_number,pedarr_fr, sigarr_fr)
+                push_panda_table_sql(connection,table_name, df)
+                #df.to_sql("Run10000", con=connection, if_exists='append', index_label='id')
             
         if bank_names=='DGH0':
             Waveform=[]

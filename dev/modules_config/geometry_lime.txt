@@ -1,0 +1,11 @@
+{
+# LIME
+'name'        : 'lemon',
+'pixelwidth'  : 0.152,  # mm
+'npixx'       : 2048,
+'vignette'    : 'data/vignette_runs03930to03932.root',
+'xmin'        : 0,
+'xmax'        : 2048,
+'ymin'        : 200,
+'ymax'        : 2048-100,
+}
