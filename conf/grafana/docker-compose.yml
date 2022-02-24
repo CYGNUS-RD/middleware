@@ -15,4 +15,4 @@ services:
     ports:
       - '3000:3000'
     environment:
-      GF_INSTALL_PLUGINS: percona-percona-app
+      GF_INSTALL_PLUGINS: percona-percona-app,michaeldmoore-scatter-panel,natel-plotly-panel,ae3e-plotly-panel
