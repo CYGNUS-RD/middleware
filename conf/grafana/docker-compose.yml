@@ -2,17 +2,41 @@ version: '3'
 
 services:
 
-  mysql:
+  db:
     image: mysql:5.7
+    container_name: db
     environment:
       MYSQL_ROOT_PASSWORD: 9754f510c12f8f1005cdb16dc51834c4
       MYSQL_DATABASE: cygno_db
       MYSQL_USER: cygno_producer
       MYSQL_PASSWORD: e3b46beda9650197978b7b7e80464f73
+    ports:
+      - "6033:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: pma
+    links:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    restart: always
+    ports:
+      - 8081:80
 
   grafana:
     image: grafana/grafana
     ports:
-      - '3000:3000'
+      - 3000:3000
     environment:
       GF_INSTALL_PLUGINS: percona-percona-app,michaeldmoore-scatter-panel,natel-plotly-panel,ae3e-plotly-panel
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: 9754f510c12f8f1005cdb16dc51834c4
+
+volumes:
+  dbdata:
+
