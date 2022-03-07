@@ -140,7 +140,7 @@ if __name__ == "__main__":
     request_id = client.register_event_request(buffer_handle)
     
     ped_array = []
-    ped_size = 1000
+    ped_size = 10
     ped_id = 0
     ped_flag = True
     
@@ -169,7 +169,7 @@ if __name__ == "__main__":
             if ped_flag:
                 
                 if ped_id >= ped_size:
-                    print("[Making Pedestal over {:d} images]".format(pedsize))
+                    print("[Making Pedestal over {:d} images]".format(ped_size))
                     pedarr_fr, sigarr_fr = makeped(ped_array)
                     ped_flag = False
                 else:

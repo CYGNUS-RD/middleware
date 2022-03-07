@@ -13,59 +13,10 @@ import time
 import midas
 import midas.client
 
-def makeped(ped_array):
-    print(np.shape(ped_array))
-    
-    pedarr_fr = np.mean(ped_array, axis=0)
-    sigarr_fr = np.std(ped_array, axis=0)
-    print(pedarr_fr[1:100,1])
-    return np.array(pedarr_fr), np.array(sigarr_fr)
-
-def load_ped():
-    import ROOT
-    from root_numpy import hist2array
-    pedfilename = "/home/cygno/Scaricati/pedmap_run02181_rebin1.root"
-    try:
-        pedrf_fr = ROOT.TFile.Open(pedfilename)
-
-        pedmap_fr = pedrf_fr.Get('pedmap').Clone()
-        pedmap_fr.SetDirectory(0)
-        pedarr_fr = hist2array(pedmap_fr).T
-
-        sigmap_fr = pedrf_fr.Get('pedmapsigma').Clone()
-        sigmap_fr.SetDirectory(0)
-        sigarr_fr = hist2array(sigmap_fr).T
-
-        pedrf_fr.Close()
-        print ("Pedestal loaded")
-        return pedarr_fr, sigarr_fr
-    except:
-        print ("No Pedestal file for this run")
-        print ("STOP")
-        return -1
-
-
-
-def run_reco(image,runnumber,ev_number,pedarr_fr, sigarr_fr):
-  
-   
-    print ("New image arrived")
-    print ("Analyzing Run%05d Image %04d"% (runnumber,ev_number))
-    ## Load image
-    arr = image
-    ## Include some reconstruction code here
-    #
-    t1 = time.time()
-    variables = pr.pre_reconstruction(arr,runnumber,ev_number,pedarr_fr,sigarr_fr,printtime=True)
-    t2 = time.time()
-
-    df = pr.opendata_table('raw_data.csv')
-    pr.savedata_totable(df,variables)
-
 
 if __name__ == "__main__":
     # Create our client
-    client = midas.client.MidasClient("pytest")
+    client = midas.client.MidasClient("db_display")
     
     # Define which buffer we want to listen for events on (SYSTEM is the 
     # main midas buffer).
@@ -76,13 +27,7 @@ if __name__ == "__main__":
     # request_id = client.register_event_request(buffer_handle, event_id = 1)
     request_id = client.register_event_request(buffer_handle)
     
-    ##### Rimuovere
-    ped_array = []
-    ped_size = 100
-    ped_id = 0
-    ped_flag = True
-    #pedarr_fr,sigarr_fr = load_ped()
-    
+    plt.figure(figsize = (10,10))
     
     while True:
         # If there's an event ready, `event` will contain a `midas.event.Event`
@@ -104,26 +49,27 @@ if __name__ == "__main__":
 
             shape = int(event.banks['CAM0'].size_bytes/2**12)
             image = np.reshape(event.banks['CAM0'].data, (shape, shape))
-            if ped_flag:
+#             if ped_flag:
                 
-                if ped_id >= ped_size:
-                    pedarr_fr, sigarr_fr = makeped(ped_array)
-                    ped_flag = False
-                else:
-                    ped_array.append(image)
-                    ped_id+=1
-            else:
-                print(image[1:100,1])
-                runnumber = client.odb_get("/Runinfo/Run number")
-                run_reco(image,runnumber,ev_number,pedarr_fr, sigarr_fr)
+#                 if ped_id >= ped_size:
+#                     pedarr_fr, sigarr_fr = makeped(ped_array)
+#                     ped_flag = False
+#                 else:
+#                     ped_array.append(image)
+#                     ped_id+=1
+#             else:
+#                 print(image[1:100,1])
+#                 runnumber = client.odb_get("/Runinfo/Run number")
+#                 run_reco(image,runnumber,ev_number,pedarr_fr, sigarr_fr)
 
-                #plt.clf()
-                #plt.imshow(image)
+            plt.clf()
+            # plt.imshow(image)
                 # plt.imshow(image, cmap='YlGnBu')
-                # plt.imshow(imgt, cmap='gray', vmin=95, vmax=105)
 
-                #majorx_ticks = np.arange(0, np.size(image),  int(np.size(image)/11))
-                #majory_ticks = np.arange(0, np.size(image),  int(np.size(image)/11))
+            plt.imshow(image, cmap='gray', vmin=95, vmax=105)
+
+            #majorx_ticks = np.arange(0, np.size(image),  int(np.size(image)/11))
+            #majory_ticks = np.arange(0, np.size(image),  int(np.size(image)/11))
                 #y0=100
     #            plt.hlines(y0, 0, np.size(image)-1, colors='g')
     #             plt.hlines(np.size(image)-y0, 0, np.size(image)-1, colors='g')
@@ -133,7 +79,7 @@ if __name__ == "__main__":
     #             plt.grid(color='r', linestyle='--', linewidth=1)
     #             plt.xticks(majorx_ticks)
     #             plt.yticks(majory_ticks)
-                #plt.pause(0.05)
+            plt.pause(0.05)
             
             
         if bank_names=='DGH0':
