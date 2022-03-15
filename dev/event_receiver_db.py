@@ -15,6 +15,12 @@ import midas.client
 
 import mysql.connector
 
+import sys
+
+# 
+sys.path.append('../')
+from cygno_conf import *
+#
 
 def makeped(ped_array):
     #print(np.shape(ped_array))
@@ -80,12 +86,15 @@ def push_panda_table_sql(connection, table_name, df):
 #         print("pippa")
 #     return
 
+
+
+
 connection = mysql.connector.connect(
-  host="131.154.96.215",
-  user="cygno_producer",
-  password="e3b46beda9650197978b7b7e80464f73",
-  database="cygno_db",
-  port=6033
+  host=MYSQL_IP,
+  user=MYSQL_USER,
+  password=MYSQL_PASSWORD,
+  database=MYSQL_DATABASE,
+  port=MYSQL_PORT
 )
 
 mycursor = connection.cursor()

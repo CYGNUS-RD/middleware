@@ -5,10 +5,10 @@ services:
     image: mysql:5.7
     container_name: db
     environment:
-      MYSQL_ROOT_PASSWORD: 9754f510c12f8f1005cdb16dc51834c4
+      MYSQL_ROOT_PASSWORD: xxx
       MYSQL_DATABASE: cygno_db
       MYSQL_USER: cygno_producer
-      MYSQL_PASSWORD: e3b46beda9650197978b7b7e80464f73
+      MYSQL_PASSWORD: yy
     ports:
       - "6033:3306"
     volumes:
