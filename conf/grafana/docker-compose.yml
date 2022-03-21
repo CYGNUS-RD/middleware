@@ -30,6 +30,24 @@ services:
 
   grafana:
     image: grafana/grafana
+    
+    [auth.generic_oauth]
+    enabled = true
+    allow_sign_up = true
+    team_ids =
+    allowed_organizations =
+    name = IAM
+    client_id = ******
+    client_secret = *****
+    scopes = openid profile email
+    auth_url = https://iam.cloud.infn.it/authorize
+    token_url = https://iam.cloud.infn.it/token
+    api_url = https://iam.cloud.infn.it/userinfo
+    cookie_secure=true
+    role_attribute_path = contains(groups[*], cygno) && 'Editor'
+    role_attribute_strict = true
+    
+    [server]
     ports:
       - 3000:3000
     environment:
