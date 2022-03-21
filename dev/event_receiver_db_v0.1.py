@@ -94,7 +94,7 @@ connection = mysql.connector.connect(
   user=MYSQL_USER,
   password=MYSQL_PASSWORD,
   database=MYSQL_DATABASE,
-  port=MYSQL_PORT2
+  port=MYSQL_PORT
 )
 
 mycursor = connection.cursor()
