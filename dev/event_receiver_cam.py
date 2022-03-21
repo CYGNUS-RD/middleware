@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 import os
 from datetime import datetime
-import pre_reconstruction as pr
+#import pre_reconstruction as pr
 import time
 
 
