@@ -5,5 +5,5 @@
 * SSH LNGS: `ssh -p 9023 standard@172.16.10.83 `
 * SSH LNF: `ssh -p 9023 standard@spaip.lnf.infn.it` (`ssh -X cygno@spaip.lnf.infn.it -p 9022`)
 * CONF: source /home/cygno/DAQ/middleware/dev/setup.sh
-* JUPYTER:  http://spaip.lnf.infn.it:8888/ ( to start: nohup jupyter notebook --no-browser& )
+* JUPYTER:  http://spaip.lnf.infn.it:8888/ ( to start: nohup jupyter notebook --no-browser& ; first config jupyter notebook --generate-config;  c.NotebookApp.allow_origin = '*'; c.NotebookApp.ip = '0.0.0.0' and set c.NotebookApp.password)
 
