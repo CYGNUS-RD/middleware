@@ -4,7 +4,7 @@
 * LIB [https://bitbucket.org/tmidas/midas/src/develop/python/](https://bitbucket.org/tmidas/midas/src/develop/python/)
 * SSH LNGS: `ssh -p 9023 standard@172.16.10.83 `
 * SSH LNF: `ssh -p 9023 standard@spaip.lnf.infn.it` (`ssh -X cygno@spaip.lnf.infn.it -p 9022`)
-* CONF: source /home/cygno/DAQ/middleware/dev/setup.sh
+* CONF: ...
 * JUPYTER LNF:  http://spaip.lnf.infn.it:8888/ (not in autostart: `nohup jupyter notebook --no-browser&` )
 ```
 sudo chmod 777 /home/software/root_build/etc/notebook/jupyter_notebook_config.py
