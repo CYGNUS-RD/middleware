@@ -36,7 +36,7 @@ export PYTHONPATH=$PYTHONPATH:$MIDASSYS/python (to set in bashrc/DAQsetup)
 sudo pip install -e $MIDASSYS/python --user
 ```
 
-in middeleware setup for cygno cytron
+in middeleware setup for cygno cytron (in dev middelware folder)
 ```
 sudo apt-get install python-numpy
 cython cython_cygno.pyx
