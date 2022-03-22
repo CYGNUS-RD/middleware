@@ -6,6 +6,9 @@
 * SSH LNF: `ssh -p 9023 standard@spaip.lnf.infn.it` (`ssh -X cygno@spaip.lnf.infn.it -p 9022`)
 * CONF: ...
 * JUPYTER LNF:  http://spaip.lnf.infn.it:8888/ (not in autostart: `nohup jupyter notebook --no-browser&` )
+* JUPYTER LNGS: http://172.16.10.83:8888/
+
+jupyter configuration
 ```
 sudo chmod 777 /home/software/root_build/etc/notebook/jupyter_notebook_config.py
 sudo chmod 777 /home/software/root_build/etc/notebook/
@@ -18,8 +21,7 @@ c.NotebookApp.ip = '0.0.0.0'
 c.NotebookApp.password = <password>
 ```
 
-
-* setup:
+python setup:
 
 ```
 pip install testresources
