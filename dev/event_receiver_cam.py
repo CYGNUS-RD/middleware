@@ -47,7 +47,7 @@ if __name__ == "__main__":
         #if event is not None:
         if bank_names=='CAM0':
 
-            shape = int(event.banks['CAM0'].size_bytes/2**12)
+            shape = int(np.sqrt(event.banks['CAM0'].size_bytes*8/16))
             image = np.reshape(event.banks['CAM0'].data, (shape, shape))
 #             if ped_flag:
                 
