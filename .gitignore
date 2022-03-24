@@ -131,3 +131,4 @@ dmypy.json
 # no png output
 *.png
 data/
+cygno_conf.py
