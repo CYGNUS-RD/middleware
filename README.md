@@ -8,6 +8,10 @@
 * JUPYTER LNF:  http://spaip.lnf.infn.it:8888/ (not in autostart: `nohup jupyter notebook --no-browser&` )
 * JUPYTER LNGS: http://172.16.10.83:8888/
 
+WARNING: directory data/ and file cygno_conf.py (contaning password) are not backuped
+
+### istallation history and tips:
+
 jupyter configuration (at LNF where root as been istalled as root)
 ```
 sudo chmod 777 /home/software/root_build/etc/notebook/jupyter_notebook_config.py
