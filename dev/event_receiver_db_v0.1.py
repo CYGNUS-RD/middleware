@@ -1,6 +1,9 @@
-"""
-A simple client that registers to receive events from midas.
-"""
+#!/usr/bin/env python3
+#
+# I. Abritta and G. Mazzitelli March 2022
+# Middelware online recostruction 
+# Modify by ... in date ...
+#
 
 from matplotlib import pyplot as plt
 import numpy as np
@@ -17,10 +20,6 @@ import mysql.connector
 
 import sys
 
-# 
-sys.path.append('../')
-from cygno_conf import *
-#
 
 def makeped(ped_array):
     #print(np.shape(ped_array))
@@ -30,169 +29,166 @@ def makeped(ped_array):
     #print(pedarr_fr[1:100,1])
     return np.array(pedarr_fr), np.array(sigarr_fr)
 
-def run_reco(image,runnumber,ev_number,pedarr_fr, sigarr_fr):
-  
-   
-    #print ("New image arrived")
-    #print ("Analyzing Run%05d Image %04d"% (runnumber,ev_number))
-    ## Load image
+def run_reco(image,run_number,ev_number,pedarr_fr, sigarr_fr):
     arr = image
     ## Include some reconstruction code here
     #
     t1 = time.time()
-    variables = pr.pre_reconstruction(arr,runnumber,ev_number,pedarr_fr,sigarr_fr,printtime=True)
+    values = pr.pre_reconstruction(arr,run_number,ev_number,pedarr_fr,sigarr_fr,printtime=True)
     t2 = time.time()
-
-    df = pr.create_pandas(variables)
+    df = pr.create_pandas(values)
     return df
 
 def push_panda_table_sql(connection, table_name, df):
-    #mycursor = connection.cursor()
     
     mycursor=connection.cursor()
-    
     mycursor.execute("SHOW TABLES LIKE '"+table_name+"'")
     result = mycursor.fetchone()
     if not result:
         cols = "`,`".join([str(i) for i in df.columns.tolist()])
         db_to_crete = "CREATE TABLE `"+table_name+"` ("+' '.join(["`"+x+"` REAL," for x in df.columns.tolist()])[:-1]+")"
-
         print ("[Table %s created into SQL Server]".format(table_name))
-        #
-        # scommentare per eseguire
-        #
         mycursor = connection.cursor()
         mycursor.execute(db_to_crete)
 
     cols = "`,`".join([str(i) for i in df.columns.tolist()])
-    #print(cols)
-    # Insert DataFrame recrds one by one.
+
     for i,row in df.iterrows():
         sql = "INSERT INTO `"+table_name+"` (`" +cols + "`) VALUES (" + "%s,"*(len(row)-1) + "%s)"
-        #print (sql, tuple(row.astype(str)))
         mycursor.execute(sql, tuple(row.astype(str)))
-
-        # the connection is not autocommitted by default, so we must commit to save our changes
         connection.commit()
-    
-    
-    
-#     mycursor.execute("SHOW TABLES LIKE '"+table_name+"'")
-#     result = mycursor.fetchone()
-#     if result:
-#         # there is a table named "tableName"
-#         print("bravo")
-#     else:
-#         print("pippa")
-#     return
+
+    mycursor.close()
 
 
 
+def main(verbose=True):
 
-connection = mysql.connector.connect(
-  host=MYSQL_IP,
-  user=MYSQL_USER,
-  password=MYSQL_PASSWORD,
-  database=MYSQL_DATABASE,
-  port=MYSQL_PORT
-)
-
-mycursor = connection.cursor()
-
-header_environment = [
-    'P0IIn0',
-    'P0IIn1',
-    'P0IIn2',
-    'P0IIn3',
-    'P0IIn4',
-    'P0IIn5',
-    'P0IIn6',
-    'P0IIn7',
-    'P0Calib',
-    'P1UIn0',
-    'P1UIn1',
-    'P1UIn2',
-    'P1UIn3',
-    'P1UIn4',
-    'P1UIn5',
-    'P1UIn6',
-    'P1UIn7',
-    'P1Calib',
-    'P3IIn0',
-    'P3IIn1',
-    'P3IIn2',
-    'P3IIn3',
-    'P3IIn4',
-    'P3IIn5',
-    'P3IIn6',
-    'P3IIn7',
-    'P3Calib']
-
-header_event = [
-    'timestamp',
-    'serial_number',
-    'event_id']
-
-header_event.extend(header_environment)
-
-if __name__ == "__main__":
-    # Create our client
     client = midas.client.MidasClient("db_producer_v0.1")
-    
-    # Define which buffer we want to listen for events on (SYSTEM is the 
-    # main midas buffer).
     buffer_handle = client.open_event_buffer("SYSTEM",None,1000000000)
-    
-    # Request events from this buffer that match certain criteria. In this
-    # case we will only be told about events with an "event ID" of 14.
-    # request_id = client.register_event_request(buffer_handle, event_id = 1)
     request_id = client.register_event_request(buffer_handle)
     
-    ped_array = []
-    ped_size = 10
-    ped_id = 0
-    ped_flag = True
-    
+    # init program variables
+    ped_array    = []
+    ped_size     = 10
+    ped_id       = 0
+    ped_flag     = True
+    ped_date_max = 10
+    aux_hv       = 0
+    init_cam     = True
+    header_event = [
+        'timestamp',
+        'serial_number',
+        'event_id']
+    # init sql variabile and connector
+    connection = mysql.connector.connect(
+      host=os.environ['MYSQL_IP'],
+      user=os.environ['MYSQL_USER'],
+      password=os.environ['MYSQL_PASSWORD'],
+      database=os.environ['MYSQL_DATABASE'],
+      port=int(os.environ['MYSQL_PORT'])
+    )
+
+#    mycursor = connection.cursor()
+
+
+    # global run useful varibles
+    header_environment = client.odb_get("/Equipment/Environment/Settings/Names Input")
+    header_event.extend(header_environment)
     while True:
-        # If there's an event ready, `event` will contain a `midas.event.Event`
-        # object. If not, it will be None. If you want to block waiting for an
-        # event to arrive, you could set async_flag to False.
-        # event = client.receive_event(buffer_handle, async_flag=True)
+        
         event = client.receive_event(buffer_handle, async_flag=False)
         if event.header.is_midas_internal_event():
-            print("Saw a special event")
+            if verbose:
+                print("Saw a special event")
             continue
+   
+        # global event useful variables
         bank_names = ", ".join(b.name for b in event.banks.values())
-        print("Event # %s of type ID %s contains banks %s" % (event.header.serial_number, event.header.event_id, bank_names))
-        print("Received event with timestamp %s containing banks %s" % (event.header.timestamp, bank_names))
-        print("%s, banks %s" % (datetime.utcfromtimestamp(event.header.timestamp).strftime('%Y-%m-%d %H:%M:%S'), bank_names))
         event_info = [event.header.timestamp, event.header.serial_number, event.header.event_id]
+        gem_hv_state = client.odb_get("/Equipment/HV/Variables/ChState[0]")
+        free_running = client.odb_get("/Configurations/FreeRunning")
+        run_number = client.odb_get("/Runinfo/Run number")
+        if verbose:
+            print("Event # %s of type ID %s contains banks %s" % (event.header.serial_number, event.header.event_id, bank_names))
+            print("Received event with timestamp %s containing banks %s" % (event.header.timestamp, bank_names))
+            print("%s, banks %s" % (datetime.utcfromtimestamp(event.header.timestamp).strftime('%Y-%m-%d %H:%M:%S'), bank_names))
 
+        
+# da ricontrollare, la logica non funziona in modo combinato 
+
+        
+#         if free_running:
+#             if ped_id >= ped_size:
+#                 gem_hv_state = 0
+#                 ped_id+=1
+#             else:
+#                 gem_hv_state = 1
+        
+        
         #if event is not None:
         if bank_names=='CAM0':
-
-            shape = int(event.banks['CAM0'].size_bytes/2**12)
-            image = np.reshape(event.banks['CAM0'].data, (shape, shape))
             
-            image = np.reshape(event.banks['CAM0'].data, (shape, shape))
-            if ped_flag:
+            if init_cam: # chiedere a francesco se possiamo metterlo nel DB e rimuovere questo pezzo
+                shape_image = int(np.sqrt(event.banks['CAM0'].size_bytes*8/16))
+                if verbose: print("image shape: "+str(shape_image)) 
+                init_cam = False 
                 
-                if ped_id >= ped_size:
-                    print("[Making Pedestal over {:d} images]".format(ped_size))
-                    pedarr_fr, sigarr_fr = makeped(ped_array)
-                    ped_flag = False
-                else:
-                    ped_array.append(image)
-                    ped_id+=1
+            image = np.reshape(event.banks['CAM0'].data, (shape_image, shape_image))
+            
+            #if ped_flag:
+            #    
+            #    if ped_id >= ped_size:
+            #        print("[Making Pedestal over {:d} images]".format(ped_size))
+            #        pedarr_fr, sigarr_fr = makeped(ped_array)
+            #        ped_flag = False
+            #    else:
+            #        ped_array.append(image)
+            #        ped_id+=1
+            #else:
+                ##debug
+            
+                     
+            if not gem_hv_state:
+                if verbose: print("[Storing ped data {:d} images]".format(ped_id))
+                ped_array.append(image)
+                ped_id+= 1
+                aux_hv = 0
             else:
-                #print(image[1:100,1])
-                print("[Starting analysis Image {:d}]".format(event.header.serial_number))
-                runnumber = client.odb_get("/Runinfo/Run number")
-                table_name = "Run{:05d}".format(runnumber)
-                df = run_reco(image,runnumber,event.header.serial_number,pedarr_fr, sigarr_fr)
-                print("[Sending reco variables to SQL]")
-                push_panda_table_sql(connection,table_name, df)
-                #df.to_sql("Run10000", con=connection, if_exists='append', index_label='id')
+                if not aux_hv:
+                    if verbose: print("[Making Pedestal over {:d} images]".format(ped_id))
+                    pedarr_fr, sigarr_fr = makeped(ped_array)
+                    np.save("pedarr.npy",pedarr_fr)
+                    np.save("sigarr.npy",sigarr_fr)
+                    aux_hv = 1
+                    # in realta' il ped andrebbe azzetato altrove solo al cobio di stato
+                    ped_array    = []
+                else:
+                    if not pedarr_fr.all():
+                        pedarr_fr = np.load("pedarr.npy")
+                        sigarr_fr = np.load("sigarr.npy")
+                        ## Checking oldness of pedestal file
+                        fileStatsObj     = os.stat ("pedarr.npy")
+                        modificationTime = time.ctime(fileStatsObj[stat.ST_MTIME])
+                        oldness = (time.time() - fileStatsObj[stat.ST_MTIME])/(60*60*24)
+
+                        print("Last Modified Time: ", modificationTime )
+                        print("Oldness of file: %.2f in days" % oldness)
+                        if oldness > ped_date_max:
+                            print("You are using Pedestal file created more than %d days ago" % ped_date_max)
+                            print("You should think of recreating it")
+                    
+                    
+                    
+                    #print(image[1:100,1])
+                    if verbose: print("[Starting analysis Image {:d}]".format(event.header.serial_number))
+
+                    table_name = "Run{:05d}".format(run_number)
+                    df = run_reco(image,run_number,event.header.serial_number,pedarr_fr, sigarr_fr)
+                    if verbose: print("[Sending reco variables to SQL]")
+                    df.insert(loc=0, column='timestamp', value=event.header.timestamp)
+                    push_panda_table_sql(connection,table_name, df)
+                    #df.to_sql("Run10000", con=connection, if_exists='append', index_label='id')
             
         if bank_names=='DGH0':
             
@@ -257,6 +253,13 @@ if __name__ == "__main__":
     # plt.show()
     
     # Disconnect from midas before we exit.
-    mycursor.close()
+    # mycursor.close()
     client.disconnect()
     
+        
+if __name__ == "__main__":
+    from optparse import OptionParser
+    parser = OptionParser(usage='usage: %prog\t ')
+    parser.add_option('-v','--verbose', dest='verbose', action="store_true", default=False, help='verbose output;');
+    (options, args) = parser.parse_args()
+    main(verbose=options.verbose)
