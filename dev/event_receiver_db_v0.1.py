@@ -29,12 +29,12 @@ def makeped(ped_array):
     #print(pedarr_fr[1:100,1])
     return np.array(pedarr_fr), np.array(sigarr_fr)
 
-def run_reco(image,run_number,ev_number,pedarr_fr, sigarr_fr):
+def run_reco(image,run_number,ev_number,pedarr_fr, sigarr_fr, nsigma):
     arr = image
     ## Include some reconstruction code here
     #
     t1 = time.time()
-    values = pr.pre_reconstruction(arr,run_number,ev_number,pedarr_fr,sigarr_fr,printtime=True)
+    values = pr.pre_reconstruction(arr,run_number,ev_number,pedarr_fr,sigarr_fr,nsigma,printtime=True)
     t2 = time.time()
     df = pr.create_pandas(values)
     return df
@@ -104,11 +104,12 @@ def main(verbose=True):
             continue
    
         # global event useful variables
-        bank_names = ", ".join(b.name for b in event.banks.values())
-        event_info = [event.header.timestamp, event.header.serial_number, event.header.event_id]
+        bank_names   = ", ".join(b.name for b in event.banks.values())
+        event_info   = [event.header.timestamp, event.header.serial_number, event.header.event_id]
         gem_hv_state = client.odb_get("/Equipment/HV/Variables/ChState[0]")
         free_running = client.odb_get("/Configurations/FreeRunning")
-        run_number = client.odb_get("/Runinfo/Run number")
+        run_number   = client.odb_get("/Runinfo/Run number")
+        nsigma       = client.odb_get("/Logger/Runlog/SQL/nsigma")
         if verbose:
             print("Event # %s of type ID %s contains banks %s" % (event.header.serial_number, event.header.event_id, bank_names))
             print("Received event with timestamp %s containing banks %s" % (event.header.timestamp, bank_names))
@@ -184,7 +185,7 @@ def main(verbose=True):
                     if verbose: print("[Starting analysis Image {:d}]".format(event.header.serial_number))
 
                     table_name = "Run{:05d}".format(run_number)
-                    df = run_reco(image,run_number,event.header.serial_number,pedarr_fr, sigarr_fr)
+                    df = run_reco(image,run_number,event.header.serial_number,pedarr_fr, sigarr_fr,nsigma)
                     if verbose: print("[Sending reco variables to SQL]")
                     df.insert(loc=0, column='timestamp', value=event.header.timestamp)
                     push_panda_table_sql(connection,table_name, df)

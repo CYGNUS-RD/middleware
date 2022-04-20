@@ -1,3 +1,4 @@
+
 import numpy as np
 import ROOT
 import time
@@ -15,11 +16,11 @@ class Variables:
         self.runnumber = runnumber
         self.nev       = i
 
-def pre_reconstruction(arr,runnumber,i,pedmap,pedsigma,printtime=False):
+def pre_reconstruction(arr,runnumber,i,pedmap,pedsigma,nsgima,printtime=False):
     t_ini = time.time()
 
     ################ analysis cards ################################
-    nsigma       = 1.3         # numero di sigma sopra il piedistallo
+    nsigma       = nsgima         # numero di sigma sopra il piedistallo
     cimax        = 5000       # valori del cut sull'imagine
     rebin        = 4       # binnagio finale immagine (deve essre un sottomultipli della 2**2 risluzione di partenza)
     eps          = 3         # maximum distance for the cluster point
@@ -73,6 +74,8 @@ def pre_reconstruction(arr,runnumber,i,pedmap,pedsigma,printtime=False):
     sample_weight[sample_weight==0] = 1
     X = points.copy()
 
+    if len(X) == 0:
+        return
     t0 = time.time()
     ddb = DBSCAN(eps=eps,min_samples=min_samples, metric='cityblock').fit(X,sample_weight = sample_weight)
     t1 = time.time()
