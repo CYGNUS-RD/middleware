@@ -1,7 +1,9 @@
-"""
-A simple client that registers to receive events from midas.
-"""
-
+#!/usr/bin/env python3
+#
+# I. Abritta and G. Mazzitelli March 2022
+# Middelware online recostruction 
+# Modify by ... in date ...
+#
 from matplotlib import pyplot as plt
 import numpy as np
 import os
@@ -14,7 +16,10 @@ import midas
 import midas.client
 
 DEFAULT_PED_VALUE = '99'
-def main(ped, verbose=True):
+DEFAULT_VMIN_VALUE = '95'
+DEFAULT_VMAX_VALUE = '120'
+
+def main(grid, vmin=DEFAULT_VMIN_VALUE, vmax=DEFAULT_VMAX_VALUE, ped=DEFAULT_PED_VALUE, verbose=True):
     # Create our client
     client = midas.client.MidasClient("db_display")
     
@@ -28,6 +33,8 @@ def main(ped, verbose=True):
     print("Ped value, or file: "+ ped)
     if ped == DEFAULT_PED_VALUE:
         pad_varege_value = float(ped)
+    vmin = int(vmin)
+    vmax = int(vmax)
     while True:
 
         event = client.receive_event(buffer_handle, async_flag=False)
@@ -62,27 +69,27 @@ def main(ped, verbose=True):
 #                 run_reco(image,runnumber,ev_number,pedarr_fr, sigarr_fr)
 
             plt.clf()
-            im = plt.imshow(image, cmap='gray', vmin=95, vmax=105)
+            im = plt.imshow(image, cmap='gray', vmin=vmin, vmax=vmax)
         
-        
-            ax = plt.gca();
+            if grid:
+                ax = plt.gca();
 
-            majorx_ticks = np.arange(0, shape,  int(shape/11))
-            majory_ticks = np.arange(0, shape,  int(shape/11))
-            # Major ticks
-            ax.set_xticks(majorx_ticks)
-            ax.set_yticks(majory_ticks)
+                majorx_ticks = np.arange(0, shape,  int(shape/11))
+                majory_ticks = np.arange(0, shape,  int(shape/11))
+                # Major ticks
+                ax.set_xticks(majorx_ticks)
+                ax.set_yticks(majory_ticks)
 
-            # Labels for major ticks
-            ax.set_xticklabels(majorx_ticks)
-            ax.set_yticklabels(majory_ticks)
+                # Labels for major ticks
+                ax.set_xticklabels(majorx_ticks)
+                ax.set_yticklabels(majory_ticks)
 
-            ax.grid(color='r', linestyle='--', linewidth=1)
+                ax.grid(color='r', linestyle='--', linewidth=1)
 
-            ax.hlines(y0, 0, shape-1, colors='g')
-            ax.hlines(shape-y0, 0, shape-1, colors='g')
-            ax.vlines(y0, 0, shape-1, colors='g')
-            ax.vlines(shape-y0, 0,shape-1, colors='g')
+                ax.hlines(y0, 0, shape-1, colors='g')
+                ax.hlines(shape-y0, 0, shape-1, colors='g')
+                ax.vlines(y0, 0, shape-1, colors='g')
+                ax.vlines(shape-y0, 0,shape-1, colors='g')
 
             plt.pause(0.05)
             
@@ -96,8 +103,11 @@ def main(ped, verbose=True):
 if __name__ == "__main__":
     from optparse import OptionParser
     parser = OptionParser(usage='usage: %prog\t ')
-    parser.add_option('-v','--verbose', dest='verbose', action="store_true", default=False, help='verbose output;');
+    parser.add_option('-g','--grid', dest='grid', action="store_true", default=False, help='grid;');
+    parser.add_option('-n','--vmin', dest='vmin', action="store", type="string", default=DEFAULT_VMIN_VALUE, help='vmin, dafaul = ' + DEFAULT_VMIN_VALUE);
+    parser.add_option('-m','--vmax', dest='vmax', action="store", type="string", default=DEFAULT_VMAX_VALUE, help='vman, dafaul = ' + DEFAULT_VMAX_VALUE);
     parser.add_option('-p','--ped', dest='ped', action="store", type="string", default=DEFAULT_PED_VALUE, help='pedestal file path, if none 99 value assumed for all points;');
+    parser.add_option('-v','--verbose', dest='verbose', action="store_true", default=False, help='verbose output;');
     (options, args) = parser.parse_args()
-    main(ped=options.ped, verbose=options.verbose)
+    main(grid=options.grid, vmin=options.vmin, vmax=options.vmax,  ped=options.ped, verbose=options.verbose)
 
