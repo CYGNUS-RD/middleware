@@ -13,36 +13,35 @@ import time
 import midas
 import midas.client
 
-
-if __name__ == "__main__":
+DEFAULT_PED_VALUE = '99'
+def main(ped, verbose=True):
     # Create our client
     client = midas.client.MidasClient("db_display")
     
-    # Define which buffer we want to listen for events on (SYSTEM is the 
-    # main midas buffer).
     buffer_handle = client.open_event_buffer("SYSTEM",None,1000000000)
-    
-    # Request events from this buffer that match certain criteria. In this
-    # case we will only be told about events with an "event ID" of 14.
-    # request_id = client.register_event_request(buffer_handle, event_id = 1)
+
     request_id = client.register_event_request(buffer_handle)
     
     plt.figure(figsize = (10,10))
-    
+    y0=100 # grean frame limit
+    print("Events display running..., Crtl-C to stop")
+    print("Ped value, or file: "+ ped)
+    if ped == DEFAULT_PED_VALUE:
+        pad_varege_value = float(ped)
     while True:
-        # If there's an event ready, `event` will contain a `midas.event.Event`
-        # object. If not, it will be None. If you want to block waiting for an
-        # event to arrive, you could set async_flag to False.
-        # event = client.receive_event(buffer_handle, async_flag=True)
+
         event = client.receive_event(buffer_handle, async_flag=False)
         if event.header.is_midas_internal_event():
-            print("Saw a special event")
+            if verbose:
+                print("Saw a special event")
             continue
         bank_names = ", ".join(b.name for b in event.banks.values())
-        print("Event # %s of type ID %s contains banks %s" % (event.header.serial_number, event.header.event_id, bank_names))
         ev_number = event.header.serial_number
-        print("Received event with timestamp %s containing banks %s" % (event.header.timestamp, bank_names))
-        print("%s, banks %s" % (datetime.utcfromtimestamp(event.header.timestamp).strftime('%Y-%m-%d %H:%M:%S'), bank_names))
+        if verbose:
+            print("Event # %s of type ID %s contains banks %s" % (event.header.serial_number, event.header.event_id, bank_names))
+
+            print("Received event with timestamp %s containing banks %s" % (event.header.timestamp, bank_names))
+            print("%s, banks %s" % (datetime.utcfromtimestamp(event.header.timestamp).strftime('%Y-%m-%d %H:%M:%S'), bank_names))
 
         #if event is not None:
         if bank_names=='CAM0':
@@ -63,52 +62,42 @@ if __name__ == "__main__":
 #                 run_reco(image,runnumber,ev_number,pedarr_fr, sigarr_fr)
 
             plt.clf()
-            # plt.imshow(image)
-                # plt.imshow(image, cmap='YlGnBu')
+            im = plt.imshow(image, cmap='gray', vmin=95, vmax=105)
+        
+        
+            ax = plt.gca();
 
-            plt.imshow(image, cmap='gray', vmin=95, vmax=105)
+            majorx_ticks = np.arange(0, shape,  int(shape/11))
+            majory_ticks = np.arange(0, shape,  int(shape/11))
+            # Major ticks
+            ax.set_xticks(majorx_ticks)
+            ax.set_yticks(majory_ticks)
 
-            #majorx_ticks = np.arange(0, np.size(image),  int(np.size(image)/11))
-            #majory_ticks = np.arange(0, np.size(image),  int(np.size(image)/11))
-                #y0=100
-    #            plt.hlines(y0, 0, np.size(image)-1, colors='g')
-    #             plt.hlines(np.size(image)-y0, 0, np.size(image)-1, colors='g')
-    #             plt.vlines(y0, 0, np.size(image)-1, colors='g')
-    #             plt.vlines(np.size(image)-y0, 0, np.size(image)-1, colors='g')
+            # Labels for major ticks
+            ax.set_xticklabels(majorx_ticks)
+            ax.set_yticklabels(majory_ticks)
 
-    #             plt.grid(color='r', linestyle='--', linewidth=1)
-    #             plt.xticks(majorx_ticks)
-    #             plt.yticks(majory_ticks)
+            ax.grid(color='r', linestyle='--', linewidth=1)
+
+            ax.hlines(y0, 0, shape-1, colors='g')
+            ax.hlines(shape-y0, 0, shape-1, colors='g')
+            ax.vlines(y0, 0, shape-1, colors='g')
+            ax.vlines(shape-y0, 0,shape-1, colors='g')
+
             plt.pause(0.05)
             
-            
-        if bank_names=='DGH0':
-            Waveform=[]
-
-            ndgtz = event.banks['DGH0'].data[2]
-            NCHDGTZ =  event.banks['DGH0'].data[3]
-            NumEvents = event.banks['DGH0'].data[4]
-
-            for i in range(ndgtz):
-                Waveform.append(event.banks['DIG0'].data[i])
-            x=np.arange(ndgtz)
-            
-        if bank_names=='INPT':
-            print(datetime.utcfromtimestamp(event.header.timestamp).strftime('%Y-%m-%d %H:%M:%S'), 
-                  "event: "+str(event.header.serial_number))
-            print("  >>>  Entry in bank %s is %s" % (bank_names, event.banks['INPT'].data))
-
-
-       # Talk to midas so it knows we're alive, or can kill us if the user
-        # pressed the "stop program" button.
         client.communicate(10)
-        
-    # You don't have to cancel the event request manually (it will be done
-    # automatically when the program exits), but for completeness we're just
-    # showing that such a function exists.
+
     client.deregister_event_request(buffer_handle, request_id)
-    # plt.show()
-    
-    # Disconnect from midas before we exit.
+
     client.disconnect()
     
+    
+if __name__ == "__main__":
+    from optparse import OptionParser
+    parser = OptionParser(usage='usage: %prog\t ')
+    parser.add_option('-v','--verbose', dest='verbose', action="store_true", default=False, help='verbose output;');
+    parser.add_option('-p','--ped', dest='ped', action="store", type="string", default=DEFAULT_PED_VALUE, help='pedestal file path, if none 99 value assumed for all points;');
+    (options, args) = parser.parse_args()
+    main(ped=options.ped, verbose=options.verbose)
+
