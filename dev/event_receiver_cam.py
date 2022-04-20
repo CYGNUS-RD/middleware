@@ -43,12 +43,13 @@ def main(grid, vmin=DEFAULT_VMIN_VALUE, vmax=DEFAULT_VMAX_VALUE, ped=DEFAULT_PED
                 print("Saw a special event")
             continue
         bank_names = ", ".join(b.name for b in event.banks.values())
-        ev_number = event.header.serial_number
+        event_number = event.header.serial_number
+        event_time = datetime.fromtimestamp(event.header.timestamp).strftime('%Y-%m-%d %H:%M:%S')
         if verbose:
-            print("Event # %s of type ID %s contains banks %s" % (event.header.serial_number, event.header.event_id, bank_names))
+            print("Event # %s of type ID %s contains banks %s" % (event_number, event.header.event_id, bank_names))
 
             print("Received event with timestamp %s containing banks %s" % (event.header.timestamp, bank_names))
-            print("%s, banks %s" % (datetime.utcfromtimestamp(event.header.timestamp).strftime('%Y-%m-%d %H:%M:%S'), bank_names))
+            print("%s, banks %s" % (event_time, bank_names))
 
         #if event is not None:
         if bank_names=='CAM0':
@@ -70,6 +71,7 @@ def main(grid, vmin=DEFAULT_VMIN_VALUE, vmax=DEFAULT_VMAX_VALUE, ped=DEFAULT_PED
 
             plt.clf()
             im = plt.imshow(image, cmap='gray', vmin=vmin, vmax=vmax)
+
         
             if grid:
                 ax = plt.gca();
@@ -90,7 +92,7 @@ def main(grid, vmin=DEFAULT_VMIN_VALUE, vmax=DEFAULT_VMAX_VALUE, ped=DEFAULT_PED
                 ax.hlines(shape-y0, 0, shape-1, colors='g')
                 ax.vlines(y0, 0, shape-1, colors='g')
                 ax.vlines(shape-y0, 0,shape-1, colors='g')
-
+            plt.title ("Event: {:d} at {:s}".format(event_number, event_time))
             plt.pause(0.05)
             
         client.communicate(10)
