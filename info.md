@@ -15,3 +15,7 @@
 ### config yupyter
 
     nano /usr/local/root_install/etc/notebook/jupyter_notebook_config.py
+
+### cloud jupyter container
+
+    https://confluence.infn.it/pages/viewpage.action?spaceKey=INFNCLOUD&title=Estenzione+e+Customizzazione+immagini+docker+CYGNO
