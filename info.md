@@ -19,14 +19,24 @@
 * https://confluence.infn.it/pages/viewpage.action?spaceKey=INFNCLOUD&title=Estenzione+e+Customizzazione+immagini+docker+CYGNO
 la logica è la seguente:
 
-1. ti crei la tua immagine dove installi tutto il software che vuoi attraverso la creazione di un dockerfile di cui dovrebbe esserci un template/guida/dummy esempio proprio nella guida alla sezione "Make a custom image"
+1. creata una directory sotto CYGNO detta custum
 
-2. questa operazione la puoi fare ovunque anche sul tuo laptop.
+2. in questa dierectory fatto il un Docker che parte dall'utlima realse (ESEMPIO DI Dockerfile CHE aggiunra solo le cygno lib)
+ 
+    # FROM dodasts/cygno-lab:<latest release> -> for example:
+    FROM dodasts/cygno-lab:v1.0.13-cygno
 
-3. quando l'immagine è buildata e ne hai fatto l'upload i.e. su dockerhub
+    RUN pip3 install --no-cache-dir -U git+https://github.com/CYGNUS-RD/cygno.git
 
-4. nel form del jupytehub di cygno basta che metti quel nome al posto del default.
+3. quando l'immagine è buildata e ne hai fatto l'upload i.e. su dockerhub (modificare la tag)
+    
+    docker build -t gmazzitelli/cygno-lab:v1.0.13-cygno /Users/mazzitel/cygno_dev/dodas-docker-images/docker/CYGNO/custom/
+    docker push gmazzitelli/cygno-hub:v1.0.13-cygno
 
-5. se vuoi rendere il nome:tag di quell'immagine disponibile nel menu' devi fare una operazione manuale di cui pensavo avessi già creato le istruzioni ma non è cosi' lo faccio e le aggiungo al link di cui sopra.
-
-questo dovrebbe darti idea della logica.. e i dettagli sono nel link.
+4. andare sulla VM e 
+    
+    cd /usr/local/share/dodasts/jupyterhub
+    sudo docker-compose down
+    sudo vim docker-compose.yaml (mettere la nuova tag)
+    sudo  docker-compose up -d --build
+    
