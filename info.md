@@ -17,26 +17,24 @@
 
 ### cloud jupyter container
 * https://confluence.infn.it/pages/viewpage.action?spaceKey=INFNCLOUD&title=Estenzione+e+Customizzazione+immagini+docker+CYGNO
-la logica è la seguente:
+* fare un frok del progetto sul proprio github e poi un clone in locale
+* creata una directory sotto CYGNO detta custom
+* in questa dierectory fatto il un Docker che parte dall'utlima realse (ESEMPIO DI Dockerfile CHE aggiunra solo le cygno lib)
+```
+#FROM dodasts/cygno-lab:<latest release> -> for example:
+FROM dodasts/cygno-lab:v1.0.13-cygno
 
-1. creata una directory sotto CYGNO detta custum
-
-2. in questa dierectory fatto il un Docker che parte dall'utlima realse (ESEMPIO DI Dockerfile CHE aggiunra solo le cygno lib)
- 
-    # FROM dodasts/cygno-lab:<latest release> -> for example:
-    FROM dodasts/cygno-lab:v1.0.13-cygno
-
-    RUN pip3 install --no-cache-dir -U git+https://github.com/CYGNUS-RD/cygno.git
-
-3. quando l'immagine è buildata e ne hai fatto l'upload i.e. su dockerhub (modificare la tag)
-    
-    docker build -t gmazzitelli/cygno-lab:v1.0.13-cygno /Users/mazzitel/cygno_dev/dodas-docker-images/docker/CYGNO/custom/
-    docker push gmazzitelli/cygno-hub:v1.0.13-cygno
-
-4. andare sulla VM e 
-    
-    cd /usr/local/share/dodasts/jupyterhub
-    sudo docker-compose down
-    sudo vim docker-compose.yaml (mettere la nuova tag)
-    sudo  docker-compose up -d --build
-    
+RUN pip3 install --no-cache-dir -U git+https://github.com/CYGNUS-RD/cygno.git
+```
+* quando l'immagine è buildata e ne hai fatto l'upload i.e. su dockerhub (modificare la tag)
+```
+docker build -t gmazzitelli/cygno-lab:v1.0.13-cygno /Users/mazzitel/cygno_dev/dodas-docker-images/docker/CYGNO/custom/
+docker push gmazzitelli/cygno-hub:v1.0.13-cygno
+```
+* andare sulla VM e 
+``` 
+cd /usr/local/share/dodasts/jupyterhub
+sudo docker-compose down
+sudo vim docker-compose.yaml (mettere la nuova tag)
+sudo  docker-compose up -d --build
+``` 
