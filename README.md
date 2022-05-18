@@ -8,7 +8,7 @@
 * JUPYTER LNF:  http://spaip.lnf.infn.it:8888/ (not in autostart: `nohup jupyter notebook --no-browser&` )
 * JUPYTER LNGS: http://172.16.10.83:8888/ 
 * (sono aperte su entrambe le macchine anche le porte del DAQ e del RTD)
-* (accesso al db ssh -L 8081:131.154.96.196:8081 standard@spaip.lnf.infn.it -p 9023)
+* (accesso al db ssh -L 8081:131.154.96.196:8081 standard@spaip.lnf.infn.it -p 9023 e ssh -L 8081:131.154.96.221:8081 -p 9023 standard@spaip.lnf.infn.it)
 
 WARNING: directory data/ and file cygno_conf.py (contaning password) are not ignored
 
