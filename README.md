@@ -7,6 +7,8 @@
 * CONF: ...
 * JUPYTER LNF:  http://spaip.lnf.infn.it:8888/ (not in autostart: `nohup jupyter notebook --no-browser&` )
 * JUPYTER LNGS: http://172.16.10.83:8888/ 
+* DAQ LNF: https://spaip.lnf.infn.it:8443/
+* DAQ LNGS: https://172.16.10.83:8443/
 
 
 * (sono aperte su entrambe le macchine anche le porte del DAQ e del RTD)
