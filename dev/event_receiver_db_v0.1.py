@@ -123,12 +123,13 @@ def main(verbose=True):
             continue
    
         # global event useful variables
-        bank_names   = ", ".join(b.name for b in event.banks.values())
-        event_info   = [event.header.timestamp, event.header.serial_number, event.header.event_id]
-        gem_hv_state = client.odb_get("/Equipment/HV/Variables/ChState[0]")
-        free_running = client.odb_get("/Configurations/FreeRunning")
-        run_number   = client.odb_get("/Runinfo/Run number")
-        nsigma       = client.odb_get("/Logger/Runlog/SQL/nsigma")
+        bank_names    = ", ".join(b.name for b in event.banks.values())
+        event_info    = [event.header.timestamp, event.header.serial_number, event.header.event_id]
+        gem_hv_state  = client.odb_get("/Equipment/HV/Variables/ChState[0]")
+        free_running  = client.odb_get("/Configurations/FreeRunning")
+        exposure_time = client.odb_get("/Configurations/Exposure")
+        run_number    = client.odb_get("/Runinfo/Run number")
+        nsigma        = client.odb_get("/Logger/Runlog/SQL/nsigma")
         if verbose:
             print("Event # %s of type ID %s contains banks %s" % (event.header.serial_number, event.header.event_id, bank_names))
             print("Received event with timestamp %s containing banks %s" % (event.header.timestamp, bank_names))
@@ -160,8 +161,8 @@ def main(verbose=True):
                 if not aux_hv:
                     if verbose: print("[Making Pedestal over {:d} images]".format(ped_id))
                     pedarr_fr, sigarr_fr = makeped(ped_array)
-                    np.save("pedarr.npy",pedarr_fr)
-                    np.save("sigarr.npy",sigarr_fr)
+                    np.save("pedarr_%.1f.npy" % exposure_time, pedarr_fr)
+                    np.save("sigarr_%.1f.npy" % exposure_time, sigarr_fr)
                     
                     ped_id = 0
                     aux_hv = 1
@@ -172,10 +173,10 @@ def main(verbose=True):
                     if verbose: print("[Initiating Reconstruction]")
                     if not len(pedarr_fr):
                         if verbose: print("[Loading Pedestal]")
-                        pedarr_fr = np.load("pedarr.npy")
-                        sigarr_fr = np.load("sigarr.npy")
+                        pedarr_fr = np.load("pedarr_%.1f.npy" % exposure_time)
+                        sigarr_fr = np.load("sigarr_%.1f.npy" % exposure_time)
                         ## Checking oldness of pedestal file
-                        fileStatsObj     = os.stat ("pedarr.npy")
+                        fileStatsObj     = os.stat ("pedarr_%.1f.npy" % exposure_time)
                         modificationTime = time.ctime(fileStatsObj[stat.ST_MTIME])
                         oldness = (time.time() - fileStatsObj[stat.ST_MTIME])/(60*60*24)
 

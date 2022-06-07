@@ -17,17 +17,17 @@ import midas.client
 import sys
 
 DEFAULT_PED_VALUE = '99'
-DEFAULT_VMIN_VALUE = '95'
-DEFAULT_VMAX_VALUE = '120'
+DEFAULT_VMIN_VALUE = '-5'
+DEFAULT_VMAX_VALUE = '15'
 DEFAULT_FRAME_VALUE= '100' # grean frame limit
 
-def image_plot(bank, vmin, vmax, grid, event_number, event_time, y0=DEFAULT_FRAME_VALUE):
+def image_plot(bank, vmin, vmax, grid, event_number, event_time, pedarr_fr, y0=DEFAULT_FRAME_VALUE):
 
-    shape = int(np.sqrt(bank.size_bytes*8/16))
+    shape = int(np.sqrt(bank.size_bytes*8/16))   
     image = np.reshape(bank.data, (shape, shape))
-
+    
     plt.clf()
-    im = plt.imshow(image, cmap='gray', vmin=vmin, vmax=vmax)
+    im = plt.imshow(image-pedarr_fr, cmap='gray', vmin=vmin, vmax=vmax)
 
 
     if grid:
@@ -51,10 +51,23 @@ def image_plot(bank, vmin, vmax, grid, event_number, event_time, y0=DEFAULT_FRAM
         ax.vlines(shape-y0, 0,shape-1, colors='g')
     plt.title ("Event: {:d} at {:s}".format(event_number, event_time))
     plt.pause(0.05)
+
+def loadped(pedarr_fr, exposure_time):
+    exposure_time_old = exposure_time
+    if not len(pedarr_fr):
+        try:
+            print("Loading ped file")
+            pedarr_fr = np.load("pedarr_%.1f.npy" % exposure_time)
+        except:
+            print("Using fixed ped = 99")
+            pedarr_fr = 99
+    return pedarr_fr, exposure_time_old
     
     
 def main(grid=False, vmin=DEFAULT_VMIN_VALUE, vmax=DEFAULT_VMAX_VALUE, ped=DEFAULT_PED_VALUE, 
          y0=DEFAULT_FRAME_VALUE, verbose=True):
+    
+    pedarr_fr    = []
     # Create our client
     client = midas.client.MidasClient("db_display")
     
@@ -68,6 +81,7 @@ def main(grid=False, vmin=DEFAULT_VMIN_VALUE, vmax=DEFAULT_VMAX_VALUE, ped=DEFAU
     print("Ped value, or file: "+ ped)
     if ped == DEFAULT_PED_VALUE:
         pad_varege_value = float(ped)
+        
     print("Image range vmin: {:s}, vmax: {:s}".format(vmin, vmax))
     vmin = int(vmin)
     vmax = int(vmax)
@@ -90,7 +104,14 @@ def main(grid=False, vmin=DEFAULT_VMIN_VALUE, vmax=DEFAULT_VMAX_VALUE, ped=DEFAU
 
             #if event is not None:
             if bank_names=='CAM0':
-                image_plot(event.banks['CAM0'], vmin, vmax, grid, event_number, event_time, y0)
+                exposure_time = client.odb_get("/Configurations/Exposure")
+                
+                pedarr_fr, exposure_time_old = loadped(pedarr_fr, exposure_time)
+                if exposure_time != exposure_time_old:
+                    pedarr_fr = []
+                    loadped(pedarr_fr, exposure_time)
+                
+                image_plot(event.banks['CAM0'], vmin, vmax, grid, event_number, event_time, pedarr_fr, y0)
 
             client.communicate(10)
         except KeyboardInterrupt:
