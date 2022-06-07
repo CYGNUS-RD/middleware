@@ -8,10 +8,11 @@
 from matplotlib import pyplot as plt
 import numpy as np
 import os
+import stat
 from datetime import datetime
 import pre_reconstruction as pr
 import time
-
+import pandas as pd
 
 import midas
 import midas.client
@@ -29,12 +30,12 @@ def makeped(ped_array):
     #print(pedarr_fr[1:100,1])
     return np.array(pedarr_fr), np.array(sigarr_fr)
 
-def run_reco(image,run_number,ev_number,pedarr_fr, sigarr_fr, nsigma):
+def run_reco(image, run_number, ev_number, pedarr_fr, sigarr_fr, nsigma):
     arr = image
     ## Include some reconstruction code here
     #
     t1 = time.time()
-    values = pr.pre_reconstruction(arr,run_number,ev_number,pedarr_fr,sigarr_fr,nsigma,printtime=True)
+    values = pr.pre_reconstruction(arr, run_number, ev_number, pedarr_fr, sigarr_fr, nsigma, printtime=True)
     t2 = time.time()
     df = pr.create_pandas(values)
     return df
@@ -47,7 +48,7 @@ def push_panda_table_sql(connection, table_name, df):
     if not result:
         cols = "`,`".join([str(i) for i in df.columns.tolist()])
         db_to_crete = "CREATE TABLE `"+table_name+"` ("+' '.join(["`"+x+"` REAL," for x in df.columns.tolist()])[:-1]+")"
-        print ("[Table %s created into SQL Server]".format(table_name))
+        print ("[Table {:s} created into SQL Server]".format(table_name))
         mycursor = connection.cursor()
         mycursor.execute(db_to_crete)
 
@@ -61,6 +62,24 @@ def push_panda_table_sql(connection, table_name, df):
     mycursor.close()
 
 
+def skipSpark(image):
+    
+    sparktest = False
+    
+    integralImage = sum(sum(image))
+    sizeX = np.shape(image)[0]
+    sizeY = np.shape(image)[1]
+    
+    testspark     = 100*sizeX*sizeY+9000000
+    
+    if integralImage > testspark:
+        print("Image has spark, will not be analyzed!")
+        sparktest = True
+    
+    
+    return sparktest
+    
+    
 
 def main(verbose=True):
 
@@ -69,12 +88,11 @@ def main(verbose=True):
     request_id = client.register_event_request(buffer_handle)
     
     # init program variables
+    pedarr_fr    = []
     ped_array    = []
-    ped_size     = 10
     ped_id       = 0
-    ped_flag     = True
     ped_date_max = 10
-    aux_hv       = 0
+    aux_hv       = 1
     init_cam     = True
     header_event = [
         'timestamp',
@@ -94,7 +112,8 @@ def main(verbose=True):
 
     # global run useful varibles
     header_environment = client.odb_get("/Equipment/Environment/Settings/Names Input")
-    header_event.extend(header_environment)
+    header_environment = header_event + header_environment
+    
     while True:
         
         event = client.receive_event(buffer_handle, async_flag=False)
@@ -117,16 +136,7 @@ def main(verbose=True):
 
         
 # da ricontrollare, la logica non funziona in modo combinato 
-
-        
-#         if free_running:
-#             if ped_id >= ped_size:
-#                 gem_hv_state = 0
-#                 ped_id+=1
-#             else:
-#                 gem_hv_state = 1
-        
-        
+   
         #if event is not None:
         if bank_names=='CAM0':
             
@@ -137,18 +147,9 @@ def main(verbose=True):
                 
             image = np.reshape(event.banks['CAM0'].data, (shape_image, shape_image))
             
-            #if ped_flag:
-            #    
-            #    if ped_id >= ped_size:
-            #        print("[Making Pedestal over {:d} images]".format(ped_size))
-            #        pedarr_fr, sigarr_fr = makeped(ped_array)
-            #        ped_flag = False
-            #    else:
-            #        ped_array.append(image)
-            #        ped_id+=1
-            #else:
-                ##debug
-            
+            ## Skipping spark images
+            if skipSpark(image):
+                continue
                      
             if not gem_hv_state:
                 if verbose: print("[Storing ped data {:d} images]".format(ped_id))
@@ -161,11 +162,16 @@ def main(verbose=True):
                     pedarr_fr, sigarr_fr = makeped(ped_array)
                     np.save("pedarr.npy",pedarr_fr)
                     np.save("sigarr.npy",sigarr_fr)
+                    
+                    ped_id = 0
                     aux_hv = 1
-                    # in realta' il ped andrebbe azzetato altrove solo al cobio di stato
+                    # in realta' il ped andrebbe azzerato altrove solo al cambio di stato
                     ped_array    = []
+                    if verbose: print("[Pedestal done]")
                 else:
-                    if not pedarr_fr.all():
+                    if verbose: print("[Initiating Reconstruction]")
+                    if not len(pedarr_fr):
+                        if verbose: print("[Loading Pedestal]")
                         pedarr_fr = np.load("pedarr.npy")
                         sigarr_fr = np.load("sigarr.npy")
                         ## Checking oldness of pedestal file
@@ -174,7 +180,7 @@ def main(verbose=True):
                         oldness = (time.time() - fileStatsObj[stat.ST_MTIME])/(60*60*24)
 
                         print("Last Modified Time: ", modificationTime )
-                        print("Oldness of file: %.2f in days" % oldness)
+                        print("Oldness of file: %.2f days" % oldness)
                         if oldness > ped_date_max:
                             print("You are using Pedestal file created more than %d days ago" % ped_date_max)
                             print("You should think of recreating it")
@@ -184,11 +190,14 @@ def main(verbose=True):
                     #print(image[1:100,1])
                     if verbose: print("[Starting analysis Image {:d}]".format(event.header.serial_number))
 
-                    table_name = "Run{:05d}".format(run_number)
-                    df = run_reco(image,run_number,event.header.serial_number,pedarr_fr, sigarr_fr,nsigma)
+                    #table_name = "Run{:05d}".format(run_number)
+                    table_name = "RecoTable"
+                    
+                    df = run_reco(image, run_number, event.header.serial_number, pedarr_fr, sigarr_fr, nsigma)
                     if verbose: print("[Sending reco variables to SQL]")
-                    df.insert(loc=0, column='timestamp', value=event.header.timestamp)
-                    push_panda_table_sql(connection,table_name, df)
+                    df.insert(loc=0, column='timestamp', value = event.header.timestamp)
+                    push_panda_table_sql(connection, table_name, df)
+                    if verbose: print("[SQL sent]")
                     #df.to_sql("Run10000", con=connection, if_exists='append', index_label='id')
             
         if bank_names=='DGH0':
@@ -230,10 +239,13 @@ def main(verbose=True):
             print(datetime.utcfromtimestamp(event.header.timestamp).strftime('%Y-%m-%d %H:%M:%S'), 
                   "event: "+str(event.header.serial_number))
             print("  >>>  Entry in bank %s is %s" % (bank_names, event.banks['INPT'].data))
-            value = event_info + list(event.banks['INPT'].data)
+            value = [event_info + list(event.banks['INPT'].data)]
+            print(value)
+            print("........")
+            print(header_environment)
             de = pd.DataFrame(value, columns = header_environment)
-            table_name = "environment"
-            push_panda_table_sql(connection,table_name, de)
+            table_name_sc = "SlowControl"
+            push_panda_table_sql(connection,table_name_sc, de)
 #            sql = "INSERT INTO `environment` ("+" ".join(["`"+hed+"`," for hed in header_event])[:-1]+") VALUES ("+",".join([str(x) for x in value])+" )"
             # print (sql)
 #            mycursor = connection.cursor()

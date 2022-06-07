@@ -20,22 +20,25 @@ def pre_reconstruction(arr,runnumber,i,pedmap,pedsigma,nsgima,printtime=False):
     t_ini = time.time()
 
     ################ analysis cards ################################
+    sizeX = np.shape(arr)[0]
+    sizeY = np.shape(arr)[1]
     nsigma       = nsgima         # numero di sigma sopra il piedistallo
     cimax        = 5000       # valori del cut sull'imagine
     rebin        = 4       # binnagio finale immagine (deve essre un sottomultipli della 2**2 risluzione di partenza)
-    eps          = 3         # maximum distance for the cluster point
-    min_samples  = 14
+    eps          = 2         # maximum distance for the cluster point
+    min_samples  = 10
     xmin         = 200
-    xmax         = 2048-100
+    xmax         = sizeX-100
     ymin         = 0
-    ymax         = 2048
-    npixx        = 2048
-    min_neighbors_average = 0.35
+    ymax         = sizeY
+    npixx        = sizeX
+    min_neighbors_average = 0.75
     self         = []
     
     pedarr_fr    = pedmap
     sigarr_fr    = pedsigma
     img_fr = arr
+    variables = Variables(runnumber,i)
    
     
     #################################
@@ -74,49 +77,51 @@ def pre_reconstruction(arr,runnumber,i,pedmap,pedsigma,nsgima,printtime=False):
     sample_weight[sample_weight==0] = 1
     X = points.copy()
 
-    if len(X) == 0:
-        return
-    t0 = time.time()
-    ddb = DBSCAN(eps=eps,min_samples=min_samples, metric='cityblock').fit(X,sample_weight = sample_weight)
-    t1 = time.time()
-
-
-    #tl.plotclusterdbscan(edcopyTight,X,ddb,npixx,rebin)
-    
-    # Black removed and is used for noise instead.
-    unique_labels = set(ddb.labels_)
-
-    # Number of polynomial clusters in labels, ignoring noise if present.
-    n_superclusters = len(unique_labels) - (1 if -1 in ddb.labels_ else 0)
-    # returned collections
     superclusters = []
-
-    t2 = time.time()        
-    for k in unique_labels:
-        if k == -1:
-            break # noise: the unclustered
-
-        class_member_mask = (ddb.labels_ == k)
-        #class_member_mask = (ddb.labels_ == k)
-        xy = np.unique(X[class_member_mask],axis=0)
-        x = xy[:, 0]; y = xy[:, 1]
+    
+    if not len(X) == 0:
+        t0 = time.time()
+        ddb = DBSCAN(eps=eps,min_samples=min_samples, metric='cityblock').fit(X,sample_weight = sample_weight)
+        t1 = time.time()
 
 
-        # both core and neighbor samples are saved in the cluster in the event
-        if k>-1 and len(x)>1:
-            cl = Cluster(xy,rebin,img_fr_satcor,img_fr_zs,'lime',debug=False,fullinfo=False,clID=k)
-            cl.iteration = 0
-            superclusters.append(cl)
+        #tl.plotclusterdbscan(edcopyTight,X,ddb,npixx,rebin)
+
+        # Black removed and is used for noise instead.
+        unique_labels = set(ddb.labels_)
+
+        # Number of polynomial clusters in labels, ignoring noise if present.
+        n_superclusters = len(unique_labels) - (1 if -1 in ddb.labels_ else 0)
+        # returned collections
 
 
-    for k,cl1 in enumerate(superclusters):
-        cl1.calcShapes()
-    t3 = time.time()
+        t2 = time.time()        
+        for k in unique_labels:
+            if k == -1:
+                break # noise: the unclustered
+
+            class_member_mask = (ddb.labels_ == k)
+            #class_member_mask = (ddb.labels_ == k)
+            xy = np.unique(X[class_member_mask],axis=0)
+            x = xy[:, 0]; y = xy[:, 1]
+
+
+            # both core and neighbor samples are saved in the cluster in the event
+            if k>-1 and len(x)>1:
+                cl = Cluster(xy, rebin, img_fr_satcor, img_fr_zs, 'lime',
+                             debug=False, fullinfo=False, clID=k)
+                cl.iteration = 0
+                superclusters.append(cl)
+
+
+        for k,cl1 in enumerate(superclusters):
+            cl1.calcShapes()
+        t3 = time.time()
 
     ## Calculating variables
 
     t4 = time.time()
-    variables = Variables(runnumber,i)
+    
     variables.cl_size     = [cl.size() for cl in superclusters]
     variables.cl_nhits    = [cl.sizeActive() for cl in superclusters]
     variables.cl_integral = [cl.integral() for cl in superclusters]
@@ -130,15 +135,16 @@ def pre_reconstruction(arr,runnumber,i,pedmap,pedsigma,nsgima,printtime=False):
     variables.cl_xmin     = [cl.shapes['xmin'] for cl in superclusters]
     variables.cl_ymax     = [cl.shapes['ymax'] for cl in superclusters]
     variables.cl_ymin     = [cl.shapes['ymin'] for cl in superclusters]
-
+    
+    
     variables.run         = (runnumber*(np.ones((1,len(variables.cl_integral)),dtype=int))[0]).tolist()
     variables.event       = (i*(np.ones((1,len(variables.cl_integral)),dtype=int))[0]).tolist()
     variables.nclu        = list(range(1,len(variables.cl_integral)))
-
+    
     t5 = time.time()
 
     t_tot = time.time()
-    if printtime:
+    if printtime and not len(X) == 0:
         print ("Step 0: Noise Reductor: %.2f seconds / %.2f minutes" % ((t_nr_end-t_nr_ini),(t_nr_end-t_nr_ini)/60))
         print ("Step 1: Clusterization: %.2f seconds / %.2f minutes" % ((t1-t0),(t1-t0)/60))
         print ("Step 2: Cluster information: %.2f seconds / %.2f minutes" % ((t3-t2),(t3-t2)/60))
