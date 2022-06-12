@@ -7,6 +7,7 @@ from array import array
 from cameraChannel import cameraGeometry
 import sys
 import utilities
+import time
 utilities = utilities.utils()
 
 class Cluster:

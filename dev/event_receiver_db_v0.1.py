@@ -20,7 +20,16 @@ import midas.client
 import mysql.connector
 
 import sys
+import cygno as cy
 
+DEFAULT_PATH_ONLINE = '/home/standard/daq/online/'
+
+def image_jpg(image, vmin, vmax, event_number, event_time):
+    
+    im = plt.imshow(image, cmap='gray', vmin=vmin, vmax=vmax)
+    plt.title ("Event: {:d} at {:s}".format(event_number, event_time))
+    plt.savefig(DEFAULT_PATH_ONLINE+'custom/tmp.png')
+    return 
 
 def makeped(ped_array):
     #print(np.shape(ped_array))
@@ -83,11 +92,13 @@ def skipSpark(image):
 
 def main(verbose=True):
 
-    client = midas.client.MidasClient("db_producer_v0.1")
+    client = midas.client.MidasClient("middleware")
     buffer_handle = client.open_event_buffer("SYSTEM",None,1000000000)
     request_id = client.register_event_request(buffer_handle)
     
     # init program variables
+    vmin         = 95
+    vmax         = 130
     pedarr_fr    = []
     ped_array    = []
     ped_id       = 0
@@ -113,7 +124,9 @@ def main(verbose=True):
     # global run useful varibles
     header_environment = client.odb_get("/Equipment/Environment/Settings/Names Input")
     header_environment = header_event + header_environment
-    
+    t0 = time.time()
+    t0bc = time.time()
+    t1bc = time.time()
     while True:
         
         event = client.receive_event(buffer_handle, async_flag=False)
@@ -139,19 +152,33 @@ def main(verbose=True):
 # da ricontrollare, la logica non funziona in modo combinato 
    
         #if event is not None:
-        if bank_names=='CAM0':
+        t0b = time.time()
+        if 'CAM0' in bank_names:
             
+
+            t0bc = time.time()
             if init_cam: # chiedere a francesco se possiamo metterlo nel DB e rimuovere questo pezzo
                 shape_image = int(np.sqrt(event.banks['CAM0'].size_bytes*8/16))
                 if verbose: print("image shape: "+str(shape_image)) 
                 init_cam = False 
                 
             image = np.reshape(event.banks['CAM0'].data, (shape_image, shape_image))
+            if verbose: print(image)
+            ## Save image
+            event_number = event.header.serial_number
+            event_time = datetime.fromtimestamp(event.header.timestamp).strftime('%Y-%m-%d %H:%M:%S')
+            t1bc = time.time() 
+            
+            t1 = time.time()
+            if (t1-t0) > 10:
+                print("[Saving image for presenter]")
+                image_jpg(image, vmin, vmax, event_number, event_time)
+                t0 = time.time()
             
             ## Skipping spark images
             if skipSpark(image):
                 continue
-                     
+
             if not gem_hv_state:
                 if verbose: print("[Storing ped data {:d} images]".format(ped_id))
                 ped_array.append(image)
@@ -161,8 +188,8 @@ def main(verbose=True):
                 if not aux_hv:
                     if verbose: print("[Making Pedestal over {:d} images]".format(ped_id))
                     pedarr_fr, sigarr_fr = makeped(ped_array)
-                    np.save("pedarr_%.1f.npy" % exposure_time, pedarr_fr)
-                    np.save("sigarr_%.1f.npy" % exposure_time, sigarr_fr)
+                    np.save(DEFAULT_PATH_ONLINE+"pedarr_%.1f.npy" % exposure_time, pedarr_fr)
+                    np.save(DEFAULT_PATH_ONLINE+"sigarr_%.1f.npy" % exposure_time, sigarr_fr)
                     
                     ped_id = 0
                     aux_hv = 1
@@ -173,10 +200,10 @@ def main(verbose=True):
                     if verbose: print("[Initiating Reconstruction]")
                     if not len(pedarr_fr):
                         if verbose: print("[Loading Pedestal]")
-                        pedarr_fr = np.load("pedarr_%.1f.npy" % exposure_time)
-                        sigarr_fr = np.load("sigarr_%.1f.npy" % exposure_time)
+                        pedarr_fr = np.load(DEFAULT_PATH_ONLINE+"pedarr_%.1f.npy" % exposure_time)
+                        sigarr_fr = np.load(DEFAULT_PATH_ONLINE+"sigarr_%.1f.npy" % exposure_time)
                         ## Checking oldness of pedestal file
-                        fileStatsObj     = os.stat ("pedarr_%.1f.npy" % exposure_time)
+                        fileStatsObj     = os.stat (DEFAULT_PATH_ONLINE+"pedarr_%.1f.npy" % exposure_time)
                         modificationTime = time.ctime(fileStatsObj[stat.ST_MTIME])
                         oldness = (time.time() - fileStatsObj[stat.ST_MTIME])/(60*60*24)
 
@@ -200,62 +227,32 @@ def main(verbose=True):
                     push_panda_table_sql(connection, table_name, df)
                     if verbose: print("[SQL sent]")
                     #df.to_sql("Run10000", con=connection, if_exists='append', index_label='id')
+        t1b = time.time()    
+        if 'DGH0' in bank_names:
             
-        if bank_names=='DGH0':
-            
-            nboard = event.banks['DGH0'].data[0]
-            ich = 1
-            data_offset = 0
-            Waveform = []
-            for iboard in nboard:
-                name_board = event.banks['DGH0'].data[ich]
-                ich+=1
-                sample_number = event.banks['DGH0'].data[ich]
-                ich+=1
-                channels_number =  event.banks['DGH0'].data[ich]
-                ich+=1
-                number_events = event.banks['DGH0'].data[ich]
-                ich+=1
-                vertical_resulution = event.banks['DGH0'].data[ich]
-                ich+=1
-                sampling_rate = event.banks['DGH0'].data[ich]
-                for icahnnels in channels_number:
-                    ich+=1
-                    cannaels_offset[icahnnels] = event.banks['DGH0'].data[ich]
-                    
-                for ievent in number_events:
-                    for icahnnels in channels_number:
-                        start = data_offset 
-                        Waveform[ievent, ichannels] = event.banks['DIG0'].data[data_offset:data_offset+sample_number]
-                        data_offset += sample_number
+            waveform_header = cy.daq_dgz2header(event.banks['DGH0'])
+            if verbose: print (waveform_header)
+            waveform = cy.daq_dgz2array(event.banks['DIG0'], waveform_header)
+            lenw = waveform_header[2]
 
-#             Waveform=[]
-#             for i in range(ndgtz):
-#                 Waveform.append(event.banks['DIG0'].data[i])
-#             x=np.arange(ndgtz)
-#            Waveform1 = event.banks['DIG0'].data[:ndgtz]
-
-            
-        if bank_names=='INPT':
-            print(datetime.utcfromtimestamp(event.header.timestamp).strftime('%Y-%m-%d %H:%M:%S'), 
+        t2b = time.time()
+        if 'INPT' in bank_names:
+            if verbose:
+                print(datetime.utcfromtimestamp(event.header.timestamp).strftime('%Y-%m-%d %H:%M:%S'), 
                   "event: "+str(event.header.serial_number))
-            print("  >>>  Entry in bank %s is %s" % (bank_names, event.banks['INPT'].data))
+                print("  >>>  Entry in bank %s is %s" % (bank_names, event.banks['INPT'].data))
+                
             value = [event_info + list(event.banks['INPT'].data)]
-            print(value)
-            print("........")
-            print(header_environment)
+            if verbose:
+                print(value)
+                print("........")
+                print(header_environment)
+                
             de = pd.DataFrame(value, columns = header_environment)
             table_name_sc = "SlowControl"
-            push_panda_table_sql(connection,table_name_sc, de)
-#            sql = "INSERT INTO `environment` ("+" ".join(["`"+hed+"`," for hed in header_event])[:-1]+") VALUES ("+",".join([str(x) for x in value])+" )"
-            # print (sql)
-#            mycursor = connection.cursor()
-#            mycursor.execute(sql)
-#            connection.commit()
-#            print(mycursor.rowcount, "Record inserted successfully into Laptop table")
-            
-
-
+            push_panda_table_sql(connection,table_name_sc, de)          
+        t3b = time.time()
+        print("Elapsed, slow {:.2f}, pmt {:.2f}, cam {:.2f}, cam part {:.2f}: ".format(t3b-t2b, t2b-t1b, t1b-t0b, t1bc-t0bc) )
        # Talk to midas so it knows we're alive, or can kill us if the user
         # pressed the "stop program" button.
         client.communicate(10)

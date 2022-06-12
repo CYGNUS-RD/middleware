@@ -18,8 +18,18 @@ import sys
 
 DEFAULT_PED_VALUE = '99'
 DEFAULT_VMIN_VALUE = '-5'
-DEFAULT_VMAX_VALUE = '15'
+DEFAULT_VMAX_VALUE = '30'
 DEFAULT_FRAME_VALUE= '100' # grean frame limit
+
+def image_jpg(bank, vmin, vmax, grid, event_number, event_time, pedarr_fr, y0=DEFAULT_FRAME_VALUE):
+
+    shape = int(np.sqrt(bank.size_bytes*8/16))
+    image = np.reshape(bank.data, (shape, shape))
+
+    im = plt.imshow(image-pedarr_fr, cmap='gray', vmin=vmin, vmax=vmax)
+    plt.title ("Event: {:d} at {:s}".format(event_number, event_time))
+    plt.savefig('/home/standard/daq/online/custom/tmp.png')
+    return 
 
 def image_plot(bank, vmin, vmax, grid, event_number, event_time, pedarr_fr, y0=DEFAULT_FRAME_VALUE):
 
@@ -60,7 +70,7 @@ def loadped(pedarr_fr, exposure_time):
             pedarr_fr = np.load("pedarr_%.1f.npy" % exposure_time)
         except:
             print("Using fixed ped = 99")
-            pedarr_fr = 99
+            pedarr_fr = 99*np.ones((2304,2304),dtype=int)
     return pedarr_fr, exposure_time_old
     
     
@@ -86,6 +96,7 @@ def main(grid=False, vmin=DEFAULT_VMIN_VALUE, vmax=DEFAULT_VMAX_VALUE, ped=DEFAU
     vmin = int(vmin)
     vmax = int(vmax)
     y0 = int(y0)
+    t0 = time.time()
     while True:
         try:
             event = client.receive_event(buffer_handle, async_flag=False)
@@ -104,14 +115,22 @@ def main(grid=False, vmin=DEFAULT_VMIN_VALUE, vmax=DEFAULT_VMAX_VALUE, ped=DEFAU
 
             #if event is not None:
             if bank_names=='CAM0':
+                t1 = time.time()
                 exposure_time = client.odb_get("/Configurations/Exposure")
                 
                 pedarr_fr, exposure_time_old = loadped(pedarr_fr, exposure_time)
                 if exposure_time != exposure_time_old:
                     pedarr_fr = []
-                    loadped(pedarr_fr, exposure_time)
+                    pedarr_fr, exposure_time_old = loadped(pedarr_fr, exposure_time)
                 
                 image_plot(event.banks['CAM0'], vmin, vmax, grid, event_number, event_time, pedarr_fr, y0)
+                
+                #if (t1-t0) > 30:
+                #    image_jpg(event.banks['CAM0'], vmin, vmax, grid, event_number, event_time, pedarr_fr, y0)
+                #    t0 = time.time()
+                
+                
+                
 
             client.communicate(10)
         except KeyboardInterrupt:

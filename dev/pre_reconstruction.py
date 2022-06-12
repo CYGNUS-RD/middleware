@@ -113,10 +113,11 @@ def pre_reconstruction(arr,runnumber,i,pedmap,pedsigma,nsgima,printtime=False):
                 cl.iteration = 0
                 superclusters.append(cl)
 
-
+        t3 = time.time()
         for k,cl1 in enumerate(superclusters):
             cl1.calcShapes()
-        t3 = time.time()
+        t34 = time.time()
+        
 
     ## Calculating variables
 
@@ -148,6 +149,7 @@ def pre_reconstruction(arr,runnumber,i,pedmap,pedsigma,nsgima,printtime=False):
         print ("Step 0: Noise Reductor: %.2f seconds / %.2f minutes" % ((t_nr_end-t_nr_ini),(t_nr_end-t_nr_ini)/60))
         print ("Step 1: Clusterization: %.2f seconds / %.2f minutes" % ((t1-t0),(t1-t0)/60))
         print ("Step 2: Cluster information: %.2f seconds / %.2f minutes" % ((t3-t2),(t3-t2)/60))
+        print ("Step 34: Cluster information 2: %.2f seconds / %.2f minutes" % ((t34-t3),(t34-t3)/60))
         print ("Step 3: Variables calculation: %.2f seconds / %.2f minutes" % ((t5-t4),(t5-t4)/60))
         print ("Total Elapsed time: %.2f seconds / %.2f minutes" % ((t_tot-t_ini),(t_tot-t_ini)/60))
     
