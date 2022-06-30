@@ -7,5 +7,6 @@ set contaner variable to
 * (sudo docker down; sudo docker-compose up -d)
 * nel folder grafana 
 ```
+sudo chown -R 472:472 /opt/myprj/grafana/
 sudo openssl req -x509 -sha256 -days 3560 -nodes  -newkey rsa:2048 -subj "/CN=cygnoC=IT/L=LNGS"  -keyout grafana.key -out grafana.crt
 ```
