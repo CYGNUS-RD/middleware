@@ -2,13 +2,13 @@
 
 * ODB INFO: [http://lmu.web.psi.ch/docu/manuals/bulk_manuals/software/midas195/html/ODB_Structure.html#ODB_System_Tree](http://lmu.web.psi.ch/docu/manuals/bulk_manuals/software/midas195/html/ODB_Structure.html#ODB_System_Tree)
 * LIB INFO: [https://bitbucket.org/tmidas/midas/src/develop/python/](https://bitbucket.org/tmidas/midas/src/develop/python/)
-* SSH LNGS: `ssh -p 9023 standard@172.16.10.83 `
+* SSH LNGS: `ssh -p 9023 standard@172.18.9.72 `
 * SSH LNF: `ssh -p 9023 standard@spaip.lnf.infn.it` (`ssh -X cygno@spaip.lnf.infn.it -p 9022`)
 * CONF: ...
 * JUPYTER LNF:  http://spaip.lnf.infn.it:8888/ (not in autostart: `nohup jupyter notebook --no-browser&` )
-* JUPYTER LNGS: http://172.16.10.83:8888/ 
+* JUPYTER LNGS: http://172.18.9.72:8888/ 
 * DAQ LNF: https://spaip.lnf.infn.it:8443/
-* DAQ LNGS: https://172.16.10.83:8443/
+* DAQ LNGS: https://172.18.9.72:8443/
 
 
 * (sono aperte su entrambe le macchine anche le porte del DAQ e del RTD)
@@ -20,7 +20,7 @@
   
 * [LNGS] To access DB or Grafana:
   *   1 - Connect to the LNGS VPN
-  *   2 - Use the following command at the terminal: `ssh -L 8081:131.154.96.221:8081 -L 3000:131.154.96.221:3000 standard@172.16.10.83 -p 9023`
+  *   2 - Use the following command at the terminal: `ssh -L 8081:131.154.96.221:8081 -L 3000:131.154.96.221:3000 standard@172.18.9.72 -p 9023`
   *   3 - DB Address: access the http://localhost:8081/ using the browser
   *   4 - Grafana Address: access the http://localhost:3000/ using the browser
   
