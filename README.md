@@ -74,4 +74,5 @@ add
 deb https://repo.data.kit.edu/ubuntu/20.04 ./
 sudo apt-get install oidc-agent
 ```
-
+### gestione del router 
+https://wiki.ubuntu-it.org/Sicurezza/Nftables
