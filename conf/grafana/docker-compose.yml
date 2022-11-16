@@ -29,27 +29,24 @@ services:
       - 8081:80
 
   grafana:
-    image: grafana/grafana
+    image: grafana/grafana:8.5.6
+    user: "0"
     ports:
       - 3000:3000
+    volumes:
+      - ./grafana:/var/lib/grafana
+
     environment:
       GF_INSTALL_PLUGINS: percona-percona-app,michaeldmoore-scatter-panel,natel-plotly-panel,ae3e-plotly-panel
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD}
-      
-#  noip:
-#    image: uping/no-ip
-#    container_name: noip
-#    restart: unless-stopped
-#    environment:
-#      - USERNAME="cygno.daq.allert@gmail.com"
-#      - PASSWORD=${NO-IP_PASSWORD}
-#      - DOMAINS=${NO-IP_DOMAIN}
-#      - INTERVAL=1h
-#    volumes:
-#      - /etc/localtime:/etc/localtime:ro
-#      - /var/noip:/config
+      GF_SECURITY_ALLOW_EMBEDDING: 1 
+      GF_USERS_ALLOW_SIGN_UP: 0
+      GF_AUTH_ANONYMOUS_ENABLED: 1
+      GF_AUTH_BASIC_ENABLED: 0
+      GF_SERVER_PROTOCOL: https
+      GF_SERVER_CERT_FILE: /var/lib/grafana/openssl/grafana.crt
+      GF_SERVER_CERT_KEY: /var/lib/grafana/openssl/grafana.key
 
 volumes:
   dbdata:
-
