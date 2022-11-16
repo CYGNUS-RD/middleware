@@ -11,15 +11,17 @@ from datetime import datetime
 #import pre_reconstruction as pr
 import time
 
+import matplotlib
 
 import midas
 import midas.client
 import sys
 
-DEFAULT_PED_VALUE = '99'
+DEFAULT_PED_VALUE = '100'
 DEFAULT_VMIN_VALUE = '-5'
 DEFAULT_VMAX_VALUE = '30'
 DEFAULT_FRAME_VALUE= '100' # grean frame limit
+
 
 def image_jpg(bank, vmin, vmax, grid, event_number, event_time, pedarr_fr, y0=DEFAULT_FRAME_VALUE):
 
@@ -35,6 +37,7 @@ def image_plot(bank, vmin, vmax, grid, event_number, event_time, pedarr_fr, y0=D
 
     shape = int(np.sqrt(bank.size_bytes*8/16))   
     image = np.reshape(bank.data, (shape, shape))
+    
     
     plt.clf()
     im = plt.imshow(image-pedarr_fr, cmap='gray', vmin=vmin, vmax=vmax)
@@ -60,7 +63,16 @@ def image_plot(bank, vmin, vmax, grid, event_number, event_time, pedarr_fr, y0=D
         ax.vlines(y0, 0, shape-1, colors='g')
         ax.vlines(shape-y0, 0,shape-1, colors='g')
     plt.title ("Event: {:d} at {:s}".format(event_number, event_time))
-    plt.pause(0.05)
+#    plt.isinteractive()
+    #plt.ion()
+    #plt.show(block=False)
+    #plt.pause(0.05)
+    #time.sleep(0.05)
+    #fig = plt.figure()
+    #fig.canvas.flush_events()
+    #time.sleep(0.05)
+    
+
 
 def loadped(pedarr_fr, exposure_time):
     exposure_time_old = exposure_time
@@ -85,7 +97,9 @@ def main(grid=False, vmin=DEFAULT_VMIN_VALUE, vmax=DEFAULT_VMAX_VALUE, ped=DEFAU
 
     request_id = client.register_event_request(buffer_handle)
     
-    plt.figure(figsize = (10,10))
+    plt.ion()
+    
+    fig = plt.figure(figsize = (10,10))
 
     print("Events display running..., Crtl-C to stop")
     print("Ped value, or file: "+ ped)
@@ -124,7 +138,8 @@ def main(grid=False, vmin=DEFAULT_VMIN_VALUE, vmax=DEFAULT_VMAX_VALUE, ped=DEFAU
                     pedarr_fr, exposure_time_old = loadped(pedarr_fr, exposure_time)
                 
                 image_plot(event.banks['CAM0'], vmin, vmax, grid, event_number, event_time, pedarr_fr, y0)
-                
+                fig.canvas.flush_events()
+                time.sleep(0.05)
                 #if (t1-t0) > 30:
                 #    image_jpg(event.banks['CAM0'], vmin, vmax, grid, event_number, event_time, pedarr_fr, y0)
                 #    t0 = time.time()
