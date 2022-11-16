@@ -191,10 +191,10 @@ def main(verbose=True):
                 t1 = time.time()
                 if (t1-t0) > 10:
                     print("[Saving image for presenter]")
-                    saveimege = multiprocess.Process(target=image_jpg, args=(image, vmin, vmax, event_number, event_time,))
-                    saveimege.daemon = True
-                    saveimege.start()
-                    #image_jpg(image, vmin, vmax, event_number, event_time)
+                    #saveimege = multiprocess.Process(target=image_jpg, args=(image, vmin, vmax, event_number, event_time,))
+                    #saveimege.daemon = True
+                    #saveimege.start()
+                    image_jpg(image, vmin, vmax, event_number, event_time)
                     t0 = time.time()
 
                 ## Skipping spark images

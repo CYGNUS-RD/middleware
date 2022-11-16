@@ -69,21 +69,11 @@ def main():
             
             for i in range(0, np.size(file_in_dir)):
                 if ('run' in str(file_in_dir[i]))   and \
-                ('.mid' in str(file_in_dir[i]))  and \
-                (not ('.gz' in str(file_in_dir[i]))) and \
-                (not('.crc32c' in str(file_in_dir[i]))) and\
-                ((str(file_in_dir[i]).split('.mid')[0] + '.crc32c') in file_in_dir) and \
-                (not ( (str(file_in_dir[i]) + '.gz') in file_in_dir)) and \
-                (not file_in_dir[i].startswith('.')):
-                    os.system('gzip ' + INAPATH + file_in_dir[i] +' &')
-            
-            for i in range(0, np.size(file_in_dir)):
-                if ('run' in str(file_in_dir[i]))   and \
-                ('.mid.gz' in str(file_in_dir[i]))  and \
-                (not (str(file_in_dir[i]).split('.gz')[0] in file_in_dir)) \
+                ('.mid.gz' in str(file_in_dir[i]))  \
                 and (not file_in_dir[i].startswith('.')):
                     
                     if cmd.grep_file(file_in_dir[i], STOROUT) == "":
+            
                         filesize = os.path.getsize(INAPATH+file_in_dir[i])
                         remotesize = s3.obj_size(file_in_dir[i],tag=TAG, 
                                              bucket='cygno-data', session="infncloud-wlcg", 
@@ -96,7 +86,7 @@ def main():
                         if verbose: print(runN, runC, state)
                             
                         if not(runN == runC and state == midas.STATE_RUNNING):
-                            print('Transferring file: '+file_in_dir[i], flush = True)
+                            print('Transferring file: '+file_in_dir[i])
                             current_try = 0
                             status, isthere = False, False # flag to know if to go to next run
                             

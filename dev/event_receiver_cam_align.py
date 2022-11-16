@@ -197,7 +197,48 @@ def getHscore(peaks, properties, imgdim = 2304):
     optl, pcovl = curve_fit(Line, xxxx, yyyy)
     
     return np.abs(-2.5-optl[1]/optl[0])
+
+
+def parabole(x, a, b, c):
+    return a + b*x + c**2
+
+def getVscore(peaks, properties, imgdim = 2304):
+    if len(peaks) == 0: return -111
+    rows = []
+    for i in range(6):
+        rows.append(peaks[np.where(np.abs(peaks[:, 0] - peaks[i, 0]) < 50)])
     
+    r2i = []
+    r4i = []
+
+    r2f = []
+    r4f = []
+    
+    for i, r in enumerate(rows):
+        xx = r[:, 0]
+        yy = r[:, 1]
+    
+        #opt, pcov = curve_fit(parabole, yy, xx)
+        opt, pcov = curve_fit(Line, yy, xx)
+        
+        xline = np.arange(int(imgdim/2) - 600, int(imgdim/2)+600)
+        
+        
+        #yline = parabole(xline, opt[0], opt[1], opt[2])
+        yline = Line(xline, opt[0], opt[1])#
+        
+        if i==1:
+            r2i.append([xline[0], yline[0]])
+            r2f.append([xline[-1], yline[-1]])
+        elif i ==3:
+            r4i.append([xline[0], yline[0]])
+            r4f.append([xline[-1], yline[-1]])
+            
+    diffi = r2i[0][1] - r4i[0][1]#/(r2i[0][1] + r4i[0][1])
+    difff = r2f[0][1] - r4f[0][1]#/(r2f[0][1] + r4f[0][1])
+
+    return (diffi - difff)*100/(diffi + difff)
+
 
 def image_plot2(bank, vmin, vmax, grid, event_number, event_time, pedarr_fr, y0=DEFAULT_FRAME_VALUE):
 
@@ -211,6 +252,7 @@ def image_plot2(bank, vmin, vmax, grid, event_number, event_time, pedarr_fr, y0=
     
     FScore = getFscore(peaks, properties)
     HScore = getHscore(peaks, properties)
+    VScore = getVscore(peaks, properties)
     
     if grid:
         ax = plt.gca();
@@ -233,7 +275,7 @@ def image_plot2(bank, vmin, vmax, grid, event_number, event_time, pedarr_fr, y0=
         ax.vlines(shape-y0, 0,shape-1, colors='g')
     
     if len(peaks!=0): plt.scatter(peaks[:,0], peaks[:,1], marker = 'x', color = 'red')
-    plt.title ("Event: {:d} at {:s} - Fscore: {:.1f} - Hscore: {:.3f}".format(event_number, event_time, FScore, HScore))
+    plt.title ("Event: {:d} at {:s} - Fscore: {:.1f} - Hscore: {:.3f} - Vscore: {:.3f}".format(event_number, event_time, FScore, HScore, VScore))
 #    plt.isinteractive()
     #plt.ion()
     #plt.show(block=False)
