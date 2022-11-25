@@ -112,6 +112,7 @@ def main(verbose=True):
     request_id = client.register_event_request(buffer_handle)
     
     # init program variables
+    t0 = time.time()
     vmin         = 95
     vmax         = 130
     pedarr_fr    = []
@@ -137,7 +138,6 @@ def main(verbose=True):
     header_environment = header_event + header_environment
 
     # DEBUG VARABLE
-    t0 = time.time()
     t0bc = time.time()
     t1bc = time.time()
     
@@ -189,7 +189,8 @@ def main(verbose=True):
 
                 ## Save image
                 t1 = time.time()
-                if (t1-t0) > 10:
+                image_update_time = client.odb_get("/middleware/image_update_time")
+                if (t1-t0) > image_update_time:
                     print("[Saving image for presenter]")
                     #saveimege = multiprocess.Process(target=image_jpg, args=(image, vmin, vmax, event_number, event_time,))
                     #saveimege.daemon = True
@@ -229,7 +230,9 @@ def main(verbose=True):
                             print("You should think of recreating it")
 
                     if verbose: print("[Starting analysis Image {:d}]".format(event.header.serial_number))
-                    recoAndUpdate(image, run_number, event_number, pedarr_fr, sigarr_fr, 
+                    reconstruction_sample_gap = client.odb_get("/middleware/reconstruction_sample_gap")    
+                    if (event_number%reconstruction_sample_gap) == 0:
+                        recoAndUpdate(image, run_number, event_number, pedarr_fr, sigarr_fr, 
                                   nsigma, event.header.timestamp, connection, verbose)
 #                         savereco = multiprocess.Process(target=recoAndUpdate, args=(image, run_number, event_number, pedarr_fr,
 #                                                                                     sigarr_fr, nsigma, event.header.timestamp,

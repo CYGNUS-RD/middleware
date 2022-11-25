@@ -32,7 +32,7 @@ def pre_reconstruction(arr,runnumber,i,pedmap,pedsigma,nsgima,printtime=False):
     ymin         = 200
     ymax         = sizeY-100
     npixx        = sizeX
-    min_neighbors_average = 0.75
+    min_neighbors_average = 1.3#0.75
     self         = []
     
     pedarr_fr    = pedmap
