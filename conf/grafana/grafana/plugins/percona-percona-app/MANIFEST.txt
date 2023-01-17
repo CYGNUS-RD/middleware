@@ -1,0 +1,54 @@
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+{
+  "manifestVersion": "2.0.0",
+  "signatureType": "community",
+  "signedByOrg": "grafana",
+  "signedByOrgName": "Grafana Labs",
+  "plugin": "percona-percona-app",
+  "version": "1.0.1",
+  "time": 1622741026718,
+  "keyId": "7e4d0c6a708866e7",
+  "files": {
+    "module.js.map": "84b4fdf24ec47530aa5d85f9e4164501d8e510b3393c8d6e9e3f8afa4585a677",
+    "plugin.json": "483184011e9763d8b8ca6541f061ad528643ac9291f2eda52c0d3a0192001f44",
+    "README.md": "bccfa9a498bc8a50b5717f14a2cab707d607bfe742ca479cac3ec336cf13ef11",
+    "img/percona_large.png": "c2439847530b9f0e1f66969e9759e4bed54f1a3b08e290c0325a9bb784b8c249",
+    "img/percona_small.png": "c2439847530b9f0e1f66969e9759e4bed54f1a3b08e290c0325a9bb784b8c249",
+    "components/config.js": "0d19c669770720530d51f25b3cb50a5d8955d92d76cd3e22afc747ad9a325030",
+    "components/config.js.map": "740e7492dff0b31a413c950aaf3d91116c4b5c89136f60e96fd642bfe3aeb0e9",
+    "components/config.html": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "module.js": "2e41d9fff59989db8fe8bdfd22fab18537b34b51fdc3a2829206623bd69e7839",
+    "dashboards/TokuDB_Metrics.json": "7775d399ba289284be2047b01ec563d146ed046a7a013058e9fb99911f19bfc8",
+    "dashboards/Summary_Dashboard.json": "834df70c4ad4f79568cd2a99a9c6bff39cab2a88f2b62a9899ee36c63cc78bde",
+    "dashboards/Galera_Graphs.json": "a0def0f119d1ee7e7fe5c883eff4244e20121285f8401a36ad3c31026eb62f9a",
+    "dashboards/Disk_Space.json": "df067a7a23ff132b860ff3dafbc59a725463869ef7d2f01a7c8a3a0e2fbb3f5e",
+    "dashboards/MySQL_Query_Response_Time.json": "321f3a3d70a50590fc7c09d4fe8ab4d5efcae2fd984f708ba0bcfa71b7562939",
+    "dashboards/Disk_Performance.json": "962803033b2c47720930cdad41eacea6f6deca87ef38a643b012a0ab80eb8a1c",
+    "dashboards/MySQL_Overview.json": "dcbed0818d6b22b5a295a8fe6f6e3bcef9db14d2be344706671c3fb1ee69d4b7",
+    "dashboards/Prometheus.json": "98e9eb2e29f6bbe74d74c60b7e7c65d0ae26a4b7f85138dc008e617fe52b6444",
+    "dashboards/MySQL_Performance_Schema.json": "3139ae920d763f24a162e8c509daa7259af51c5a1b63c30e1037de5b5dfc393e",
+    "dashboards/MySQL_User_Statistics.json": "a01f08552d4b15ccd6fc8f49e18a7947f54de9631f58de4e7cdd0ae61c39392b",
+    "dashboards/MySQL_MyISAM_Metrics.json": "d383f8ff9436ff42495f91edb6caad6bb21354c37e7deb4853085d057bfcdd9e",
+    "dashboards/Trends_Dashboard.json": "d1406f0432c5d161ade8ceb4db2a98c97bd114c58be4a37627dd6896a3c2ff93",
+    "dashboards/System_Overview.json": "4478698aee33e7a33063741cd9a98613f8f4ecef51b935276bd88e285751628b",
+    "dashboards/Cross_Server_Graphs.json": "a9814b583e94b4b6ceb0d52c8b1d48f0d8de9675b5bde4cc1e3defe869ae721b",
+    "dashboards/MySQL_InnoDB_Metrics.json": "071671197841aa3cd152236f0e26fb73c3709cadba379d4eff1a836db7f4333f",
+    "dashboards/MySQL_Table_Statistics.json": "d1a2418982c4ece0871c31d0ad953ac728fb7ab5c80e1e1b91541f6be9da544d",
+    "dashboards/MySQL_Replication.json": "bb8cb7ab2593a50d592fc307e4d0542f5f9505cd3e76088494b3048c6ba358eb",
+    "src/img/percona_large.png": "c2439847530b9f0e1f66969e9759e4bed54f1a3b08e290c0325a9bb784b8c249",
+    "src/img/percona_small.png": "c2439847530b9f0e1f66969e9759e4bed54f1a3b08e290c0325a9bb784b8c249"
+  }
+}
+-----BEGIN PGP SIGNATURE-----
+Version: OpenPGP.js v4.10.1
+Comment: https://openpgpjs.org
+
+wqEEARMKAAYFAmC5ECIACgkQfk0ManCIZufTzAIIqhcwKFPqucUJVLHaaDyW
+f+rVFGrKXqXMfWGy2BoSATIcOt029laVVDZkH3Uhjf1la8Rp3YgXCkmdUk53
+bOUgMywCCQEDBMXS4jCJqyvtn9KfhNwFqJYTe2/LMq48f0H/zDvf0Lp6dL9e
+xxPo7AzcVrK35emlvX38PM1a5LnI7e7H6/JWgA==
+=a446
+-----END PGP SIGNATURE-----
