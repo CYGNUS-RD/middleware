@@ -13,7 +13,8 @@ services:
     ports:
       - "6033:3306"
     volumes:
-      - dbdata:/var/lib/mysql
+#      - dbdata:/var/lib/mysql
+      - ./mysql:/var/lib/mysql
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -42,7 +43,7 @@ services:
       GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD}
       GF_SECURITY_ALLOW_EMBEDDING: 1 
       GF_USERS_ALLOW_SIGN_UP: 0
-      GF_AUTH_ANONYMOUS_ENABLED: 1
+      GF_AUTH_ANONYMOUS_ENABLED: 0
       GF_AUTH_BASIC_ENABLED: 0
       GF_SERVER_DOMAIN: ${GF_SERVER_DOMAIN}
       GF_SERVER_PROTOCOL: https
@@ -63,6 +64,6 @@ services:
       GF_AUTH_GENERIC_OAUTH_COOKIE_SECURE: 'True'
       GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_PATH: "contains(groups, 'cygno')  && 'Admin' || contains(groups, 'cygno-users') && 'Viewer'"
       GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_STRICT: 'True'
-volumes:
-  dbdata:
+#volumes:
+#  dbdata:
 
