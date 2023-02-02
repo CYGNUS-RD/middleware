@@ -12,17 +12,21 @@
 
 
 * (sono aperte su entrambe le macchine anche le porte del DAQ e del RTD)
-* [LNF] To access the DB and Grafana:
-  *   1 - Connect to the LNF VPN
-  *   2 - Use the following command at the terminal: `ssh -L 8081:131.154.96.196:8081 -L 3000:131.154.96.196:3000 standard@spaip.lnf.infn.it -p 9023`
-  *   3 - DB Address: access the http://localhost:8081/ using the browser
-  *   4 - Grafana Address: access the http://localhost:3000/ using the browser
+* To access Grafana (Just one for both DBs):
+  * 1 - Go to the link: https://131.154.96.196:3000/
+  * 2 - Choose "Sign in with IAM"
+  * 3 - Use your INFN credentials
+  * 4 - Go to the desired Dashboard
   
-* [LNGS] To access DB or Grafana:
-  *   1 - Connect to the LNGS VPN
-  *   2 - Use the following command at the terminal: `ssh -L 8081:131.154.96.221:8081 -L 3000:131.154.96.221:3000 standard@172.18.9.72 -p 9023`
+* [LNF] To access the DB:
+  *   1 - Connect to the LNF VPN
+  *   2 - Use the following command at the terminal: `ssh -L 8081:131.154.96.196:8081 standard@spaip.lnf.infn.it -p 9023`
   *   3 - DB Address: access the http://localhost:8081/ using the browser
-  *   4 - Grafana Address: access the http://localhost:3000/ using the browser
+  
+* [LNGS] To access DB:
+  *   1 - Connect to the LNGS VPN
+  *   2 - Use the following command at the terminal: `ssh -L 8081:131.154.96.221:8081 standard@172.18.9.72 -p 9023`
+  *   3 - DB Address: access the http://localhost:8081/ using the browser
   
 
 WARNING: directory data/ and file cygno_conf.py (contaning password) are not ignored
