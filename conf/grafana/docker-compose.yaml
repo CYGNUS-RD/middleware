@@ -2,33 +2,6 @@ version: '3'
 
 services:
 
-  db:
-    image: mysql:5.7
-    container_name: db
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: cygno_db
-      MYSQL_USER: cygno_producer
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    ports:
-      - "6033:3306"
-    volumes:
-#      - dbdata:/var/lib/mysql
-      - ./mysql:/var/lib/mysql
-
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: pma
-    links:
-      - db
-    environment:
-      PMA_HOST: db
-      PMA_PORT: 3306
-      PMA_ARBITRARY: 1
-    restart: always
-    ports:
-      - 8081:80
-
   grafana:
     image: grafana/grafana:9.2.4
     user: "0"
@@ -50,6 +23,7 @@ services:
       GF_SERVER_CERT_FILE: /var/lib/grafana/openssl/grafana.crt
       GF_SERVER_CERT_KEY: /var/lib/grafana/openssl/grafana.key
       GF_SERVER_ROOT_URL: https://${GF_SERVER_DOMAIN}:3000
+      GF_SECURITY_COOKIE_SECURE: 'True'
       GF_AUTH_GENERIC_OAUTH_ENABLED: 'True'
       GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP: 'True'
       GF_AUTH_GENERIC_OAUTH_TEAM_IDS: ''
@@ -64,6 +38,4 @@ services:
       GF_AUTH_GENERIC_OAUTH_COOKIE_SECURE: 'True'
       GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_PATH: "contains(groups, 'cygno')  && 'Admin' || contains(groups, 'cygno-users') && 'Viewer'"
       GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_STRICT: 'True'
-#volumes:
-#  dbdata:
 
