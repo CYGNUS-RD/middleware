@@ -27,7 +27,7 @@ import midas.file_reader
 
 #MAX_CPU_AVAILABLE   = multiprocess.cpu_count()
 #DAQ_ROOT            = os.environ['DAQ_ROOT']
-DEFAULT_PATH_ONLINE = '/jupyter-workspace/cloud-storage/cygno-analysis/middleware/' #DAQ_ROOT+'/online/'
+DEFAULT_PATH_ONLINE = 'pedestals/' #DAQ_ROOT+'/online/'
 
 def image_jpg(image, vmin, vmax, event_number, event_time):
     
@@ -168,12 +168,13 @@ def main(verbose=True):
         print("Getting List of runs")
         
         run_number = list_runs_to_analyze[0]
-        dfrun = cy.run_info_logbook(run=run_number, sql=True, verbose=False)
+        sql_update_reco_status(run_number,0,connection)
         
-        mfile = cy.open_mid(run=run_number, path='/jupyter-workspace/cloud-storage/cygno-data/', cloud=False, tag='LNGS', verbose=True)
+        dfrun = cy.run_info_logbook(run=run_number, sql=True, verbose=False)
+        mfile = cy.open_mid(run=run_number, path='/jupyter-workspace/cloud-storage/cygno-data/', cloud=True, tag='LNGS', verbose=True)
         
         print("Starting analysing the first one")
-        sql_update_reco_status(run_number,0,connection)
+        
 
         #event = client.receive_event(buffer_handle, async_flag=True)
 
@@ -283,6 +284,8 @@ def main(verbose=True):
             #save_ped = client.odb_get("/middleware/save_ped")
         ## End of the run
         sql_update_reco_status(run_number,1,connection)
+        ## remove file from tmp
+        os.remove('/tmp/run%05d.mid.gz' % run_number)
         if (ped_id > 0):
             print("[Making Pedestal over {:d} images]".format(ped_id))
             #pedarr_fr, sigarr_fr = makeped(ped_array)
