@@ -1,8 +1,12 @@
 set contaner variable to 
 
-* nuova veriosne:
+* nuova versione v2:
+* porta 443 al posto di 3000
+
+
+* nuova veriosne v1:
 * port 6033, 8081, 3000
-* set variabili in shel .bashrc (ROOT) 
+* set variabili in shel .bashrc (ROOT) salvate in [repo](https://github.com/gmazzitelli/info/blob/main/daq_info.md)
 * container sotto middleware in home directory di ROOT
 
 ------

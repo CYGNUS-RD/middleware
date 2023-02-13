@@ -2,7 +2,7 @@
   "client_id": ${GF_AUTH_GENERIC_OAUTH_CLIENT_ID},
   "client_secret": ${GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET},
   "redirect_uris": [
-    "https://grafana.cygno.cloud.infn.it/login/generic_oauth"
+    "https://131.154.96.196:3000/login/generic_oauth"
   ],
   "client_name": "grafanaLNF",
   "client_uri": null,

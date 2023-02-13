@@ -6,7 +6,7 @@ services:
     image: grafana/grafana:9.2.4
     user: "0"
     ports:
-      - 443:3000
+      - 3000:3000
     volumes:
       - ./grafana:/var/lib/grafana
 
@@ -22,7 +22,7 @@ services:
       GF_SERVER_PROTOCOL: https
       GF_SERVER_CERT_FILE: /var/lib/grafana/openssl/grafana.crt
       GF_SERVER_CERT_KEY: /var/lib/grafana/openssl/grafana.key
-      GF_SERVER_ROOT_URL: https://${GF_SERVER_DOMAIN}:443
+      GF_SERVER_ROOT_URL: https://${GF_SERVER_DOMAIN}:3000
       GF_SECURITY_COOKIE_SECURE: 'True'
       GF_AUTH_GENERIC_OAUTH_ENABLED: 'True'
       GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP: 'True'
