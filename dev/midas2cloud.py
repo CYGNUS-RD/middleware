@@ -50,7 +50,7 @@ def main():
     INAPATH    = options.inpath
     DAQPATH    = options.daqpath
 
-    STOROUT    = DAQPATH+"online/daq_stored.log"
+    STOROUT    = DAQPATH+"online/log/daq_stored.log"
     FILELOK    = INAPATH+"analized.lok"
     newupoload = []
     print('{:s} midas2cloud started'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
@@ -100,14 +100,18 @@ def main():
                 ('.mid.gz' in str(file_in_dir[i]))  and \
                 (not (str(file_in_dir[i]).split('.gz')[0] in file_in_dir)) \
                 and (not file_in_dir[i].startswith('.')):
-
-                    if cy.cmd.grep_file(file_in_dir[i], STOROUT) == "": # da sotituire con il check nell'sql 
+                    
+                    runN = int(file_in_dir[i].split('run')[-1].split('.mid.gz')[0])
+                    
+                    if cy.cmd.grep_file(file_in_dir[i], STOROUT) == "" or \
+                    cy.daq_read_runlog_replica_status(connection, runN, storage="local", verbose=verbose)==0: 
+                        # cy.cmd.grep_file(file_in_dir[i], STOROUT) == "" or 
                         
                         dtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                         
                         print('{:s} Udatentig matadata for filer file: {:s}'.format(dtime, file_in_dir[i]))
                         filesize = os.path.getsize(INAPATH+file_in_dir[i])               
-                        runN = int(file_in_dir[i].split('run')[-1].split('.mid.gz')[0])
+
                         md5sum = cy.cmd.file_md5sum(INAPATH+file_in_dir[i])
                         runC = client.odb_get("/Runinfo/Run number")
                         state = client.odb_get("/Runinfo/State")
@@ -131,49 +135,49 @@ def main():
                             compressing_files -= 1
                             current_try = 0
                             status, isthere = False, False # flag to know if to go to next run
-                            try:
-                                while(not status):   
-                                    #tries many times for errors of connection or others that may be worth another try
-                                    if verbose : 
-                                        print("Uploading: "+INAPATH+file_in_dir[i])
-                                        print(INAPATH+file_in_dir[i],TAG, 'cygno-data', "infncloud-wlcg", verbose, filesize)
-                                    if filesize < 5400000000: # ~ 5 GB
-                                        dtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                                        print('{:s} Uploading file: {:s}'.format(dtime, file_in_dir[i]))
-                                        status, isthere = cy.s3.obj_put(INAPATH+file_in_dir[i],tag=TAG, 
-                                                                     bucket='cygno-data', session="infncloud-wlcg", 
-                                                                     verbose=verbose)
-
-                                        # status, isthere = True, True
-                                        dtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                                        if status:
-                                            if isthere:
-                                                remotesize = cy.s3.obj_size(file_in_dir[i],tag=TAG, 
+                            #try:
+                            while(not status):   
+                                #tries many times for errors of connection or others that may be worth another try
+                                if verbose : 
+                                    print("Uploading: "+INAPATH+file_in_dir[i])
+                                    print(INAPATH+file_in_dir[i],TAG, 'cygno-data', "infncloud-wlcg", verbose, filesize)
+                                if filesize < 5400000000: # ~ 5 GB
+                                    dtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                                    print('{:s} Uploading file: {:s}'.format(dtime, file_in_dir[i]))
+                                    status, isthere = cy.s3.obj_put(INAPATH+file_in_dir[i],tag=TAG, 
                                                                  bucket='cygno-data', session="infncloud-wlcg", 
                                                                  verbose=verbose)
 
-                                                newupoload.append(storeStatus(file_in_dir[i], filesize, status, 
-                                                                              remotesize, STOROUT))
-                                                cy.daq_update_runlog_replica_status(connection, 
-                                                                                    runN, storage="cloud", 
-                                                                                    status=1, verbose=verbose)
-                                                cy.daq_update_runlog_replica_tag(connection, runN, 
-                                                                                 TAG=TAG, verbose=verbose)
+                                    # status, isthere = True, True
+                                    dtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                                    if status:
+                                        if isthere:
+                                            remotesize = cy.s3.obj_size(file_in_dir[i],tag=TAG, 
+                                                             bucket='cygno-data', session="infncloud-wlcg", 
+                                                             verbose=verbose)
 
-                                                print('{:s} Upload done: {:s}'.format(dtime, file_in_dir[i]))
-                                                ipload+=1
-                                        else:
-                                            current_try = current_try+1
-                                            if current_try==max_tries:
-                                                print('ERROR: Max try number reached: '+str(current_try))
-                                                status=True
+                                            newupoload.append(storeStatus(file_in_dir[i], filesize, status, 
+                                                                          remotesize, STOROUT))
+                                            cy.daq_update_runlog_replica_status(connection, 
+                                                                                runN, storage="cloud", 
+                                                                                status=1, verbose=verbose)
+                                            cy.daq_update_runlog_replica_tag(connection, runN, 
+                                                                             TAG=TAG, verbose=verbose)
+
+                                            print('{:s} Upload done: {:s}'.format(dtime, file_in_dir[i]))
+                                            ipload+=1
                                     else:
-                                        storeStatus(file_in_dir[i], filesize, status, 0,  STOROUT)
-                                        print('{:s} ERROR: File too large, not uploaded: {:s}'.format(dtime,file_in_dir[i]))
-                                        status=True
-                            except:
-                                dtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                                print('{:s} ERROR: Tranfering files: {:s}'.format(dtime,file_in_dir[i]))
+                                        current_try = current_try+1
+                                        if current_try==max_tries:
+                                            print('ERROR: Max try number reached: '+str(current_try))
+                                            status=True
+                                else:
+                                    storeStatus(file_in_dir[i], filesize, status, 0,  STOROUT)
+                                    print('{:s} ERROR: File too large, not uploaded: {:s}'.format(dtime,file_in_dir[i]))
+                                    status=True
+#                             except:
+#                                 dtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+#                                 print('{:s} ERROR: Tranfering files: {:s}'.format(dtime,file_in_dir[i]))
                                       
                                       
                     if verbose: print("file alredy uploaded or size ok")

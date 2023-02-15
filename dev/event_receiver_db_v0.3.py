@@ -109,7 +109,7 @@ def main(verbose=True):
 
     client = midas.client.MidasClient("middleware")
     buffer_handle = client.open_event_buffer("SYSTEM",None,1000000000)
-    request_id = client.register_event_request(buffer_handle)
+    request_id = client.register_event_request(buffer_handle, sampling_type = 2)#midas.GET_SOME)
     
     # init program variables
     t0 = time.time()
@@ -190,13 +190,13 @@ def main(verbose=True):
                 ## Save image
                 t1 = time.time()
                 image_update_time = client.odb_get("/middleware/image_update_time")
-                if (t1-t0) > image_update_time:
-                    print("[Saving image for presenter]")
-                    #saveimege = multiprocess.Process(target=image_jpg, args=(image, vmin, vmax, event_number, event_time,))
-                    #saveimege.daemon = True
-                    #saveimege.start()
-                    image_jpg(image, vmin, vmax, event_number, event_time)
-                    t0 = time.time()
+                #if (t1-t0) > image_update_time:
+                print("[Saving image for presenter]")
+                #saveimege = multiprocess.Process(target=image_jpg, args=(image, vmin, vmax, event_number, event_time,))
+                #saveimege.daemon = True
+                #saveimege.start()
+                image_jpg(image, vmin, vmax, event_number, event_time)
+                t0 = time.time()
 
                 ## Skipping spark images
                 if skipSpark(image):
@@ -205,10 +205,10 @@ def main(verbose=True):
                 if not gem_hv_state and state == midas.STATE_RUNNING:
                     if verbose: print("[Storing ped data {:d} images]".format(ped_id))
                     #ped_array.append(image)
-                    
+                  
                     m_image += image
                     s_image += image**2
-                    
+                  
                     exposure_ped = exposure_time
                     ped_id+= 1
                     
@@ -231,15 +231,15 @@ def main(verbose=True):
 
                     if verbose: print("[Starting analysis Image {:d}]".format(event.header.serial_number))
                     reconstruction_sample_gap = client.odb_get("/middleware/reconstruction_sample_gap")    
-                    if (event_number%reconstruction_sample_gap) == 0:
-                        if verbose: print("[recostructing Image {:d}]".format(event.header.serial_number))
-                        recoAndUpdate(image, run_number, event_number, pedarr_fr, sigarr_fr, 
+                    #if (event_number%reconstruction_sample_gap) == 0:
+                    if verbose: print("[recostructing Image {:d}]".format(event.header.serial_number))
+                    recoAndUpdate(image, run_number, event_number, pedarr_fr, sigarr_fr, 
                                    nsigma, event.header.timestamp, connection, verbose)
-#                         savereco = multiprocess.Process(target=recoAndUpdate, args=(image, run_number, event_number, pedarr_fr,
-#                                                                                     sigarr_fr, nsigma, event.header.timestamp,
-#                                                                                     connection, verbose,))
-#                         savereco.daemon = True
-#                         savereco.start()
+                          #savereco = multiprocess.Process(target=recoAndUpdate, args=(image, run_number, event_number, pedarr_fr,
+                          #                                                            sigarr_fr, nsigma, event.header.timestamp,
+                          #                                                            connection, verbose,))
+                          #savereco.daemon = True
+                          #savereco.start()
 
             t1b = time.time()    
             if 'DGH0' in bank_names:

@@ -109,7 +109,7 @@ def main(verbose=True):
 
     client = midas.client.MidasClient("middleware")
     buffer_handle = client.open_event_buffer("SYSTEM",None,1000000000)
-    request_id = client.register_event_request(buffer_handle)
+    request_id = client.register_event_request(buffer_handle, sampling_type = midas.GET_SOME)
     
     # init program variables
     t0 = time.time()
@@ -205,10 +205,10 @@ def main(verbose=True):
                 if not gem_hv_state and state == midas.STATE_RUNNING:
                     if verbose: print("[Storing ped data {:d} images]".format(ped_id))
                     #ped_array.append(image)
-                    
+                  
                     m_image += image
                     s_image += image**2
-                    
+                  
                     exposure_ped = exposure_time
                     ped_id+= 1
                     
@@ -231,15 +231,15 @@ def main(verbose=True):
 
                     if verbose: print("[Starting analysis Image {:d}]".format(event.header.serial_number))
                     reconstruction_sample_gap = client.odb_get("/middleware/reconstruction_sample_gap")    
-                    if (event_number%reconstruction_sample_gap) == 0:
-                        if verbose: print("[recostructing Image {:d}]".format(event.header.serial_number))
-                        recoAndUpdate(image, run_number, event_number, pedarr_fr, sigarr_fr, 
-                                   nsigma, event.header.timestamp, connection, verbose)
-#                         savereco = multiprocess.Process(target=recoAndUpdate, args=(image, run_number, event_number, pedarr_fr,
-#                                                                                     sigarr_fr, nsigma, event.header.timestamp,
-#                                                                                     connection, verbose,))
-#                         savereco.daemon = True
-#                         savereco.start()
+#                     if (event_number%reconstruction_sample_gap) == 0:
+#                         if verbose: print("[recostructing Image {:d}]".format(event.header.serial_number))
+#                         recoAndUpdate(image, run_number, event_number, pedarr_fr, sigarr_fr, 
+#                                    nsigma, event.header.timestamp, connection, verbose)
+# #                         savereco = multiprocess.Process(target=recoAndUpdate, args=(image, run_number, event_number, pedarr_fr,
+# #                                                                                     sigarr_fr, nsigma, event.header.timestamp,
+# #                                                                                     connection, verbose,))
+# #                         savereco.daemon = True
+# #                         savereco.start()
 
             t1b = time.time()    
             if 'DGH0' in bank_names:
@@ -265,23 +265,23 @@ def main(verbose=True):
             end = time.perf_counter()
             print("Run: {:d} Event: {:d} at {:s}".format(run_number, event_number, event_time))
             print("Elapsed, slow {:.2f}, pmt {:.2f}, cam {:.2f}, read cam {:.2f}, subprocess {:.2f} ".format(t3b-t2b, t2b-t1b, t1b-t0b, t1bc-t0bc, end-start) )
-        save_ped = client.odb_get("/middleware/save_ped")
-        if save_ped and (ped_id > 0):
-            print("[Making Pedestal over {:d} images]".format(ped_id))
-            #pedarr_fr, sigarr_fr = makeped(ped_array)
-            pedarr_fr = m_image/ped_id
+#         save_ped = client.odb_get("/middleware/save_ped")
+#         if save_ped and (ped_id > 0):
+#             print("[Making Pedestal over {:d} images]".format(ped_id))
+#             #pedarr_fr, sigarr_fr = makeped(ped_array)
+#             pedarr_fr = m_image/ped_id
         
-            sigarr_fr = np.sqrt((s_image - pedarr_fr**2 * ped_id) / (ped_id - 1))
-            #m_image[np.isnan(s_image)==True]=m_image.mean() # pach per i valori insani di sigma e media
-            #s_image[np.isnan(s_image)==True]=1024
-            np.save(DEFAULT_PATH_ONLINE+"pedarr_%.1f.npy" % exposure_ped, pedarr_fr)
-            np.save(DEFAULT_PATH_ONLINE+"sigarr_%.1f.npy" % exposure_ped, sigarr_fr)
+#             sigarr_fr = np.sqrt((s_image - pedarr_fr**2 * ped_id) / (ped_id - 1))
+#             #m_image[np.isnan(s_image)==True]=m_image.mean() # pach per i valori insani di sigma e media
+#             #s_image[np.isnan(s_image)==True]=1024
+#             np.save(DEFAULT_PATH_ONLINE+"pedarr_%.1f.npy" % exposure_ped, pedarr_fr)
+#             np.save(DEFAULT_PATH_ONLINE+"sigarr_%.1f.npy" % exposure_ped, sigarr_fr)
 
-            ped_id = 0
-            m_image = np.zeros((shape_image, shape_image), dtype=np.float64)
-            s_image = np.zeros((shape_image, shape_image), dtype=np.float64)
-            client.odb_set("/middleware/save_ped", False)
-            if verbose: print("[Pedestal done]")
+#             ped_id = 0
+#             m_image = np.zeros((shape_image, shape_image), dtype=np.float64)
+#             s_image = np.zeros((shape_image, shape_image), dtype=np.float64)
+#             client.odb_set("/middleware/save_ped", False)
+#             if verbose: print("[Pedestal done]")
         client.communicate(10)
         time.sleep(0.1)
         

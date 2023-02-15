@@ -274,7 +274,7 @@ def image_plot2(bank, vmin, vmax, grid, event_number, event_time, pedarr_fr, y0=
         ax.vlines(y0, 0, shape-1, colors='g')
         ax.vlines(shape-y0, 0,shape-1, colors='g')
     
-    if len(peaks!=0): plt.scatter(peaks[:,0], peaks[:,1], marker = 'x', color = 'red')
+    if len(peaks!=0): plt.scatter(peaks[:,0], peaks[:,1], marker = 'x', color = 'green')
     plt.title ("Event: {:d} at {:s} - Fscore: {:.1f} - Hscore: {:.3f} - Vscore: {:.3f}".format(event_number, event_time, FScore, HScore, VScore))
 #    plt.isinteractive()
     #plt.ion()
