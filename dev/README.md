@@ -14,3 +14,7 @@ command line
     run=03397; cp daq_stored.log bck/ ; grep -v $run bck/daq_stored.log  > daq_stored.log
 
 vedi file copyupload.sh che copia da una nummero all'altro ed eventualmnte elimina dai log
+
+### 
+    - midas2cloud.py e' in produzione.
+    - check_midas2cloud_tail (./check_midas2cloud_tail.py -q -c) per recuperare e rimettere a posto file non porattati in cloud o metadati sbagliati
