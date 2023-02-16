@@ -86,7 +86,7 @@ def main(grid=False, vmin=DEFAULT_VMIN_VALUE, vmax=DEFAULT_VMAX_VALUE, ped=DEFAU
     
     buffer_handle = client.open_event_buffer("SYSTEM",None,1000000000)
 
-    request_id = client.register_event_request(buffer_handle)
+    request_id = client.register_event_request(buffer_handle,  sampling_type = 2)
     
     plt.ion()
     fig = plt.figure(figsize = (10,10))

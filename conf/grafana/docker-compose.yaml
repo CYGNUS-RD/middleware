@@ -6,9 +6,11 @@ services:
     image: grafana/grafana:9.2.4
     user: "0"
     ports:
-      - 3000:3000
+      - 443:3000
     volumes:
-      - ./grafana:/var/lib/grafana
+      - dbdata:/var/lib/grafana
+      - /etc/letsencrypt/live/grafana.cygno.cloud.infn.it/fullchain.pem:/var/lib/grafana/openssl/fullchain.pem:ro
+      - /etc/letsencrypt/live/grafana.cygno.cloud.infn.it/privkey.pem:/var/lib/grafana/openssl/privkey.pem:ro
 
     environment:
       GF_INSTALL_PLUGINS: percona-percona-app,michaeldmoore-scatter-panel,natel-plotly-panel,ae3e-plotly-panel
@@ -20,9 +22,9 @@ services:
       GF_AUTH_BASIC_ENABLED: 0
       GF_SERVER_DOMAIN: ${GF_SERVER_DOMAIN}
       GF_SERVER_PROTOCOL: https
-      GF_SERVER_CERT_FILE: /var/lib/grafana/openssl/grafana.crt
-      GF_SERVER_CERT_KEY: /var/lib/grafana/openssl/grafana.key
-      GF_SERVER_ROOT_URL: https://${GF_SERVER_DOMAIN}:3000
+      GF_SERVER_CERT_FILE: /var/lib/grafana/openssl/fullchain.pem #/var/lib/grafana/openssl/grafana.crt
+      GF_SERVER_CERT_KEY: /var/lib/grafana/openssl/privkey.pem  #/var/lib/grafana/openssl/grafana.key
+      GF_SERVER_ROOT_URL: https://${GF_SERVER_DOMAIN}:443
       GF_SECURITY_COOKIE_SECURE: 'True'
       GF_AUTH_GENERIC_OAUTH_ENABLED: 'True'
       GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP: 'True'
@@ -39,3 +41,5 @@ services:
       GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_PATH: "contains(groups, 'cygno')  && 'Admin' || contains(groups, 'cygno-users') && 'Viewer'"
       GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_STRICT: 'True'
 
+volumes:
+   dbdata:

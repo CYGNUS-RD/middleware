@@ -232,8 +232,9 @@ def main(verbose=True):
                     if verbose: print("[Starting analysis Image {:d}]".format(event.header.serial_number))
                     reconstruction_sample_gap = client.odb_get("/middleware/reconstruction_sample_gap")    
                     if (event_number%reconstruction_sample_gap) == 0:
+                        if verbose: print("[recostructing Image {:d}]".format(event.header.serial_number))
                         recoAndUpdate(image, run_number, event_number, pedarr_fr, sigarr_fr, 
-                                  nsigma, event.header.timestamp, connection, verbose)
+                                   nsigma, event.header.timestamp, connection, verbose)
 #                         savereco = multiprocess.Process(target=recoAndUpdate, args=(image, run_number, event_number, pedarr_fr,
 #                                                                                     sigarr_fr, nsigma, event.header.timestamp,
 #                                                                                     connection, verbose,))

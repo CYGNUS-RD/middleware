@@ -2,7 +2,7 @@
   "client_id": ${GF_AUTH_GENERIC_OAUTH_CLIENT_ID},
   "client_secret": ${GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET},
   "redirect_uris": [
-    "https://131.154.96.196:3000/login/generic_oauth"
+    "https://grafana.cygno.cloud.infn.it/login/generic_oauth"
   ],
   "client_name": "grafanaLNF",
   "client_uri": null,
@@ -44,7 +44,7 @@
   "software_version": null,
   "code_challenge_method": null,
   "registration_access_token": ${gf_registration_access_token},
-  "registration_client_uri": "https://iam.cloud.infn.it/register/bfc75429-8dcc-4ca6-acc6-a1164ee225d0",
+  "registration_client_uri": "https://iam.cloud.infn.it/register/"${GF_AUTH_GENERIC_OAUTH_CLIENT_ID},
   "softwareId": null,
   "softwareVersion": null,
   "token_endpoint_auth_signing_alg": null,
