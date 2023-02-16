@@ -28,6 +28,7 @@ import midas.file_reader
 #MAX_CPU_AVAILABLE   = multiprocess.cpu_count()
 #DAQ_ROOT            = os.environ['DAQ_ROOT']
 DEFAULT_PATH_ONLINE = 'pedestals/' #DAQ_ROOT+'/online/'
+URL                 = 'https://minio.cloud.infn.it/'
 
 def image_jpg(image, vmin, vmax, event_number, event_time):
     
@@ -52,6 +53,52 @@ def run_reco(image, run_number, ev_number, pedarr_fr, sigarr_fr, nsigma, verbose
     values = pr.pre_reconstruction(arr, run_number, ev_number, pedarr_fr, sigarr_fr, nsigma, printtime=verbose)
     t2 = time.time()
     df = pr.create_pandas(values)
+    return df
+
+def ped_reco(image, run_number, ev_number, verbose):
+    import pandas as pd
+    
+    arr = image
+    ## Include some reconstruction code here
+    #
+    integralT = np.sum(arr)
+    mediaT = np.mean(arr)
+    sigmaT = np.std(arr)
+    
+    mediaR1 = np.mean(arr[0:256, 0:256])
+    sigmaR1 = np.std(arr[0:256, 0:256])
+    
+    mediaR2 = np.mean(arr[int(2304/2-128):int(2304/2+128), 0:256])
+    sigmaR2 = np.std(arr[int(2304/2-128):int(2304/2+128), 0:256])
+    
+    mediaR3 = np.mean(arr[2304-256:2304, 0:256])
+    sigmaR3 = np.std(arr[2304-256:2304, 0:256])
+    
+    mediaR4 = np.mean(arr[0:256, int(2304/2-128):int(2304/2+128)])
+    sigmaR4 = np.std(arr[0:256, int(2304/2-128):int(2304/2+128)])
+    
+    mediaR5 = np.mean(arr[int(2304/2-128):int(2304/2+128), int(2304/2-128):int(2304/2+128)])
+    sigmaR5 = np.std(arr[int(2304/2-128):int(2304/2+128), int(2304/2-128):int(2304/2+128)])
+    
+    mediaR6 = np.mean(arr[2304-256:2304, int(2304/2-128):int(2304/2+128)])
+    sigmaR6 = np.std(arr[2304-256:2304, int(2304/2-128):int(2304/2+128)])
+    
+    mediaR7 = np.mean(arr[0:256, 2304-256:2304])
+    sigmaR7 = np.std(arr[0:256, 2304-256:2304])
+    
+    mediaR8 = np.mean(arr[int(2304/2-128):int(2304/2+128), 2304-256:2304])
+    sigmaR8 = np.std(arr[int(2304/2-128):int(2304/2+128), 2304-256:2304])
+    
+    mediaR9 = np.mean(arr[2304-256:2304, 2304-256:2304])
+    sigmaR9 = np.std(arr[2304-256:2304, 2304-256:2304])
+    
+    
+    # initialize list of lists
+    data = [run_number, ev_number, integralT, mediaT, sigmaT, mediaR1, sigmaR1, mediaR2, sigmaR2, mediaR3, sigmaR3, mediaR4, sigmaR4, mediaR5, sigmaR5, mediaR6, sigmaR6, mediaR7, sigmaR7, mediaR8, sigmaR8, mediaR9, sigmaR9]
+    
+    # Create the pandas DataFrame
+    df = pd.DataFrame([data], columns = ['Run','Event','IntegralT','MediaT','SigmaT','MediaR1','SigmaR1','MediaR2','SigmaR2','MediaR3','SigmaR3','MediaR4','SigmaR4','MediaR5','SigmaR5','MediaR6','SigmaR6','MediaR7','SigmaR7','MediaR8','SigmaR8','MediaR9','SigmaR9'])
+    
     return df
 
 def push_panda_table_sql(connection, table_name, df):
@@ -92,6 +139,20 @@ def skipSpark(image):
     
     
     return sparktest
+
+def recoPedAndUpdate(image, run_number, event_number, timestamp, connection, verbose=False):
+    #table_name = "Run{:05d}".format(run_number)
+    table_name = "PedRecoTable"
+    df = ped_reco(image, run_number, event_number, verbose)
+    if verbose: print("[Sending reco variables to SQL]")
+    df.insert(loc=0, column='timestamp', value = timestamp)
+    try:
+        push_panda_table_sql(connection, table_name, df)
+    except:
+        print["Connection down, SQL not sent"]
+        
+    if verbose: print("[SQL sent]")
+    #df.to_sql("Run10000", con=connection, if_exists='append', index_label='id')
     
 def recoAndUpdate(image, run_number, event_number, pedarr_fr, sigarr_fr, nsigma, timestamp, connection, verbose=False):
     #table_name = "Run{:05d}".format(run_number)
@@ -107,12 +168,12 @@ def recoAndUpdate(image, run_number, event_number, pedarr_fr, sigarr_fr, nsigma,
     if verbose: print("[SQL sent]")
     #df.to_sql("Run10000", con=connection, if_exists='append', index_label='id')
     
-def checkNewRuns():
+def checkNewRuns(run_number_start,hv_state):
     
     list_runs_to_analyze = []
     while len(list_runs_to_analyze) == 0:
         df = cy.read_cygno_logbook(verbose=False)
-        list_runs_to_analyze = df.run_number[(df["storage_cloud_status"] == 1) & (df["online_reco_status"] == -1) & (df["run_number"] > 6504)].values.tolist()
+        list_runs_to_analyze = df.run_number[(df["storage_cloud_status"] == 1) & (df["online_reco_status"] == -1) & (df["run_number"] > run_number_start) & (df["HV_STATE"] == hv_state)].values.tolist()
         time.sleep(5)
 
     return list_runs_to_analyze
@@ -121,10 +182,72 @@ def sql_update_reco_status(run,value,connection):
     cmd.update_sql_value(connection, table_name="Runlog", row_element="run_number", 
                      row_element_condition=run, 
                      colum_element="online_reco_status", value=value, 
-                     verbose=False)
+                     verbose=True)
     
 
-def main(verbose=True):
+def get_put_2cloud(fun, localpath, key, url, bucket, session, verbose):
+    
+    import boto3
+    import requests
+    from boto3sts import credentials as creds
+    import urllib.parse
+
+    session = creds.assumed_session(session, endpoint=url,verify=True)
+    s3 = session.client('s3', endpoint_url=url, config=boto3.session.Config(signature_version='s3v4'), verify=True)
+    if fun == "get":
+        url_out = s3.generate_presigned_url('get_object', 
+                                        Params={'Bucket': bucket,
+                                                'Key': key}, 
+                                        ExpiresIn=3600)
+    elif fun == "put":
+        url_out = s3.generate_presigned_post(bucket, key, ExpiresIn=3600)
+        with open(localpath, 'rb') as f:
+            files = {'file': (localpath, f)}
+            http_response = requests.post(url_out['url'], data=url_out['fields'], files=files)
+    else:
+        url_out = ''
+    
+    return url_out
+        
+
+def writeped2root(pedrun, pedmean, pedrms, option='update', verbose=False):
+    import ROOT
+    
+    pedfilename = "pedestals/pedmap_run%s_rebin1.root" % (pedrun)
+    (nx,ny) = pedmean.shape
+    #h2 = ROOT.TH2D('pic_run',fname+'_'+str(id),nx,0,nx,ny,0,ny)
+    
+    pedfile = ROOT.TFile.Open(pedfilename,'recreate')
+    pedmap = ROOT.TH2D('pedmap','pedmap',nx,0,nx,ny,0,ny)
+    pedmapS = ROOT.TH2D('pedmapsigma','pedmapsigma',nx,0,nx,ny,0,ny)
+    
+   
+    # now save in a persistent ROOT object
+    for ix in range(nx):
+        for iy in range(ny):
+            pedmap.SetBinContent(ix+1,iy+1,pedmean[ix,iy]);
+            pedmap.SetBinError(ix+1,iy+1,pedrms[ix,iy]);
+            pedmapS.SetBinContent(ix+1,iy+1,pedrms[ix,iy]);
+
+    pedfile.cd()
+    pedmap.Write()
+    pedmapS.Write()
+    pedmean1D = ROOT.TH1D('pedmean','pedestal mean',500,97,103)
+    pedrms1D = ROOT.TH1D('pedrms','pedestal RMS',1000,0,10)
+    for ix in range(nx):
+        for iy in range(ny):
+            pedmean1D.Fill(pedmap.GetBinContent(ix,iy)) 
+            pedrms1D.Fill(pedmap.GetBinError(ix,iy)) 
+    pedmean1D.Write()
+    pedrms1D.Write()
+    pedfile.Close()
+    
+    if verbose:
+        print("Pedestal calculated and saved into ",pedfilename)
+        
+    return pedfilename
+
+def main(run_number_start, hv_state, verbose=True):
     
     #client = midas.client.MidasClient("middleware")
     #buffer_handle = client.open_event_buffer("SYSTEM",None,1000000000)
@@ -164,7 +287,7 @@ def main(verbose=True):
     while True:
         t0bc = time.time()
         
-        list_runs_to_analyze = checkNewRuns()
+        list_runs_to_analyze = checkNewRuns(run_number_start, hv_state)
         print("Getting List of runs")
         
         run_number = list_runs_to_analyze[0]
@@ -232,6 +355,8 @@ def main(verbose=True):
                     if dfrun["HV_STATE"].values[0] == 0:
                         if verbose: print("[Storing ped data {:d} images]".format(ped_id))
                         #ped_array.append(image)
+                        
+                        recoPedAndUpdate(image, run_number, event_number, event.header.timestamp, connection, verbose)
 
                         m_image += image
                         s_image += image**2
@@ -243,8 +368,19 @@ def main(verbose=True):
                         if verbose: print("[Initiating Reconstruction]")
                         if not len(pedarr_fr):
                             if verbose: print("[Loading Pedestal]")
-                            pedarr_fr = np.load(DEFAULT_PATH_ONLINE+"pedarr_%.1f.npy" % exposure_time)
-                            sigarr_fr = np.load(DEFAULT_PATH_ONLINE+"sigarr_%.1f.npy" % exposure_time)
+                            
+                            dfped  = dfrun[(dfrun.online_reco_status == 1) & (dfrun.HV_STATE == 0) & (dfrun.run_number < run_number)]
+                            pedrun = dfped.sort_values(by='run_number', ascending=False).run_number.values[0]
+                            pedfilename_get = 'pedmap_run%s_rebin1.root' % (pedrun)
+                            
+                            url_ped   = get_put_2cloud('get', '', 'middleware/'+pedfilename_get, URL, 'cygno-analysis', 'dodas', verbose=verbose)
+                            
+                            pedrf_fr  = uproot.open(url_ped)
+                            pedarr_fr = pedrf_fr['pedmap'].values().T
+                            sigarr_fr = pedrf_fr['pedmap'].errors().T
+                            
+                            #pedarr_fr = np.load(DEFAULT_PATH_ONLINE+"pedarr_%.1f.npy" % exposure_time)
+                            #sigarr_fr = np.load(DEFAULT_PATH_ONLINE+"sigarr_%.1f.npy" % exposure_time)
                             ## Checking oldness of pedestal file
                             fileStatsObj     = os.stat (DEFAULT_PATH_ONLINE+"pedarr_%.1f.npy" % exposure_time)
                             modificationTime = time.ctime(fileStatsObj[stat.ST_MTIME])
@@ -296,7 +432,15 @@ def main(verbose=True):
             #s_image[np.isnan(s_image)==True]=1024
             np.save(DEFAULT_PATH_ONLINE+"pedarr_%.1f.npy" % exposure_ped, pedarr_fr)
             np.save(DEFAULT_PATH_ONLINE+"sigarr_%.1f.npy" % exposure_ped, sigarr_fr)
-
+            #pedmap_run4155_rebin1.root
+            
+            # Save pedmap into ROOT file
+            writeped2root(run_number, pedarr_fr, sigarr_fr, option='update', verbose=True)
+            pedfilename = 'pedmap_run%s_rebin1.root' % (run_number)
+            # Upload the file into the CLOUD
+            get_put_2cloud('put', DEFAULT_PATH_ONLINE+pedfilename, 'middleware/'+pedfilename, URL, 'cygno-analysis', 'dodas', verbose=verbose)
+            
+            os.remove(DEFAULT_PATH_ONLINE+pedfilename)
             ped_id = 0
             m_image = np.zeros((shape_image, shape_image), dtype=np.float64)
             s_image = np.zeros((shape_image, shape_image), dtype=np.float64)
@@ -313,7 +457,14 @@ def main(verbose=True):
         
 if __name__ == "__main__":
     from optparse import OptionParser
-    parser = OptionParser(usage='usage: %prog\t ')
+    parser = OptionParser(usage='usage: %prog\t [-ubsv] run_number_start hv_state')
     parser.add_option('-v','--verbose', dest='verbose', action="store_true", default=False, help='verbose output;');
     (options, args) = parser.parse_args()
-    main(verbose=options.verbose)
+    #main(verbose=options.verbose)
+    
+    if len(args) < 2:
+        print(args, len(args))
+        parser.error("incorrect number of arguments")
+
+    else:
+        main(int(args[0]), int(args[1]), options.verbose)
