@@ -35,7 +35,7 @@ def main(INAPATH, TAG, fcopy, fsql, fforce, verbose):
         print ("ERROR: Sql connetion")
         sys.exit(1)
     print ("Checking file localy and remote: ", datetime.datetime.now().time())
-    for i, file_in in enumerate(files_in_dir(INAPATH, ftype='mid.gz', tail_of_file=100, verbose=False)):
+    for i, file_in in enumerate(files_in_dir(INAPATH, ftype='mid.gz', tail_of_file=10000, verbose=False)):
             #
             # loop on run*.gz files
             #
