@@ -23,6 +23,9 @@ import sys
 import cygno as cy
 import multiprocess
 
+from json import dumps
+from kafka import KafkaProducer
+
 MAX_CPU_AVAILABLE   = multiprocess.cpu_count()
 DAQ_ROOT            = os.environ['DAQ_ROOT']
 DEFAULT_PATH_ONLINE = DAQ_ROOT+'/online/'
@@ -76,7 +79,10 @@ def init_sql():
 
 
 def main(verbose=True):
-
+    producer = KafkaProducer(
+        bootstrap_servers=['localhost:9092'],
+        value_serializer=lambda x: dumps(x).encode('utf-8')
+    )
     client = midas.client.MidasClient("middleware")
     buffer_handle = client.open_event_buffer("SYSTEM",None,1000000000)
     request_id = client.register_event_request(buffer_handle, sampling_type = 2)#midas.GET_SOME)
@@ -131,10 +137,10 @@ def main(verbose=True):
 
             if 'INPT' in bank_names:                
                 value = [event_info + list(event.banks['INPT'].data)]
-                if verbose:
-                    print(value)
-                    print("........")
-                    print(header_environment)
+                try:
+                    producer.send('slow_control', value=value)
+                except:
+                    print (int(time.time()), "KAFKA ERROR...")
 
                 de = pd.DataFrame(value, columns = header_environment)
                 table_name_sc = "SlowControl"

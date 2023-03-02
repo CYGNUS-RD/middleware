@@ -9,6 +9,66 @@ def storeStatus(filen, size, status, remotesize, outfile):
     stchar = ' '.join([filen, str(size), str(status), str(remotesize)])
     cmd.append2file(stchar, outfile)
     return stchar
+
+def replica_sql_value(connection, connection_remote, table_name, row_element, row_element_condition, verbose=False):
+    import datetime
+    sql = "SELECT * FROM `"+table_name+"` WHERE `"+row_element+"` = "+row_element_condition+";"
+    #SELECT * FROM `Runlog` WHERE `run_number` = 1024;
+    if verbose: print(sql)
+    #try:
+    # read from local
+    mycursor = connection.cursor()
+    mycursor.execute(sql)
+    row = mycursor.fetchone()
+
+    row_list = []
+
+    for i,data in enumerate(row):
+        if isinstance(data, datetime.datetime):
+            data = data.strftime('%Y-%m-%d %H:%M:%S')
+        row_list.append(data)
+    row = tuple(row_list)
+
+    cols = mycursor.column_names
+
+    cols = "`,`".join([str(i) for i in list(cols)])
+
+    mycursor.close()
+    #except:
+    #    return 0    
+    #sql = "INSERT INTO `{}` (`" +cols+ "`) VALUES {}".format(table_name, row)
+    sql = "INSERT INTO `"+table_name+"` (`" +cols+ "`) VALUES "+str(row)
+    if verbose: print(sql)
+    try:
+        # replica on remote
+        mycursor = connection_remote.cursor()
+        #sql = "INSERT INTO `"+table_name+"` (`" +cols + "`) VALUES (" + "%s,"*(len(row)-1) + "%s)"
+        mycursor.execute(sql)
+        #mycursor.execute(sql, row.astype(str))
+        connection_remote.commit()
+        mycursor.close()
+        
+        if verbose: print(mycursor.rowcount, "Update done")
+
+        return row[0]
+    except:
+        return 0
+
+def daq_sql_connection_local(verbose=False):
+    import mysql.connector
+    import os
+    try:
+        connection = mysql.connector.connect(
+          host='localhost',
+          user=os.environ['MYSQL_USER'],
+          password=os.environ['MYSQL_PASSWORD'],
+          database=os.environ['MYSQL_DATABASE'],
+          port=3306
+        )
+        if verbose: print(connection)
+        return connection
+    except:
+        return False
     
     
 def main():
@@ -60,7 +120,12 @@ def main():
     
     compressing_files = 0
     
-    connection = cy.daq_sql_cennection(verbose)
+    connection_remote = cy.daq_sql_cennection(verbose)
+    if not connection_remote:
+        print('{:s} ERROR: Sql connetion'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+        sys.exit(1)
+    
+    connection = daq_sql_connection_local(verbose)#cy.daq_sql_cennection(verbose)
     if not connection:
         print('{:s} ERROR: Sql connetion'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
         sys.exit(1)
@@ -164,6 +229,27 @@ def main():
                                             cy.daq_update_runlog_replica_tag(connection, runN, 
                                                                              TAG=TAG, verbose=verbose)
 
+                                            ###### Update SQL Remote
+                                            
+                                            #lastrun = cy.read_sql_value(connection, "Runlog", "run_number", 
+                                            #   str(runN), "*",verbose)
+                                            n_try = 3
+                                            
+                                            while (n_try>0):
+                                            
+                                                status_replica = replica_sql_value(connection, connection_remote, 
+                                                                              "Runlog", "run_number",  str(runN),
+                                                                              verbose=verbose)
+                                                if status_replica:
+                                                    break
+                                                print("WARNING: SQL Replica try", n_try)
+                                                n_try-=1
+                                            if n_try == 0: print('ERROR: Max SQL try replica reached')
+                                            
+                                            
+                                            
+                                            
+                                            ##############################
                                             print('{:s} Upload done: {:s}'.format(dtime, file_in_dir[i]))
                                             ipload+=1
                                     else:
