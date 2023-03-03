@@ -83,11 +83,11 @@ https://wiki.ubuntu-it.org/Sicurezza/Nftables
 ```
 IP LNGS: mazzitel@172.18.9.72
 ```
-Configurazione Virtual host e routing /etc/nftables.conf
-Restart seervice: ```nft -f /etc/nftables.conf```
-Configurazione fixed host: /etc/dhcp/fixed-addr.conf
-Restart service: ```systemctl restart isc-dhcp-server.service```
-ip volatili: /var/lib/dhcp/dhcpd.leases
+* Configurazione Virtual host e routing /etc/nftables.conf
+* Restart seervice: ```nft -f /etc/nftables.conf```
+* Configurazione fixed host: /etc/dhcp/fixed-addr.conf
+* Restart service: ```systemctl restart isc-dhcp-server.service```
+* ip volatili: /var/lib/dhcp/dhcpd.leases
 
 
 ```
