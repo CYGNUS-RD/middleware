@@ -80,6 +80,7 @@ sudo apt-get install oidc-agent
 ```
 ### gestione del router 
 https://wiki.ubuntu-it.org/Sicurezza/Nftables
+ssh mazzitel@172.18.9.72
 ```
 host daq-server1 {hardware ethernet 3c:ec:ef:6c:df:ac; fixed-address 192.168.99.10; } 
 host daq-server2 {hardware ethernet 3c:ec:ef:6c:e0:d8; fixed-address 192.168.99.11; } 
