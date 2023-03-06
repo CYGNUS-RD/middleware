@@ -1,5 +1,8 @@
-## How to install MariaDB and Useful links
+# How to install MariaDB and Useful links
 
+# Installation and Configuration Maria DB
+
+links (https://www.digitalocean.com/community/tutorials/how-to-install-mariadb-on-ubuntu-22-04, https://www.digitalocean.com/community/tutorials/how-to-install-and-secure-phpmyadmin-on-ubuntu-20-04, https://www.server-world.info/en/note?os=Ubuntu_22.04&p=mariadb&f=6)
 
 ## Configure mysql_secure_installation
 
