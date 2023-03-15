@@ -1,0 +1,42 @@
+version: '3'
+# https://hub.docker.com/_/mariadb
+services:
+
+  db:
+    image: mariadb:10.5.15
+    container_name: mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: cygno_db
+      MYSQL_USER: cygno_producer
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+#
+# con networ_mode il reindirizzamento delle porte non funziona
+#    ports: 
+#      - "3307:3306"
+#
+    volumes:
+      - ${PWD}/50-server.cnf:/etc/mysql/mariadb.conf.d/50-server.cnf
+      - mariadb:/var/lib/mysql
+
+    network_mode: host
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: pma_mdb
+#    links:
+#      - db
+    environment:
+#      PMA_HOST: db
+      PMA_HOST: 127.0.0.1
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    restart: always
+#    ports:
+#      - 8082:80
+
+    network_mode: host
+
+volumes:
+  mariadb:

@@ -1,0 +1,50 @@
+version: '2'
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper:3.4.6
+    container_name: zookeeper
+    ports:
+     - "2181:2181"
+
+  kafka:
+    image: wurstmeister/kafka
+    container_name: kafka
+    ports:
+     - "9092:9092"
+    expose:
+     - "9093"
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9093,OUTSIDE://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CREATE_TOPICS: "topic_test:1:1"
+    volumes:
+     - /var/run/docker.sock:/var/run/docker.sock
+
+  sentinel:
+    image: gmazzitelli/cygno-st:v1.0.3-cygno
+    container_name: sentinel
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
+    environment:
+      OIDC_AGENT: ${OIDC_AGENT}
+      REFRESH_TOKEN: ${REFRESH_TOKEN}
+      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+      IAM_SERVER: ${IAM_SERVER}
+      IAM_SCOPES: "'openid profile email offline_access wlcg wlcg.groups'"
+    volumes:
+      - ${PWD}/dev/:/root/dev
+      - ${PWD}/start_script.sh:/start_script.sh
+    command: /bin/sh -c "/start_script.sh && tail -f /dev/null"
+
+  editor:
+    image: jupyter/minimal-notebook
+    container_name: editor
+    user: root
+    volumes:
+      - ${PWD}/dev:/home/jovyan/work/
+    ports:
+      - "8890:8888"

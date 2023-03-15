@@ -1,0 +1,57 @@
+version: '3'
+services:
+
+  orchestratore: 
+    image: gmazzitelli/cygno-orchestratore:v1.0.1
+    container_name: orchestratore 
+    volumes:
+      - ./apache/html:/var/www/html
+    ports:
+      - "8080:80"
+      - "443:443"
+    environment:
+      MYSQL_DATABASE: cygno_cloud
+      MYSQL_USER: cygno_user
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+
+  editor:
+#image: jupyter/scipy-notebook
+    image: jupyter/minimal-notebook
+    container_name: editor 
+    user: root
+    volumes:
+      - ./apache/html:/home/jovyan/work/
+    ports:
+      - "8889:8888"
+#environment:
+#      CHOWN_EXTRA: /home/jovyan/html/ # non mi sembra fiunzioni. L'unico modo e' stato dare chmod -R 777 alla directory html
+#      NB_UID: root #${SUDO_UID}
+#      NB_GID: root #${SUDO_GID}
+
+  db:
+    image: mysql:5.7
+    container_name: db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: cygno_cloud
+      MYSQL_USER: cygno_user
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "6033:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: pma
+    links:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    restart: always
+    ports:
+      - 8081:80
+volumes:
+  dbdata:
