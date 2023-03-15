@@ -10,6 +10,7 @@ import os
 from datetime import datetime
 #import pre_reconstruction as pr
 import time
+
 import cygno as cy
 
 import midas
@@ -22,34 +23,114 @@ DEFAULT_VMAX_VALUE  = '120'
 DEFAULT_FRAME_VALUE = '100' # grean frame limit
 DEFAULT_PMT_VALUE   = '5'
 
+divisions = np.array([12,12])
 
-def plot_iamge(bank, vmin, vmax, grid, event_number, event_time, y0=DEFAULT_FRAME_VALUE):
+def find_stdArray(img_arr, divisions, overlap = 30):
+    
+    n_evs = np.shape(img_arr)[0]
+    size = np.shape(img_arr)[1]
+    div_size = size/divisions
+    
+    std_arr = np.zeros([n_evs, divisions[0]*divisions[1]], dtype = float)
+    
+    for ev in range(n_evs):
+        img = img_arr[ev]
+
+        x, y = np.meshgrid(np.arange(divisions[0]), np.arange(divisions[1]))
+
+        #print("Image: %.3f \u00B1 %.3f" %(np.mean(img.flatten()), np.std(img.flatten())))
+        for k in range(divisions[0]*divisions[1]):
+            xx = x.flatten()[k]
+            yy = y.flatten()[k]
+
+            x_begin = int(xx*div_size[0])
+            x_end = int((xx+1)*div_size[0])
+
+            y_begin = int(yy*div_size[1])
+            y_end = int((yy+1)*div_size[1])
+
+            x_begin = x_begin - (overlap if x_begin != 0 else 0)
+            x_end = x_end + (overlap if x_end != 2304 else 0)
+
+            y_begin = y_begin - (overlap if y_begin != 0 else 0)
+            y_end = y_end + (overlap if y_end != 2304 else 0)
+
+
+            img_div = img[x_begin:x_end, y_begin:y_end]
+            std_arr[ev,k] = np.std(img_div)
+
+    return std_arr
+
+
+def trigger(std_arr, threshold):
+    
+    trigger_arr = std_arr > threshold
+    return np.where(trigger_arr)[0]
+
+def plot_image(ax, bank, vmin, vmax, grid, event_number, event_time, trigger_position, divisions, y0=DEFAULT_FRAME_VALUE, overlap = 30):
 
     shape = int(np.sqrt(bank.size_bytes*8/16))
     image = np.reshape(bank.data, (shape, shape))
-    ax = plt.imshow(image, cmap='gray', vmin=vmin, vmax=vmax)
-
-
+    
+    
+    ax[0].imshow(image, cmap='gray', vmin=vmin, vmax=vmax)
+    plt.title ("Event: {:d} at {:s}".format(event_number, event_time))
     if grid:
-        ax = plt.gca();
+        ax[0] = plt.gca();
 
         majorx_ticks = np.arange(0, shape,  int(shape/11))
         majory_ticks = np.arange(0, shape,  int(shape/11))
         # Major ticks
-        ax.set_xticks(majorx_ticks)
-        ax.set_yticks(majory_ticks)
+        ax[0].set_xticks(majorx_ticks)
+        ax[0].set_yticks(majory_ticks)
 
         # Labels for major ticks
-        ax.set_xticklabels(majorx_ticks)
-        ax.set_yticklabels(majory_ticks)
+        ax[0].set_xticklabels(majorx_ticks)
+        ax[0].set_yticklabels(majory_ticks)
 
-        ax.grid(color='r', linestyle='--', linewidth=1)
+        ax[0].grid(color='r', linestyle='--', linewidth=1)
 
-        ax.hlines(y0, 0, shape-1, colors='g')
-        ax.hlines(shape-y0, 0, shape-1, colors='g')
-        ax.vlines(y0, 0, shape-1, colors='g')
-        ax.vlines(shape-y0, 0,shape-1, colors='g')
+        ax[0].hlines(y0, 0, shape-1, colors='g')
+        ax[0].hlines(shape-y0, 0, shape-1, colors='g')
+        ax[0].vlines(y0, 0, shape-1, colors='g')
+        ax[0].vlines(shape-y0, 0,shape-1, colors='g')
+    
+    div_size = shape/divisions
+    
+    x, y = np.meshgrid(np.arange(divisions[0]), np.arange(divisions[1]))
+    
+    img_trigger = np.zeros([2304,2304])
+    
+    if trigger_position.any():
+        for k in trigger_position:
+            xx = x.flatten()[k]
+            yy = y.flatten()[k]
+
+            x_begin = int(xx*div_size[0])
+            x_end = int((xx+1)*div_size[0])
+
+            y_begin = int(yy*div_size[1])
+            y_end = int((yy+1)*div_size[1])
+
+            x_begin = x_begin - (overlap if x_begin != 0 else 0)
+            x_end = x_end + (overlap if x_end != 2304 else 0)
+
+            y_begin = y_begin - (overlap if y_begin != 0 else 0)
+            y_end = y_end + (overlap if y_end != 2304 else 0)
+            
+            img_trigger[x_begin:x_end, y_begin:y_end] = image[x_begin:x_end, y_begin:y_end]
+    
+    ax[1].imshow(img_trigger, cmap='gray', vmin=vmin, vmax=vmax)
+    ax[1].grid(color='gray', linestyle='--', linewidth=1)
+    ax[1].set_xticks(np.arange(0,2304,2304/12))
+    ax[1].set_yticks(np.arange(0,2304,2304/12))
+
+    plt.title ("Event: {:d} at {:s} triggered {:d} times".format(event_number, event_time, len(trigger_position)))
+    
+    #plt.show()
+    
     return
+
 
 def plot_waveform(waveform, lenw, pmt, event_number, event_time):
     import numpy as np
@@ -74,7 +155,7 @@ def main(grid=False, vmin=DEFAULT_VMIN_VALUE, vmax=DEFAULT_VMAX_VALUE, ped=DEFAU
     request_id = client.register_event_request(buffer_handle, sampling_type = 2)
     
     plt.ion()
-    fig = plt.figure(figsize=(12,6), facecolor='#DEDEDE')
+    fig, ax = plt.subplots(1, 2, figsize=(12,6), facecolor='#DEDEDE')
 
 #    fig = plt.figure()
 
@@ -106,7 +187,7 @@ def main(grid=False, vmin=DEFAULT_VMIN_VALUE, vmax=DEFAULT_VMAX_VALUE, ped=DEFAU
                 print("%s, banks %s" % (event_time, bank_names))
 
             #plt.ion() #sovrapone i grafici nella stessa finestra
-            plt.clf()
+            #plt.clf()
             for bank_name, bank in event.banks.items():
 		
                 if bank_name=='INPT':
@@ -123,15 +204,22 @@ def main(grid=False, vmin=DEFAULT_VMIN_VALUE, vmax=DEFAULT_VMAX_VALUE, ped=DEFAU
                     plot_waveform(waveform, lenw, int(pmt), event_number, event_time)
 
                 if bank_name=='CAM0': 
-                    plt.subplot(1,2,1)
-                    t1 = time.time()
-                    plot_iamge(event.banks['CAM0'], vmin, vmax, grid, event_number, event_time, y0)
-                    t2 = time.time()
                     
+                    t1 = time.time()
+                    img, _, _ = cy.daq_cam2array(bank)
+                    
+                    img_sparkless = np.copy(img)
+                    coord = np.load("/home/standard/Documents/pains-test/spark_coordinates_3890.npy")
+                    img_sparkless[coord[:,0], coord[:,1]] = np.mean(img)
+                    
+                    std_arr = find_stdArray(img_sparkless.reshape(1,2304,2304), divisions, overlap = 30)
+                    threshold = np.load("/home/standard/Documents/pains-test/threshold_90.npy")
+                    trigger_position = np.where(std_arr[0] > threshold)[0]
+                    plot_image(ax, event.banks['CAM0'], vmin = vmin, vmax = vmax, grid = grid, event_number = event_number, event_time = event_time,  trigger_position = trigger_position, divisions = divisions, y0 = y0)
+                    
+                    t2 = time.time()
                     print(t2-t1)
                 
-            
-            plt.title ("Event: {:d} at {:s}".format(event_number, event_time))
             fig.canvas.flush_events()
             time.sleep(0.05)
             #plt.show()
