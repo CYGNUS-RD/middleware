@@ -244,7 +244,17 @@ def main():
                                                     break
                                                 print("WARNING: SQL Replica try", n_try)
                                                 n_try-=1
-                                            if n_try == 0: print('ERROR: Max SQL try replica reached')
+                                                connection_remote = cy.daq_sql_cennection(verbose)
+                                                if not connection_remote:
+                                                    print('{:s} ERROR: Sql connetion'\
+                                                          .format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+                                                    sys.exit(1)
+                                                    
+                                                    
+                                            if n_try == 0: 
+                                                print('ERROR: Max SQL try replica reached')
+                                            else:
+                                                print('{:s} Replica sql updated'.format(dtime) )
                                             
                                             
                                             
