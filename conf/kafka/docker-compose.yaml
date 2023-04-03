@@ -19,12 +19,20 @@ services:
       KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_CREATE_TOPICS: "topic_test:1:1"
+      KAFKA_CREATE_TOPICS: "online:1:1"
+#      KAFKA_REPLICA_FETCH_MAX_BYTES: 31457280
+      KAFKA_PRODUCER_MAX_REQUEST_SIZE: 31457280
+      KAFKA_CONSUMER_MAX_PARTITION_FETCH_BYTES: 31457280
+      KAFKA_MESSAGE_MAX_BYTES: 31457280
+      CONNECT_PRODUCER_MAX_REQUEST_SIZE: 31457280
+      CONNECT_CONSUMER_MAX_PARTITION_FETCH_BYTES: 31457280
+      KAFKA_LOG_RETENTION_HOURS: 1
+      KAFKA_LOG_RETENTION_BYTES: 1073741824
     volumes:
      - /var/run/docker.sock:/var/run/docker.sock
 
   sentinel:
-    image: gmazzitelli/cygno-st:v1.0.3-cygno
+    image: gmazzitelli/cygno-st:v1.0.4-cygno
     container_name: sentinel
     stdin_open: true # docker run -i
     tty: true        # docker run -t
@@ -37,8 +45,9 @@ services:
       IAM_SCOPES: "'openid profile email offline_access wlcg wlcg.groups'"
     volumes:
       - ${PWD}/dev/:/root/dev
-      - ${PWD}/start_script.sh:/start_script.sh
-    command: /bin/sh -c "/start_script.sh && tail -f /dev/null"
+      - ${PWD}/start_script.sh:/root/start_script.sh
+    command: /bin/sh -c "/root/start_script.sh && tail -f /dev/null"
+#    command: /bin/sh -c "echo \"source /root/start_script.sh\" >> /root/.bashrc && tail -f /dev/null"
 
   editor:
     image: jupyter/minimal-notebook
@@ -48,3 +57,10 @@ services:
       - ${PWD}/dev:/home/jovyan/work/
     ports:
       - "8890:8888"
+
+  web:
+     image: nginx:latest
+     ports:
+       - "80:80"
+     volumes:
+       - ${PWD}/dev:/usr/share/nginx/html
