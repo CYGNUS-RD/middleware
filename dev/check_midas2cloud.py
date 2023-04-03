@@ -14,7 +14,7 @@ def main(INAPATH, TAG, fcopy, fsql, fforce, verbose):
     import cygno as cy
     
     import datetime
-    
+
     if fsql:
         connection = cy.daq_sql_cennection(verbose)
         if not connection:
@@ -90,9 +90,9 @@ if __name__ == "__main__":
     #
     TAG         = 'LNGS'
     INAPATH     = '/data01/data/'
-    max_tries   = 5
 
-    parser = OptionParser(usage='usage: %prog [-t [{:s}] -i [{:s}]  -n [{:d}] rv]\n'.format(TAG,INAPATH, max_tries))
+
+    parser = OptionParser(usage='usage: %prog [-t [{:s}] -i [{:s}] -csv]\n'.format(TAG,INAPATH))
     parser.add_option('-i','--inpath', dest='inpath', type='string', default=INAPATH, help='PATH to raw data')
     parser.add_option('-t','--tag', dest='tag', type='string', default=TAG, help='tag where dir for data')
     parser.add_option('-c','--copy', dest='copy', action="store_true", default=False, help='upload data on S3 if error')

@@ -11,23 +11,32 @@ services:
       MYSQL_DATABASE: cygno_db
       MYSQL_USER: cygno_producer
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    ports:
-      - "3307:3306"
+#
+# con networ_mode il reindirizzamento delle porte non funziona
+#    ports: 
+#      - "3307:3306"
+#
     volumes:
+      - ${PWD}/50-server.cnf:/etc/mysql/mariadb.conf.d/50-server.cnf
       - mariadb:/var/lib/mysql
+
+    network_mode: host
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     container_name: pma_mdb
-    links:
-      - db
+#    links:
+#      - db
     environment:
-      PMA_HOST: db
+#      PMA_HOST: db
+      PMA_HOST: 127.0.0.1
       PMA_PORT: 3306
       PMA_ARBITRARY: 1
     restart: always
-    ports:
-      - 8082:80
+#    ports:
+#      - 8082:80
+
+    network_mode: host
 
 volumes:
   mariadb:
