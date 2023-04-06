@@ -86,9 +86,9 @@ def main():
     #
     # deault parser value
     #
-    TAG         = 'LNGS'
-    INAPATH     = '/data01/data/'
-    DAQPATH     = '/home/standard/daq/'
+    TAG         = os.environ['TAG']
+    INAPATH     = os.environ['INAPATH']# '/data01/data/'
+    DAQPATH     = os.environ['DAQPATH']# '/home/standard/daq/'
     max_tries   = 5
     #to = 'giovanni.mazzitelli@lnf.infn.it, davide.pinci@roma1.infn.it, francesco.renga@roma1.infn.it'
     to = ''
