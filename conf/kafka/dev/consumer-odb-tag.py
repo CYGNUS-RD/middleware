@@ -1,16 +1,17 @@
+#!/usr/bin/env python3
 from kafka import KafkaConsumer
 from kafka.structs import TopicPartition
 from json import loads, dump
 import time
 import os, sys
-
+TAG='LNGS'
 def get_script_path():
     return os.path.dirname(os.path.realpath(sys.argv[0]))
 
 consumer = KafkaConsumer(
-    'midas-odb',
+    'midas-odb-'+TAG,
     bootstrap_servers=['localhost:9092'],
-    auto_offset_reset='earliest',
+    auto_offset_reset='latest',
     enable_auto_commit=True,
     group_id='online-odb',
     value_deserializer=lambda x: loads(x.decode('utf-8'))

@@ -1,11 +1,10 @@
+#!/usr/bin/env python3
 from kafka import KafkaConsumer
 # from json import loads
-from time import sleep
+import time
 import numpy as np
 import io
-import numpy as np
-import struct
-#from json import loads, dumps, dump
+from json import loads, dump
 from midas import event
 import midas
 import pandas as pd
@@ -16,7 +15,7 @@ import cygno as cy
 
 import os
 import sys
-
+TAG='LNGS'
 
 def get_script_path():
     return os.path.dirname(os.path.realpath(sys.argv[0]))
@@ -33,8 +32,7 @@ def image_jpg(image, vmin, vmax, event_number, event_time):
         img_bytes = f.read()
     img_base64 = base64.b64encode(img_bytes).decode('utf-8')
     # create json object
-    data = {'image': img_base64}
-
+    data = {'event_time': event_time, 'image': img_base64}
     # write json to file
     fpath = get_script_path()
     with open(fpath+'/plot.json', 'w') as f:
@@ -92,50 +90,59 @@ def main(verbose=False):
         'serial_number',
         'event_id']
     consumer = KafkaConsumer(
-        'midas-event',
-        bootstrap_servers=['localhost:9092'], 
-        auto_offset_reset='latest',
+        'midas-event-file-'+TAG,
+        bootstrap_servers=['localhost:9092'],
+        auto_offset_reset='earliest',
         enable_auto_commit=True,
         group_id='online-event',
-        max_partition_fetch_bytes = 31457280,
-     #   value_deserializer=lambda x: loads(x.decode('utf-8'))
-     #   value_deserializer=lambda x: dumps(x).decode('utf-8')
+        value_deserializer=lambda x: loads(x.decode('utf-8'))
     )
-    # reset to the end of the stream
-    # consumer.poll()
-    # consumer.seek_to_end()
-    #
     event = midas.event.Event()
-
+    consumer.poll()
+    consumer.seek_to_end()
     for msg in consumer:
-        binary_data = io.BytesIO(msg.value)
-        decoded_data = binary_data.read()
-        pyload = decoded_data
-        event.unpack(pyload, use_numpy=False)
-        # print("received {:.1f} Mb message: {:}".format( len(msg.value)/1024/1024, msg.value[0:20]))
-        bank_names = ", ".join(b.name for b in event.banks.values())
-        # print(type(binary_data), type(pyload), (event.header.timestamp))
-        bank_names    = ", ".join(b.name for b in event.banks.values())
-        event_info    = [event.header.timestamp, event.header.serial_number, event.header.event_id]
-        event_number  = event.header.serial_number
-        event_time    = datetime.fromtimestamp(event.header.timestamp).strftime('%Y-%m-%d %H:%M:%S')
-        print (event_info, bank_names)
-        if ('CAM0' in bank_names):
-            image, _, _ = cy.daq_cam2array(event.banks['CAM0']) # matrice delle imagine
-            image_jpg(image, vmin, vmax, event_number, event_time)
-        #     print("cam")
-        # if 'INPT' in bank_names:                
-        #     value = [event_info + list(event.banks['INPT'].data)]
-        #     de = pd.DataFrame(value, columns = header_environment)
-        #     table_name_sc = "SlowControl"
-        #     n_try=0
-        #     while push_panda_table_sql(connection,table_name_sc, de) == -1 and n_try<=max_try:
-        #         time.sleep(1)
-        #         connection = init_sql()
-        #         print (int(time.time()), "ERROR SQL push_panda_table_sql fail...", n_try, connection)
-        #     n_try+=1
-        #     if n_try==max_try:
-        #         exit(-1)
+        start = time.time()
+        event_data = msg.value
+        event_info_json = loads(event_data)
+        print(event_info_json)
+        payload_name =  "/tmp/{}_{}_{}.dat".format(TAG, event_info_json["timestamp"],
+                                                   event_info_json["serial_number"])
+        end = time.time()
+        print("Elapsed: {:.1f} s".format(end-start))
+        try:
+            start = time.time()
+            with open(payload_name, "rb") as f:
+                    payload = f.read()
+            cy.cmd.rm_file(payload_name)
+            event.unpack(payload, use_numpy=False)
+            # print("received {:.1f} Mb message: {:}".format( len(msg.value)/1024/1024, msg.value[0:20]))
+            bank_names = ", ".join(b.name for b in event.banks.values())
+            # print(type(binary_data), type(pyload), (event.header.timestamp))
+            bank_names    = ", ".join(b.name for b in event.banks.values())
+            event_info    = [event.header.timestamp, event.header.serial_number, event.header.event_id]
+            event_number  = event.header.serial_number
+            event_time    = datetime.fromtimestamp(event.header.timestamp).strftime('%Y-%m-%d %H:%M:%S')
+            print (event_info, bank_names)
+            if ('CAM0' in bank_names):
+                image, _, _ = cy.daq_cam2array(event.banks['CAM0']) # matrice delle imagine
+                image_jpg(image, vmin, vmax, event_number, event_time)
+            #     print("cam")
+            # if 'INPT' in bank_names:                
+            #     value = [event_info + list(event.banks['INPT'].data)]
+            #     de = pd.DataFrame(value, columns = header_environment)
+            #     table_name_sc = "SlowControl"
+            #     n_try=0
+            #     while push_panda_table_sql(connection,table_name_sc, de) == -1 and n_try<=max_try:
+            #         time.sleep(1)
+            #         connection = init_sql()
+            #         print (int(time.time()), "ERROR SQL push_panda_table_sql fail...", n_try, connection)
+            #     n_try+=1
+            #     if n_try==max_try:
+            #         exit(-1)
+            end = time.time()
+            print("Elapsed: {:.1f} s".format(end-start))
+        except:
+            print ("ERROR")
         
         
         
