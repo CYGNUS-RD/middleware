@@ -4,6 +4,9 @@
 # Middelware online recostruction 
 # Modify by ... in date ...
 #
+
+import os, sys
+
 # Load globals env
 DAQ_ROOT            = os.environ['DAQ_ROOT']
 DEFAULT_PATH_ONLINE = DAQ_ROOT+'/online/'
@@ -18,7 +21,7 @@ def image_jpg(image, vmin, vmax, event_number, event_time):
 
 def main(verbose=True):
     import numpy as np
-    import os, sys
+
     from datetime import datetime
 
     import time
@@ -46,22 +49,25 @@ def main(verbose=True):
     request_id = client.register_event_request(buffer_handle, sampling_type = 2) 
     
     # init program variables #####
-    t0 = time.time()
     vmin         = 95
     vmax         = 130
-
+    odb_update   = 3 # probabilemnte da mettere in middleware 
+    event_info   = {}
+    end1 = time.time()
+    
     
     while True:
-        start = time.time()
+        start1 = time.time()
+        if (start1-end1) > odb_update:
+            # update ODB
+            odb_json = dumps(client.odb_get("/"))
+            producer.send('midas-odb-'+TAG, value=odb_json)
+            end1 = time.time()
+            print("ODB elapsed: {:.2f}, payload size {:.1f} kb".format(end1-start1, len(odb_json.encode('utf-8'))/1024))
+            # ######
+            
+        start2 = time.time()
         event = client.receive_event(buffer_handle, async_flag=True)
-        # update ODB
-        odb_json = dumps(client.odb_get("/"))
-        producer.send('midas-odb-'+TAG, value=odb_json)
-        end = time.time()
-        print("ODB elapsed: {:.2f}, payload size {:.1f} kb".format(end-start, len(odb_json.encode('utf-8'))/1024))
-        # ######
-        start = time.time()
-        
         if event is not None:
             if event.header.is_midas_internal_event():
                 if verbose:
@@ -70,23 +76,32 @@ def main(verbose=True):
                 
             # load global event useful variables from header
             bank_names    = ", ".join(b.name for b in event.banks.values())
-            event_info    = [event.header.timestamp, event.header.serial_number, event.header.event_id]
             event_number  = event.header.serial_number
             event_time    = datetime.fromtimestamp(event.header.timestamp).strftime('%Y-%m-%d %H:%M:%S')
+            run_number    = client.odb_get("/Runinfo/Run number")
+            event_info["timestamp"]             = event.header.timestamp
+            event_info["serial_number"]         = event.header.serial_number
+            event_info["event_id"]              = event.header.event_id
+            event_info["trigger_mask"]          = event.header.trigger_mask
+            event_info["event_data_size_bytes"] = event.header.event_data_size_bytes
+            event_info["run_number"]            = run_number
+            event_info_json = dumps(event_info)
             # #################
             # update EVENT
             payload = event.pack()
-            payload_name =  "/tmp/{}_{}.dat".format(TAG, event.header.timestamp)
+            payload_name =  "/tmp/{}_{}_{}.dat".format(TAG, event.header.timestamp, event_number)
+
+
+
             with open(payload_name, "wb") as f:
                 f.write(payload)
+
             command = "scp -i /home/standard/.ssh/daq_id "+payload_name+" mazzitel@131.154.96.175:/tmp/ && rm "+payload_name
             status, output = subprocess.getstatusoutput(command)
-            event_info_json = dumps(event_info)
-            end = time.time()
+            end2 = time.time()
             if status==0:
                 producer.send('midas-event-file-'+TAG, value=event_info_json)
-                
-                if verbose: print("EVENT elapsed: {:.2f}, payload size {:.1f} Mb encoded {:.1f} Mb timestamp {:} ".format(end-start, np.size(payload)/1024/1024, np.size(encoded_data)/1024/1024, event.header.timestamp))
+                if verbose: print("EVENT elapsed: {:.2f}, payload size {:.1f} Mb, timestamp {:} ".format(end2-start2, np.size(payload)/1024/1024, event.header.timestamp))
             else:
                 print(event_time+": ERROR in coping event")
 
