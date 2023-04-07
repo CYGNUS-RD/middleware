@@ -98,23 +98,23 @@ def main(verbose=True):
             event_info_json = dumps(event_info)
             # #################
             # update EVENT
-            payload = event.pack()
+#             payload = event.pack()
 
-            binary_data = io.BytesIO()
-            binary_data.write(payload)
-            binary_data.seek(0)
-            encoded_data = binary_data.read()
+#             binary_data = io.BytesIO()
+#             binary_data.write(payload)
+#             binary_data.seek(0)
+#             encoded_data = binary_data.read()
             
-            producerb.send('midas-event'+TAG, value=(encoded_data))
-            producerb.flush()
+#             producerb.send('midas-event'+TAG, value=(encoded_data))
+#             producerb.flush()
 
-            end2 = time.time()
-            if verbose: print("EVENT elapsed: {:.2f}, payload size {:.1f} Mb, timestamp {:} ".format(end2-start2, np.size(payload)/1024/1024, event.header.timestamp))
+#             end2 = time.time()
+#             if verbose: print("EVENT elapsed: {:.2f}, payload size {:.1f} Mb, timestamp {:} ".format(end2-start2, np.size(payload)/1024/1024, event.header.timestamp))
 
-            image_update_time = client.odb_get("/middleware/image_update_time")
-            if ('CAM0' in bank_names) and (int(time.time())%image_update_time==0): # CAM image
-                image, _, _ = cy.daq_cam2array(event.banks['CAM0']) # matrice delle imagine
-                image_jpg(image, vmin, vmax, event_number, event_time)
+#             image_update_time = client.odb_get("/middleware/image_update_time")
+#             if ('CAM0' in bank_names) and (int(time.time())%image_update_time==0): # CAM image
+#                 image, _, _ = cy.daq_cam2array(event.banks['CAM0']) # matrice delle imagine
+#                 image_jpg(image, vmin, vmax, event_number, event_time)
 
               
         client.communicate(10)

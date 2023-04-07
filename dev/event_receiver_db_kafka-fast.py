@@ -17,6 +17,8 @@ def image_jpg(image, vmin, vmax, event_number, event_time):
     im = plt.imshow(image, cmap='gray', vmin=vmin, vmax=vmax)
     plt.title ("Event: {:d} at {:s}".format(event_number, event_time))
     plt.savefig(DEFAULT_PATH_ONLINE+'custom/tmp.png')
+    plt.close()
+    del image
     return 
 
 def main(verbose=True):

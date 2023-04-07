@@ -40,14 +40,15 @@ def image_jpg(image, vmin, vmax, event_number, event_time, producer):
     im = plt.imshow(image, cmap='gray', vmin=vmin, vmax=vmax)
     plt.title ("Event: {:d} at {:s}".format(event_number, event_time))
     plt.savefig(DEFAULT_PATH_ONLINE+'custom/tmp.png')
-
+    plt.close()
     with open(DEFAULT_PATH_ONLINE+'custom/tmp.png', 'rb') as f:
         img_bytes = f.read()
-    
+    f.close()
     #image_to_kafka = base64.b64encode(cv2.imencode('.jpg', img)[1]).decode()
     img_base64 = base64.b64encode(img_bytes).decode('utf-8')
     producer.send('image-topic', value=img_base64.encode('utf-8'))
-    
+
+    del im, img_bytes, img_base64, image
     return 
 
 def push_panda_table_sql(connection, table_name, df):
