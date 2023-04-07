@@ -21,7 +21,7 @@ def image_jpg(image, vmin, vmax, event_number, event_time):
     del image
     return 
 
-def main(verbose=True):
+def main(sendodb, sendevent, verbose=True):
     import numpy as np
 
     from datetime import datetime
@@ -41,18 +41,19 @@ def main(verbose=True):
     from json import dumps
     from kafka import KafkaProducer
     import subprocess
-    
-    producer = KafkaProducer(
-        bootstrap_servers=['localhost:9092'],
-        value_serializer=lambda x: dumps(x).encode('utf-8')
-    )    
-    producerb = KafkaProducer(
-        bootstrap_servers=['localhost:9092'],
-        #value_serializer=lambda m: json.dumps(m).encode('ascii'),
-        #value_serializer=lambda v: dumps(v).encode('utf-8'),
-        max_request_size= 15728640,
-        #max_block_ms=300000
-    )
+    if sendodb:
+        producer = KafkaProducer(
+            bootstrap_servers=['localhost:9092'],
+            value_serializer=lambda x: dumps(x).encode('utf-8')
+        )    
+    if sendevent:
+        producerb = KafkaProducer(
+            bootstrap_servers=['localhost:9092'],
+            #value_serializer=lambda m: json.dumps(m).encode('ascii'),
+            #value_serializer=lambda v: dumps(v).encode('utf-8'),
+            max_request_size= 15728640,
+            #max_block_ms=300000
+        )
     
     client = midas.client.MidasClient("middleware")
     buffer_handle = client.open_event_buffer("SYSTEM",None,1000000000)
@@ -68,7 +69,7 @@ def main(verbose=True):
     
     while True:
         start1 = time.time()
-        if (start1-end1) > odb_update:
+        if (start1-end1)>odb_update and sendodb:
             # update ODB
             odb_json = dumps(client.odb_get("/"))
             producer.send('midas-odb-'+TAG, value=odb_json)
@@ -98,18 +99,19 @@ def main(verbose=True):
             event_info_json = dumps(event_info)
             # #################
             # update EVENT
-            payload = event.pack()
+            if sendevent:
+                payload = event.pack()
 
-            binary_data = io.BytesIO()
-            binary_data.write(payload)
-            binary_data.seek(0)
-            encoded_data = binary_data.read()
-            
-            producerb.send('midas-event'+TAG, value=(encoded_data))
-            producerb.flush()
+                binary_data = io.BytesIO()
+                binary_data.write(payload)
+                binary_data.seek(0)
+                encoded_data = binary_data.read()
 
-            end2 = time.time()
-            if verbose: print("EVENT elapsed: {:.2f}, payload size {:.1f} Mb, timestamp {:} ".format(end2-start2, np.size(payload)/1024/1024, event.header.timestamp))
+                producerb.send('midas-event'+TAG, value=(encoded_data))
+                producerb.flush()
+
+                end2 = time.time()
+                if verbose: print("EVENT elapsed: {:.2f}, payload size {:.1f} Mb, timestamp {:} ".format(end2-start2, np.size(payload)/1024/1024, event.header.timestamp))
 
             image_update_time = client.odb_get("/middleware/image_update_time")
             if ('CAM0' in bank_names) and (int(time.time())%image_update_time==0): # CAM image
@@ -129,6 +131,9 @@ def main(verbose=True):
 if __name__ == "__main__":
     from optparse import OptionParser
     parser = OptionParser(usage='usage: %prog\t ')
+    parser.add_option('-e','--event', dest='event', action="store_false", default=True, help='send event [True];');
+    parser.add_option('-o','--odb', dest='odb', action="store_false", default=True, help='send odb [True];');
     parser.add_option('-v','--verbose', dest='verbose', action="store_true", default=False, help='verbose output;');
     (options, args) = parser.parse_args()
-    main(verbose=options.verbose)
+    if options.verbose: print(options, args)
+    main(options.odb, options.event, verbose=options.verbose)
