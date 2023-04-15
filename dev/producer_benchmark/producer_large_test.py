@@ -8,7 +8,7 @@ import io
 import json
 import time
 
-datapath = "./data/"
+datapath = "./test_data/"
 data_payload = os.listdir(datapath)
 data_payload = sorted(data_payload)
 
