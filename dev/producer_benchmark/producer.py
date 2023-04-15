@@ -4,7 +4,7 @@ from kafka import KafkaProducer
 from kafka.errors import KafkaError
 
 producer = KafkaProducer(
-    bootstrap_servers = "localhost:36511"
+    bootstrap_servers = "localhost:9092"
 )
 
 topic = "orders"

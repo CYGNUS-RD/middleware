@@ -6,6 +6,7 @@ consumer = KafkaConsumer(
   group_id="demo-group",
   auto_offset_reset="earliest",
   enable_auto_commit=False,
+  fetch_message_max_bytes=31457280,
   consumer_timeout_ms=1000
 )
 

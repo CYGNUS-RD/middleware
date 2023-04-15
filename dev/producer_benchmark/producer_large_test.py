@@ -13,7 +13,7 @@ data_payload = os.listdir(datapath)
 data_payload = sorted(data_payload)
 
 producer = KafkaProducer(
-    bootstrap_servers = "localhost:42461",
+    bootstrap_servers = "localhost:9092",
     max_request_size  = 31457280,
     max_block_ms      = 300000
 )

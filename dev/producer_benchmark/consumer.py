@@ -2,7 +2,7 @@
 from kafka import KafkaConsumer
 
 consumer = KafkaConsumer(
-  bootstrap_servers=["localhost:36511"],
+  bootstrap_servers=["localhost:9092"],
   group_id="demo-group",
   auto_offset_reset="earliest",
   enable_auto_commit=False,
