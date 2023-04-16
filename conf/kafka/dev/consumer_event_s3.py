@@ -64,6 +64,7 @@ def main(TAG, verbose=False):
 
     )
     topic = 'midas-event-'+TAG
+    #
     # reset to the end of the stream
     # consumer.poll()
     # consumer.seek_to_end()

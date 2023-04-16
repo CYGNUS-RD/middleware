@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from kafka import KafkaConsumer
 from kafka.structs import TopicPartition
 from json import loads, dump
@@ -7,37 +8,47 @@ import os, sys
 def get_script_path():
     return os.path.dirname(os.path.realpath(sys.argv[0]))
 
-consumer = KafkaConsumer(
-    'midas-odb',
-    bootstrap_servers=['localhost:9092'],
-    auto_offset_reset='earliest',
-    enable_auto_commit=True,
-    group_id='online-odb',
-    value_deserializer=lambda x: loads(x.decode('utf-8'))
-)
-# reset to the end of the stream
 
-# consumer.subscribe('midas-odb')
-# partition = TopicPartition('midas-odb', 0)
-# #end_offset = consumer.end_offsets([partition])
-# consumer.seek_to_end(partition)
+def main(TAG, verbose=False):
+    consumer = KafkaConsumer(
+        bootstrap_servers=['localhost:9092'],
+        auto_offset_reset='latest',
+        enable_auto_commit=True,
+        group_id='online-odb',
+        value_deserializer=lambda x: loads(x.decode('utf-8'))
+    )
 
-start = time.time()
-fpath = get_script_path()
-for event in consumer:
-    event_data = event.value
-    odb = loads(event_data)
-    end = time.time()
-    if int(end-start)>2: # write no faster then value
-        # print ("DT: {} run {} Event: {}".format(int(end-start), odb["Runinfo"]["Run number"],
-        #                                         odb["Equipment"]["Trigger"]["Statistics"]))
-        start = time.time()
-        # dump info
-        value = odb["Runinfo"]
-        for key in value:
-            print(key, "->", value[key])
+    fpath = get_script_path()
+    consumer.subscribe('midas-odb-'+TAG)
+    
+    while True:
+        try:
+            for message in consumer:
+                odb = loads(message.value)
+                with open(fpath+'/'+TAG+'_odb.json', 'w', encoding='utf-8') as f:
+                    dump(odb, f, ensure_ascii=False, indent=4)
+                if verbose:
+                    topic_info = f"topic: {message.partition}|{message.offset})"
+                    message_info = f"key: {message.key}, {message.value}"
+                    print(f"{topic_info}, {message_info}")
+                    value = odb["Runinfo"]
+                    for key in value:
+                        print(key, "->", value[key])
+        except Exception as e:
+            print(f"Error occurred while consuming messages: {e}")
+            sys.exit(1)
+        except KeyboardInterrupt:
+            sys.exit(0)
+            consumer.close()
+    
 
-        with open(fpath+'/odb.json', 'w', encoding='utf-8') as f:
-            dump(odb, f, ensure_ascii=False, indent=4)
+        time.sleep(0.1)
 
-    time.sleep(0.1)
+    
+if __name__ == "__main__":
+    from optparse import OptionParser
+    parser = OptionParser(usage='usage: %prog\t ')
+    parser.add_option('-t','--tag', dest='tag', type='string', default='LNGS', help='tag LNF/LNGS [LNGS];');
+    parser.add_option('-v','--verbose', dest='verbose', action="store_true", default=False, help='verbose output;');
+    (options, args) = parser.parse_args()
+    main(TAG=options.tag, verbose=options.verbose)
