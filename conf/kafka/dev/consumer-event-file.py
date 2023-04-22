@@ -32,11 +32,16 @@ def image_jpg(image, vmin, vmax, event_number, event_time):
         img_bytes = f.read()
     img_base64 = base64.b64encode(img_bytes).decode('utf-8')
     # create json object
-    data = {'event_time': event_time, 'image': img_base64}
+    data = {'image': img_base64}
+
     # write json to file
     fpath = get_script_path()
     with open(fpath+'/plot.json', 'w') as f:
         json.dump(data, f)
+        
+    f.close()
+    plt.close()
+    del im, img_bytes, img_base64, data, image
         
     return 
 
@@ -126,19 +131,7 @@ def main(verbose=False):
             if ('CAM0' in bank_names):
                 image, _, _ = cy.daq_cam2array(event.banks['CAM0']) # matrice delle imagine
                 image_jpg(image, vmin, vmax, event_number, event_time)
-            #     print("cam")
-            # if 'INPT' in bank_names:                
-            #     value = [event_info + list(event.banks['INPT'].data)]
-            #     de = pd.DataFrame(value, columns = header_environment)
-            #     table_name_sc = "SlowControl"
-            #     n_try=0
-            #     while push_panda_table_sql(connection,table_name_sc, de) == -1 and n_try<=max_try:
-            #         time.sleep(1)
-            #         connection = init_sql()
-            #         print (int(time.time()), "ERROR SQL push_panda_table_sql fail...", n_try, connection)
-            #     n_try+=1
-            #     if n_try==max_try:
-            #         exit(-1)
+
             end = time.time()
             print("Elapsed: {:.1f} s".format(end-start))
         except:
