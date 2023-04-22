@@ -18,16 +18,10 @@ def image_jpg(image, vmin, vmax, event_number, event_time):
     plt.title ("Event: {:d} at {:s}".format(event_number, event_time))
     plt.savefig(DEFAULT_PATH_ONLINE+'custom/tmp.png')
     plt.close()
-    del image
+    del image, im
     return 
 
-def on_success(metadata):
-    print(f"Message produced to topic '{metadata.topic}' at offset {metadata.offset}")
-
-def on_error(e):
-    print(f"Error sending message: {e}")
-
-def main(sendodb, sendevent, verbose=True):
+def main(verbose=True):
     import numpy as np
 
     from datetime import datetime
@@ -42,45 +36,45 @@ def main(sendodb, sendevent, verbose=True):
     import mysql.connector
 
     import cygno as cy
-    import io
 
     from json import dumps
     from kafka import KafkaProducer
-    import subprocess
-    if sendodb:
-        producer = KafkaProducer(
-            bootstrap_servers=['localhost:9092'],
-            value_serializer=lambda x: dumps(x).encode('utf-8')
-        )
-    if sendevent:
-        producerb = KafkaProducer(
-            bootstrap_servers = "localhost:9092",
-            max_request_size  = 31457280,
-#             compression_type  = 'gzip',
-            max_block_ms      = 300000
-        )
-    topic1 = 'midas-odb-'+TAG
-    topic2 = 'midas-event-'+TAG
+    
+    import requests
+    import boto3
+    from boto3sts import credentials as creds
+    import urllib.parse
+    
+    producer = KafkaProducer(
+        bootstrap_servers=['localhost:9092'],
+        value_serializer=lambda x: dumps(x).encode('utf-8')
+    )    
+    
+    session = creds.assumed_session("infncloud-wlcg", endpoint="https://minio.cloud.infn.it/", verify=True)
+    s3 = session.client('s3', endpoint_url="https://minio.cloud.infn.it/", config=boto3.session.Config(signature_version='s3v4'),
+                                                verify=True)
     
     client = midas.client.MidasClient("middleware")
     buffer_handle = client.open_event_buffer("SYSTEM",None,1000000000)
     request_id = client.register_event_request(buffer_handle, sampling_type = 2) 
-
+    
     # init program variables #####
     vmin         = 95
     vmax         = 130
     odb_update   = 3 # probabilemnte da mettere in middleware 
     event_info   = {}
     end1 = time.time()
-
+    
+    
     while True:
         start1 = time.time()
-        if (start1-end1)>odb_update and sendodb:
+        if (start1-end1) > odb_update:
             # update ODB
             odb_json = dumps(client.odb_get("/"))
-            producer.send(topic1, value=odb_json)
+            producer.send('midas-odb-'+TAG, value=odb_json)
             end1 = time.time()
-            if verbose: print("ODB elapsed: {:.2f}, payload size {:.1f} kb".format(end1-start1, len(odb_json.encode('utf-8'))/1024))
+            if verbose:
+                print("ODB elapsed: {:.2f}, payload size {:.1f} kb".format(end1-start1, len(odb_json.encode('utf-8'))/1024))
             # ######
             
         start2 = time.time()
@@ -105,47 +99,25 @@ def main(sendodb, sendevent, verbose=True):
             event_info_json = dumps(event_info)
             # #################
             # update EVENT
-            if sendevent:
-                payload = event.pack()
+            payload = event.pack()
+            payload_name =  "{}_{}_{}.dat".format(TAG, event.header.timestamp, event_number)
+            try:
+                url_out = s3.generate_presigned_post('cygno-data','EVENTS/'+payload_name, ExpiresIn=3600)
+            except:
+                print("presigned post error")
+                continue
 
-#                 payload_name =  "/tmp/payload.dat"
-
-# test load from file (non cambia)
-#                 with open(payload_name, "wb") as f:
-#                     f.write(payload)
-#                 with open(payload_name, 'rb') as f:
-#                     data_bytes = f.read()
-#                 data_base64 = base64.b64encode(data_bytes).decode('utf-8')
-# oroiginario
-#                 binary_data = io.BytesIO()
-#                 binary_data.write(payload)
-#                 binary_data.seek(0)
-#                 encoded_data = binary_data.read()
-#                 data_base64 = base64.b64encode(encoded_data).decode('utf-8')
-# shorter
-
-#                 data_base64 = base64.b64encode(payload).decode('utf-8')
-
-#                 future = producerb.send(topic2, data_base64.encode('utf-8'))
-        
-
-
-                binary_data = io.BytesIO()
-                binary_data.write(payload)
-                binary_data.seek(0)
-                encoded_data = binary_data.read()
-
-                future = producerb.send(topic2, encoded_data)
-
-                future.add_errback(on_error)
-                end3 = time.time()
-                #subprocess.Popen(producerb.flush(), stdout=None, stderr=None, stdin=None, close_fds=True)
-                producerb.flush()
-
+            files = {'file': (payload_name, payload)}
+            try:
+                http_response = requests.post(url_out['url'], data=url_out['fields'], files=files, timeout=5)
+            except requests.exceptions.RequestException as e:
+                print(e)
+                continue
+            finally:
                 end2 = time.time()
-                if verbose: 
-                    future.add_callback(on_success)
-                    print("EVENT elapsed: {:.2f}, flush {:.2f}, payload size {:.1f} Mb, timestamp {:} ".format(end2-start2, end2-end3, np.size(payload)/1024/1024, event.header.timestamp))
+                producer.send('midas-event-file-'+TAG, value=event_info_json)
+                if verbose: print("EVENT elapsed: {:.2f}, payload size {:.1f} Mb, timestamp {:}, Run Number {:}, Event Number {:}, Event ID {:} ".format(end2-start2, np.size(payload)/1024/1024, event.header.timestamp, run_number, event_number, event.header.event_id))
+
 
             image_update_time = client.odb_get("/middleware/image_update_time")
             if ('CAM0' in bank_names) and (int(time.time())%image_update_time==0): # CAM image
@@ -165,9 +137,6 @@ def main(sendodb, sendevent, verbose=True):
 if __name__ == "__main__":
     from optparse import OptionParser
     parser = OptionParser(usage='usage: %prog\t ')
-    parser.add_option('-e','--event', dest='event', action="store_false", default=True, help='NO send event [True];');
-    parser.add_option('-o','--odb', dest='odb', action="store_false", default=True, help='NO send odb [True];');
     parser.add_option('-v','--verbose', dest='verbose', action="store_true", default=False, help='verbose output;');
     (options, args) = parser.parse_args()
-    if options.verbose: print(options, args)
-    main(options.odb, options.event, verbose=options.verbose)
+    main(verbose=options.verbose)
