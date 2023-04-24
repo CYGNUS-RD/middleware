@@ -80,17 +80,16 @@ def main(TAG, session, verbose=False):
                 t1 = time.time()
                 event_info_json = json.loads(json.loads(mes.value))
 
-                # if verbose:
-                #     print(event_info_json)
-                
+                if verbose:
+                    print(event_info_json)
                 payload_name =  "{}_{}_{}.dat".format(TAG, event_info_json["timestamp"], event_info_json["serial_number"])
+                if verbose:
+                    print(payload_name)
 
                 url = baseurl+payload_name 
-                response = requests.get(url)
-                
                 if verbose:
-                    print(payload_name, response.status_code)
-                    
+                    print(url)
+                response = requests.get(url)
                 if response.status_code==200:
                     payload = response.content
 
@@ -101,21 +100,24 @@ def main(TAG, session, verbose=False):
                     event_info    = [event.header.timestamp, event.header.serial_number, event.header.event_id]
                     event_number  = event.header.serial_number
                     event_time    = datetime.fromtimestamp(event.header.timestamp).strftime('%Y-%m-%d %H:%M:%S')
-                    end = time.time()
                     if verbose: print (event_info, bank_names)
+                    end = time.time()
                     if ('CAM0' in bank_names) and (end-start)>10:
-                        # ora bypassato serviva solo per vedere che fosse creato quello che serviva
-                        # image, _, _ = cy.daq_cam2array(event.banks['CAM0']) # matrice delle imagine
-                        # image_jpg(image, vmin, vmax, event_number, event_time)
+                        image, _, _ = cy.daq_cam2array(event.banks['CAM0']) # matrice delle imagine
+                        image_jpg(image, vmin, vmax, event_number, event_time)
                         if (verbose):
-                            print(">>> GENERATING jpeg IMAGE")
+                            print("GENERATING jpeg IMAGE")
+                            
+                        ## Insert Sentinel Code here    
+                            
+                            
                         start = time.time()
                     s3.delete_object(Bucket='cygno-data', Key='EVENTS/'+payload_name)
                     #cy.s3.obj_rm(payload_name, TAG, bucket='cygno-data', session=session, verbose=verbose)
-                # if verbose:
-                #     topic_info = f"topic: {mes.partition}|{mes.offset})"
-                #     mes_info = f"key: {mes.key}, {mes.value}"
-                #     print(f"{topic_info}")
+                if verbose:
+                    topic_info = f"topic: {mes.partition}|{mes.offset})"
+                    mes_info = f"key: {mes.key}, {mes.value}"
+                    print(f"{topic_info}")
 
         except Exception as e:
             print(f"Error occurred while consuming messages: {e}")

@@ -25,28 +25,43 @@ def main(TAG, mongo, verbose=False):
         mongo_col = mongo_db["odb"]  
         
     fpath = get_script_path()
-    consumer.subscribe('midas-odb-'+TAG)
-    start = time.time()
+    consumer.subscribe(['midas-odb-'+TAG, 'midas-camera-'+TAG, 'midas-pmt-'+TAG])
+    start_mongo = time.time()
+    up_time_mongo = 600
+    fpath = get_script_path()
     while True:
         
         try:
-            for message in consumer:
+            raw_messages = consumer.poll(
+                timeout_ms=100, max_records=1
+            )
+            for topic_partition, messages in raw_messages.items():
                 end = time.time()
-                odb = loads(message.value)
-                with open(fpath+'/'+TAG+'_odb.json', 'w', encoding='utf-8') as f:
-                    dump(odb, f, ensure_ascii=False, indent=4)
+                if topic_partition.topic == 'midas-odb-'+TAG:
+                    if verbose:
+                        print("DEBUG: odb")
 
-                if (end-start)>600 and mongo:
-                    mongo_col.insert_one(odb)
-                    start = time.time()
-                    
-                if verbose:
-                    topic_info = f"topic: {message.partition}|{message.offset})"
-                    message_info = f"key: {message.key}"#, {message.value}"
-                    print(f"{topic_info}, {message_info}")
-                # value = odb["Runinfo"]
-                    # for key in value:
-                    #      print(key, "->", value[key])
+                    odb = loads(messages[0].value)
+                    with open(fpath+'/'+TAG+'_odb.json', 'w', encoding='utf-8') as f:
+                        dump(odb, f, ensure_ascii=False, indent=4)
+
+                    if (end-start_mongo)>up_time_mongo and mongo:
+                        mongo_col.insert_one(odb)
+                        start_mongo = time.time()
+                        
+                elif topic_partition.topic == 'midas-camera-'+TAG:
+                    if verbose:
+                        print("DEBUG: camera")
+
+                    img_base64 = messages[0].value#.decode('utf-8')
+                    data = {'image': img_base64}
+                    # write json to file
+                    with open(fpath+'/'+TAG+'_image.json', 'w') as f:
+                        dump(data, f)
+                elif topic_partition.topic == 'midas-pmt-'+TAG:
+                    if verbose:
+                        print("DEBUG: pmt")
+                        
         except Exception as e:
             print(f"Error occurred while consuming messages: {e}")
             sys.exit(1)
@@ -57,7 +72,7 @@ def main(TAG, mongo, verbose=False):
             sys.exit(0)
     
 
-        time.sleep(0.1)
+        #time.sleep(0.1)
 
     
 if __name__ == "__main__":
