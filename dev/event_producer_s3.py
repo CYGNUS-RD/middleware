@@ -12,14 +12,60 @@ DAQ_ROOT            = os.environ['DAQ_ROOT']
 DEFAULT_PATH_ONLINE = DAQ_ROOT+'/online/'
 TAG                 = os.environ['TAG']
 
-def image_jpg(image, vmin, vmax, event_number, event_time):
+# def image_jpg(image, vmin, vmax, event_number, event_time):
+#     from matplotlib import pyplot as plt
+#     im = plt.imshow(image, cmap='gray', vmin=vmin, vmax=vmax)
+#     plt.title ("Event: {:d} at {:s}".format(event_number, event_time))
+#     plt.savefig(DEFAULT_PATH_ONLINE+'custom/tmp.png')
+#     plt.close()
+#     del image, im
+#     return 
+
+def image_jpg(image, vmin, vmax, event_number, event_time, producer, verbose=False):
     from matplotlib import pyplot as plt
+    import numpy as np
+    import base64
+    
     im = plt.imshow(image, cmap='gray', vmin=vmin, vmax=vmax)
     plt.title ("Event: {:d} at {:s}".format(event_number, event_time))
     plt.savefig(DEFAULT_PATH_ONLINE+'custom/tmp.png')
     plt.close()
-    del image, im
+    with open(DEFAULT_PATH_ONLINE+'custom/tmp.png', 'rb') as f:
+        img_bytes = f.read()
+    f.close()
+    img_base64 = base64.b64encode(img_bytes).decode('utf-8')
+    producer.send('midas-camera-'+TAG, value=img_base64)#.encode('utf-8'))
+    #producer.flush()
+    if verbose:
+        print("DEBUG: image created")
+
+    del im, img_bytes, img_base64, image
     return 
+
+def pmt_jpg(header, waveform_f, producer, number_of_w_readed = 5, verbose=False):
+    from matplotlib import pyplot as plt
+    import numpy as np
+    import base64
+    
+    fig, ax = plt.subplots(header[0][0], number_of_w_readed, figsize=(10, header[1][0]))
+    for t in range(0, header[0][0]):
+        offset = t*header[1][0]
+        for w in range(0, number_of_w_readed):
+            ax[t,w].plot(np.linspace(0, header[2][0], header[2][0]), waveform_f[offset], label="t: {:d} w{:d}".format(t,w))
+            ax[t,w].legend()
+            offset+=1
+    plt.savefig(DEFAULT_PATH_ONLINE+'custom/pmt.png')
+    plt.close()
+    with open(DEFAULT_PATH_ONLINE+'custom/pmt.png', 'rb') as f:
+        img_bytes = f.read()
+    f.close()
+    img_base64 = base64.b64encode(img_bytes).decode('utf-8')
+    producer.send('midas-pmt-'+TAG, value=img_base64)#.encode('utf-8'))
+    #producer.flush()
+    if verbose:
+        print("DEBUG: pmt created")
+    del fig, ax, img_bytes, img_base64, header, waveform_f
+    return
 
 def main(verbose=True):
     import numpy as np
@@ -75,7 +121,8 @@ def main(verbose=True):
             producer.send('midas-odb-'+TAG, value=odb_json)
             end1 = time.time()
             if verbose:
-                print("ODB elapsed: {:.2f}, payload size {:.1f} kb".format(end1-start1, len(odb_json.encode('utf-8'))/1024))
+                print("DEBUG: ODB elapsed: {:.2f}, payload size {:.1f} kb".format(end1-start1, 
+                                                                                  len(odb_json.encode('utf-8'))/1024))
             # ######
             
         start2 = time.time()
@@ -129,24 +176,38 @@ def main(verbose=True):
                 binary_data.seek(0)
                 s3.put_object(Body=binary_data.read(), Bucket='cygno-data', Key='EVENTS/'+payload_name)
             except Exception as e:
-                print('S3 put object exception occurred: {}'.format(e))
+                print('ERROR >>> S3 put object exception occurred: {}'.format(e))
                 continue
                 
             finally:
                 end2 = time.time()
                 producer.send('midas-event-file-'+TAG, value=event_info_json)
-                if verbose: print("EVENT elapsed: {:.2f}, payload size {:.1f} Mb, timestamp {:}, Run Number {:}, Event Number {:}, Event ID {:} ".format(end2-start2, np.size(payload)/1024/1024, event.header.timestamp, run_number, event_number, event.header.event_id))
+                #producer.flush()
+                if verbose: print("DEBUG: elapsed: {:.2f}, payload size {:.1f} Mb, timestamp {:}, Run Number {:}, Event Number {:}, Event ID {:} ".format(end2-start2, np.size(payload)/1024/1024, 
+                                                        event.header.timestamp, run_number, event_number, 
+                                                        event.header.event_id))
 
-
+            ################
+            ## loacal stuf
+            ################
             image_update_time = client.odb_get("/middleware/image_update_time")
+            imege_pmt_offset = image_update_time/2
             if ('CAM0' in bank_names) and (int(time.time())%image_update_time==0): # CAM image
                 try: 
                     image, _, _ = cy.daq_cam2array(event.banks['CAM0']) # matrice delle imagine
-                    image_jpg(image, vmin, vmax, event_number, event_time)
+                    image_jpg(image, vmin, vmax, event_number, event_time, producer, verbose)
                 except Exception as e:
-                    print('generate IMAGE exception occurred: {}'.format(e))
+                    print('ERROR >>> generate IMAGE exception occurred: {}'.format(e))
                     continue
-              
+            if ('DGH0' in bank_names) and (int(time.time()+imege_pmt_offset)%image_update_time==0): # PMTs wavform 
+                try:
+                    header = cy.daq_dgz_full2header(bank, verbose=False)
+                    waveform_f, waveform_s = cy.daq_dgz_full2array(event.banks['DIG0'], header)
+                    pmt_jpg(header, waveform_f, producer, number_of_w_readed = 5, verbose=verbose)
+                except Exception as e:
+                    print('ERROR >>> generate PMTs exception occurred: {}'.format(e))
+                    continue
+                
         client.communicate(10)
         time.sleep(0.1)
         
