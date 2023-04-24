@@ -32,10 +32,10 @@ def on_error(e):
 
 for i, payload in enumerate(data_payload):
     t1 = time.time()
-#    with open(datapath+payload, 'rb') as f:
-#        data_bytes = f.read()
-    with open('/tmp/payload.dat', 'rb') as f:
-         data_bytes = f.read()
+    with open(datapath+payload, 'rb') as f:
+        data_bytes = f.read()
+#     with open('/tmp/payload.dat', 'rb') as f:
+#          data_bytes = f.read()
 
     data_base64 = base64.b64encode(data_bytes).decode('utf-8')
     t2  = time.time()

@@ -21,10 +21,10 @@ def main(verbose):
                 payload = f.read()
             payload_name =  "payload_{:05d}.dat".format(id)
             url_out = s3.generate_presigned_post('cygno-data','EVENTS/'+payload_name, ExpiresIn=3600)
-
+            # print(url_out)
             t1 = time.time()
             files = {'file': (payload_name, payload)}
-            http_response = requests.post(url_out['url'], data=url_out['fields'], files=files)
+            http_response = requests.post(url_out['url'], data=url_out['fields'], files=files, timeout=5)
             print("{:05d} {} {:.2f} {:.2f}".format(id, http_response.status_code, time.time()-t1, time.time()-t2))
             id+=1
             time.sleep(0.1)

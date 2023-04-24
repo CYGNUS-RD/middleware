@@ -21,13 +21,7 @@ def image_jpg(image, vmin, vmax, event_number, event_time):
     del image
     return 
 
-def on_success(metadata):
-    print(f"Message produced to topic '{metadata.topic}' at offset {metadata.offset}")
-
-def on_error(e):
-    print(f"Error sending message: {e}")
-
-def main(sendodb, sendevent, verbose=True):
+def main(verbose=True):
     import numpy as np
 
     from datetime import datetime
@@ -42,45 +36,36 @@ def main(sendodb, sendevent, verbose=True):
     import mysql.connector
 
     import cygno as cy
-    import io
 
     from json import dumps
     from kafka import KafkaProducer
     import subprocess
-    if sendodb:
-        producer = KafkaProducer(
-            bootstrap_servers=['localhost:9092'],
-            value_serializer=lambda x: dumps(x).encode('utf-8')
-        )
-    if sendevent:
-        producerb = KafkaProducer(
-            bootstrap_servers = "localhost:9092",
-            max_request_size  = 31457280,
-#             compression_type  = 'gzip',
-            max_block_ms      = 300000
-        )
-    topic1 = 'midas-odb-'+TAG
-    topic2 = 'midas-event-'+TAG
+    
+    producer = KafkaProducer(
+        bootstrap_servers=['localhost:9092'],
+        value_serializer=lambda x: dumps(x).encode('utf-8')
+    )    
     
     client = midas.client.MidasClient("middleware")
     buffer_handle = client.open_event_buffer("SYSTEM",None,1000000000)
     request_id = client.register_event_request(buffer_handle, sampling_type = 2) 
-
+    
     # init program variables #####
     vmin         = 95
     vmax         = 130
     odb_update   = 3 # probabilemnte da mettere in middleware 
     event_info   = {}
     end1 = time.time()
-
+    
+    
     while True:
         start1 = time.time()
-        if (start1-end1)>odb_update and sendodb:
+        if (start1-end1) > odb_update:
             # update ODB
             odb_json = dumps(client.odb_get("/"))
-            producer.send(topic1, value=odb_json)
+            producer.send('midas-odb-'+TAG, value=odb_json)
             end1 = time.time()
-            if verbose: print("ODB elapsed: {:.2f}, payload size {:.1f} kb".format(end1-start1, len(odb_json.encode('utf-8'))/1024))
+            print("ODB elapsed: {:.2f}, payload size {:.1f} kb".format(end1-start1, len(odb_json.encode('utf-8'))/1024))
             # ######
             
         start2 = time.time()
@@ -105,47 +90,22 @@ def main(sendodb, sendevent, verbose=True):
             event_info_json = dumps(event_info)
             # #################
             # update EVENT
-            if sendevent:
-                payload = event.pack()
-
-#                 payload_name =  "/tmp/payload.dat"
-
-# test load from file (non cambia)
-#                 with open(payload_name, "wb") as f:
-#                     f.write(payload)
-#                 with open(payload_name, 'rb') as f:
-#                     data_bytes = f.read()
-#                 data_base64 = base64.b64encode(data_bytes).decode('utf-8')
-# oroiginario
-#                 binary_data = io.BytesIO()
-#                 binary_data.write(payload)
-#                 binary_data.seek(0)
-#                 encoded_data = binary_data.read()
-#                 data_base64 = base64.b64encode(encoded_data).decode('utf-8')
-# shorter
-
-#                 data_base64 = base64.b64encode(payload).decode('utf-8')
-
-#                 future = producerb.send(topic2, data_base64.encode('utf-8'))
-        
+            payload = event.pack()
+            payload_name =  "/tmp/{}_{}_{}.dat".format(TAG, event.header.timestamp, event_number)
 
 
-                binary_data = io.BytesIO()
-                binary_data.write(payload)
-                binary_data.seek(0)
-                encoded_data = binary_data.read()
 
-                future = producerb.send(topic2, encoded_data)
+            with open(payload_name, "wb") as f:
+                f.write(payload)
 
-                future.add_errback(on_error)
-                end3 = time.time()
-                #subprocess.Popen(producerb.flush(), stdout=None, stderr=None, stdin=None, close_fds=True)
-                producerb.flush()
-
-                end2 = time.time()
-                if verbose: 
-                    future.add_callback(on_success)
-                    print("EVENT elapsed: {:.2f}, flush {:.2f}, payload size {:.1f} Mb, timestamp {:} ".format(end2-start2, end2-end3, np.size(payload)/1024/1024, event.header.timestamp))
+            command = "scp -i /home/standard/.ssh/daq_id "+payload_name+" mazzitel@131.154.96.175:/tmp/ && rm "+payload_name
+            status, output = subprocess.getstatusoutput(command)
+            end2 = time.time()
+            if status==0:
+                producer.send('midas-event-file-'+TAG, value=event_info_json)
+                if verbose: print("EVENT elapsed: {:.2f}, payload size {:.1f} Mb, timestamp {:} ".format(end2-start2, np.size(payload)/1024/1024, event.header.timestamp))
+            else:
+                print(event_time+": ERROR in coping event")
 
             image_update_time = client.odb_get("/middleware/image_update_time")
             if ('CAM0' in bank_names) and (int(time.time())%image_update_time==0): # CAM image
@@ -165,9 +125,6 @@ def main(sendodb, sendevent, verbose=True):
 if __name__ == "__main__":
     from optparse import OptionParser
     parser = OptionParser(usage='usage: %prog\t ')
-    parser.add_option('-e','--event', dest='event', action="store_false", default=True, help='NO send event [True];');
-    parser.add_option('-o','--odb', dest='odb', action="store_false", default=True, help='NO send odb [True];');
     parser.add_option('-v','--verbose', dest='verbose', action="store_true", default=False, help='verbose output;');
     (options, args) = parser.parse_args()
-    if options.verbose: print(options, args)
-    main(options.odb, options.event, verbose=options.verbose)
+    main(verbose=options.verbose)
