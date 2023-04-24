@@ -29,6 +29,7 @@ def main(verbose=True):
     import time
     import base64
     import json
+    import io
 
     import midas
     import midas.client
@@ -98,21 +99,39 @@ def main(verbose=True):
             event_info["run_number"]            = run_number
             event_info_json = dumps(event_info)
             # #################
-            # update EVENT
+            # upload EVENT on S3
+            # #################
             payload = event.pack()
             payload_name =  "{}_{}_{}.dat".format(TAG, event.header.timestamp, event_number)
-            try:
-                url_out = s3.generate_presigned_post('cygno-data','EVENTS/'+payload_name, ExpiresIn=3600)
-            except:
-                print("presigned post error")
-                continue
+#
+# esempio con presigned url, il piu' lento
+#             try:
+#                 url_out = s3.generate_presigned_post('cygno-data','EVENTS/'+payload_name, ExpiresIn=3600)
+#             except:
+#                 print("presigned post error")
+#                 continue
 
-            files = {'file': (payload_name, payload)}
+#             files = {'file': (payload_name, payload)}
+#             try:
+#                 http_response = requests.post(url_out['url'], data=url_out['fields'], files=files, timeout=5)
+#             except requests.exceptions.RequestException as e:
+#                 print(e)
+#                 continue
+# esempio con scrittura e invio file un po' piu' veloce
+#            try:
+#                 with open('/tmp/'+payload_name, "wb") as f:
+#                     f.write(payload)
+#                 s3.upload_file('/tmp/'+payload_name, 'cygno-data', 'EVENTS/'+payload_name)
+# 
             try:
-                http_response = requests.post(url_out['url'], data=url_out['fields'], files=files, timeout=5)
-            except requests.exceptions.RequestException as e:
-                print(e)
+                binary_data = io.BytesIO()
+                binary_data.write(payload)
+                binary_data.seek(0)
+                s3.put_object(Body=binary_data.read(), Bucket='cygno-data', Key='EVENTS/'+payload_name)
+            except Exception as e:
+                print('S3 put object exception occurred: {}'.format(e))
                 continue
+                
             finally:
                 end2 = time.time()
                 producer.send('midas-event-file-'+TAG, value=event_info_json)
@@ -121,9 +140,12 @@ def main(verbose=True):
 
             image_update_time = client.odb_get("/middleware/image_update_time")
             if ('CAM0' in bank_names) and (int(time.time())%image_update_time==0): # CAM image
-                image, _, _ = cy.daq_cam2array(event.banks['CAM0']) # matrice delle imagine
-                image_jpg(image, vmin, vmax, event_number, event_time)
-
+                try: 
+                    image, _, _ = cy.daq_cam2array(event.banks['CAM0']) # matrice delle imagine
+                    image_jpg(image, vmin, vmax, event_number, event_time)
+                except Exception as e:
+                    print('generate IMAGE exception occurred: {}'.format(e))
+                    continue
               
         client.communicate(10)
         time.sleep(0.1)
