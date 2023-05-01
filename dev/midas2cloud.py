@@ -119,11 +119,13 @@ def main():
     client = midas.client.MidasClient("midas2cloud")
     
     compressing_files = 0
-    
-    connection_remote = cy.daq_sql_cennection(verbose)
-    if not connection_remote:
-        print('{:s} ERROR: Sql connetion'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-        sys.exit(1)
+
+# 
+# parte di codice commentata perche non fa piu' la replica del DB remoto, ma si e' attivata la replica SQL.
+#     connection_remote = cy.daq_sql_cennection(verbose)
+#     if not connection_remote:
+#         print('{:s} ERROR: Sql connetion'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+#         sys.exit(1)
     
     connection = daq_sql_connection_local(verbose)#cy.daq_sql_cennection(verbose)
     if not connection:
@@ -234,27 +236,29 @@ def main():
                                             #lastrun = cy.read_sql_value(connection, "Runlog", "run_number", 
                                             #   str(runN), "*",verbose)
                                             n_try = 3
+#
+# parte di codice commentata perche non fa piu' la replica del DB remoto, ma si e' attivata la replica SQL.
+#
+#                                             while (n_try>0):
                                             
-                                            while (n_try>0):
-                                            
-                                                status_replica = replica_sql_value(connection, connection_remote, 
-                                                                              "Runlog", "run_number",  str(runN),
-                                                                              verbose=verbose)
-                                                if status_replica:
-                                                    break
-                                                print("WARNING: SQL Replica try", n_try)
-                                                n_try-=1
-                                                connection_remote = cy.daq_sql_cennection(verbose)
-                                                if not connection_remote:
-                                                    print('{:s} ERROR: Sql connetion'\
-                                                          .format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-                                                    sys.exit(1)
+#                                                 status_replica = replica_sql_value(connection, connection_remote, 
+#                                                                               "Runlog", "run_number",  str(runN),
+#                                                                               verbose=verbose)
+#                                                 if status_replica:
+#                                                     break
+#                                                 print("WARNING: SQL Replica try", n_try)
+#                                                 n_try-=1
+#                                                 connection_remote = cy.daq_sql_cennection(verbose)
+#                                                 if not connection_remote:
+#                                                     print('{:s} ERROR: Sql connetion'\
+#                                                           .format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+#                                                     sys.exit(1)
                                                     
                                                     
-                                            if n_try == 0: 
-                                                print('ERROR: Max SQL try replica reached')
-                                            else:
-                                                print('{:s} Replica sql updated'.format(dtime) )
+#                                             if n_try == 0: 
+#                                                 print('ERROR: Max SQL try replica reached')
+#                                             else:
+#                                                 print('{:s} Replica sql updated'.format(dtime) )
                                             
                                             
                                             
