@@ -10,7 +10,8 @@ import numpy as np
 import os
 import os.path
 import stat
-from datetime import datetime
+#from datetime import datetime
+import datetime
 import time
 import pandas as pd
 import subprocess
@@ -31,7 +32,6 @@ import midas.file_reader
 #DAQ_ROOT            = os.environ['DAQ_ROOT']
 DEFAULT_PATH_ONLINE = 'pedestals/' #DAQ_ROOT+'/online/'
 URL                 = 'https://minio.cloud.infn.it/'
-
 
 def writeSubmitFile(submit_path, submit_run, nproc, maxentries):
     
@@ -325,8 +325,106 @@ def forOverPandasTransfer(df, connection):# Define the two filters
     
     return df
 
+def forOverPandasCloud(df):# Define the two filters
+    filter1 = df['Status'] == 'completed'
+    filter2 = df['Data_transfered'] == 1
+    filter3 = df['Cloud_storage'] == 0
+    
+
+    # Loop over the rows of the DataFrame and apply the filters
+    for index, row in df.iterrows():
+        if filter1[index] and filter2[index] and filter3[index]:
+            cluster_ID_row = row['Cluster_ID']
+            run_number_row = row['Run_number']
+            #Run data2cloud
+            recofilename = '%s_run%05d_%s.root' % ('reco', run_number_row, '3D')
+            recofolder   =  '../submitJobs/' 
+            
+            uploadStatus = reco2cloud(recofilename, recofolder, verbose=False)
+            
+            if uploadStatus:          
+                #Update dataFrame
+                df.loc[df['Cluster_ID'] == cluster_ID_row, 'Cloud_storage'] = 1
+    return df
+            
+def reco2cloud(recofilename, recofolder, verbose=False):
+      #
+    # deault parser value
+    #
+    TAG         = "RECO/Winter23"
+    session     = "sentinel-wlcg"
+    bucket      = "cygno-analysis"
+    max_tries   = 5
+    
+    INAPATH     = recofolder
+    file_in_dir = recofilename
+    
+    filesize = os.path.getsize(INAPATH+file_in_dir) 
+    dtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    #if verbose:              
+    print('{:s} Transferring file: {:s}'.format(dtime, file_in_dir))
+    
+    current_try = 0
+    aux         = 0
+    status, isthere = False, False # flag to know if to go to next run
+    while(not status):   
+        #tries many times for errors of connection or others that may be worth another try
+        if verbose: 
+            print(INAPATH+file_in_dir,TAG, bucket, session, verbose, filesize)
+        status, isthere = cy.s3.obj_put(INAPATH+file_in_dir,tag=TAG, 
+                                     bucket=bucket, session=session, 
+                                     verbose=verbose)
+        if status:
+            if isthere:
+                remotesize = cy.s3.obj_size(file_in_dir,tag=TAG, 
+                                 bucket=bucket, session=session, 
+                                 verbose=verbose)
+
+                cy.cmd.rm_file(INAPATH+file_in_dir)
+                if verbose:              
+                    print('{:s} file removed: {:s}'.format(dtime, file_in_dir))
+
+                ##############################
+                if verbose: 
+                    print('{:s} Upload done: {:s}'.format(dtime, file_in_dir))
+                aux = 1
+
+        else:
+            current_try = current_try+1
+            if current_try==max_tries:
+                print('{:s} ERROR: Max try number reached: {:d}'.format(dtime, current_try))
+                status=True
+                aux = 0
+    return aux
+
+def refreshToken():
+    print("Setting environment (Condor and SQL)")
+    process = subprocess.Popen(
+        "source ../start_script.sh", shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+    
+    process2 = subprocess.Popen(
+        "source ../SQLSetup.sh", shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+
+    output, error = process.communicate()
+
+    #if error:
+    #    raise Exception(f"Error in executing condor refresh: {error}")
+        
+    output2, error2 = process2.communicate()
+    
+    #if error:
+    #    raise Exception(f"Error in executing SQLSetup: {error}")            
+        
     
 def main(run_number_start, verbose=True):
+    #Set environment variables
+    refreshToken()
 
     # init sql variabile and connector
     connection = mysql.connector.connect(
@@ -348,6 +446,13 @@ def main(run_number_start, verbose=True):
         # create an empty DataFrame with the desired columns
         columns_condor = ['Cluster_ID', 'Run_number', 'Status', 'Data_transfered', 'Cloud_storage']
         df_condor = pd.DataFrame(columns=columns_condor)
+        
+    ### to fix some problems
+    for j in range(327,923):
+        df_condor.loc[df_condor['Cluster_ID'] == j, 'Cloud_storage'] = 1
+        #df_condor.loc[df_condor['Cluster_ID'] == 328, 'Cloud_storage'] = 1
+    df_condor.to_csv('../submitJobs/df_condor.csv', index=False)
+    df_condor.to_json('../dev/df_condor.json', orient="table")
 
     run_number_start = 16798
     nproc            = 4
@@ -358,24 +463,20 @@ def main(run_number_start, verbose=True):
     
 
     #while True:
-    for i in range(50):
+    for i in range(200):
         
         # check if 10 minutes have passed
         elapsed_time = time.time() - start_time
-        if elapsed_time >= 600:
-            # call the subprocess
-            #if os.getcwd() != "/root"
-            #    os.chdir("..")
-            print("Setting environment (Condor and SQL)")
-            subprocess.run(["source", "../SQLSetup.sh"])
-            subprocess.run(["source", "../start_script.sh"])
+        if elapsed_time >= 120:
+            refreshToken()
             # reset the start time
             start_time = time.time()
         
         ##Check if the run arrived at the cloud 
         list_runs_to_analyze = checkNewRuns(run_number_start)
         
-        if i < 50:
+        #if i < 50:
+        for i in range(1):
         #while len(list_runs_to_analyze) > 0: ## keep send jobs to condor if we have new runs to analyze
             
             list_runs_to_analyze = checkNewRuns(run_number_start)
@@ -397,11 +498,17 @@ def main(run_number_start, verbose=True):
           
             print(df_condor)
 
+        
+        
         df_condor = forOverPandasStatus(df_condor)
         df_condor = forOverPandasTransfer(df_condor, connection)
+        df_condor = forOverPandasCloud(df_condor)
+        
         print(df_condor)
         # save the dataframe to a CSV file
+        print("Saving Condor DataFrame Control Monitor")
         df_condor.to_csv('df_condor.csv', index=False)
+        df_condor.to_json('../dev/df_condor.json', orient="table")
         print("Waiting 60 seconds to check Job status")
         time.sleep(60)
 
