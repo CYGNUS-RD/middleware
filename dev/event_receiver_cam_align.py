@@ -217,22 +217,24 @@ def getVscore(peaks, properties, imgdim = 2304):
     for i, r in enumerate(rows):
         xx = r[:, 0]
         yy = r[:, 1]
-    
-        #opt, pcov = curve_fit(parabole, yy, xx)
-        opt, pcov = curve_fit(Line, yy, xx)
-        
-        xline = np.arange(int(imgdim/2) - 600, int(imgdim/2)+600)
-        
-        
-        #yline = parabole(xline, opt[0], opt[1], opt[2])
-        yline = Line(xline, opt[0], opt[1])#
-        
-        if i==1:
-            r2i.append([xline[0], yline[0]])
-            r2f.append([xline[-1], yline[-1]])
-        elif i ==3:
-            r4i.append([xline[0], yline[0]])
-            r4f.append([xline[-1], yline[-1]])
+        if len(xx) > 1 and len(yy) > 1:
+            #opt, pcov = curve_fit(parabole, yy, xx)
+            opt, pcov = curve_fit(Line, yy, xx)
+
+            xline = np.arange(int(imgdim/2) - 600, int(imgdim/2)+600)
+
+
+            #yline = parabole(xline, opt[0], opt[1], opt[2])
+            yline = Line(xline, opt[0], opt[1])#
+
+            if i==1:
+                r2i.append([xline[0], yline[0]])
+                r2f.append([xline[-1], yline[-1]])
+            elif i ==3:
+                r4i.append([xline[0], yline[0]])
+                r4f.append([xline[-1], yline[-1]])
+        else:
+            return -9999
             
     diffi = r2i[0][1] - r4i[0][1]#/(r2i[0][1] + r4i[0][1])
     difff = r2f[0][1] - r4f[0][1]#/(r2f[0][1] + r4f[0][1])
