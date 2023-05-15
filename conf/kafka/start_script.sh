@@ -18,8 +18,8 @@ cat > /etc/condor/condor_config.local << EOF
 AUTH_SSL_CLIENT_CAFILE = /etc/pki/ca-trust/source/anchors/htcondor_ca.crt
 SCITOKENS_FILE = /tmp/token
 SEC_DEFAULT_AUTHENTICATION_METHODS = SCITOKENS
-COLLECTOR_HOST = 131.154.96.142.myip.cloud.infn.it:30618
-SCHEDD_HOST = 131.154.96.142.myip.cloud.infn.it
+COLLECTOR_HOST = 131.154.96.173.myip.cloud.infn.it:30618
+SCHEDD_HOST = 131.154.96.173.myip.cloud.infn.it
 EOF
 #
 # 
