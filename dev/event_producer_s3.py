@@ -7,67 +7,15 @@
 
 import os, sys
 
+
 # Load globals env
 DAQ_ROOT            = os.environ['DAQ_ROOT']
 DEFAULT_PATH_ONLINE = DAQ_ROOT+'/online/'
 TAG                 = os.environ['TAG']
 
-# def image_jpg(image, vmin, vmax, event_number, event_time):
-#     from matplotlib import pyplot as plt
-#     im = plt.imshow(image, cmap='gray', vmin=vmin, vmax=vmax)
-#     plt.title ("Event: {:d} at {:s}".format(event_number, event_time))
-#     plt.savefig(DEFAULT_PATH_ONLINE+'custom/tmp.png')
-#     plt.close()
-#     del image, im
-#     return 
 
-def image_jpg(image, vmin, vmax, event_number, event_time, producer, verbose=False):
-    from matplotlib import pyplot as plt
-    import numpy as np
-    import base64
+def main(verbose=False):
     
-    im = plt.imshow(image, cmap='gray', vmin=vmin, vmax=vmax)
-    plt.title ("Event: {:d} at {:s}".format(event_number, event_time))
-    plt.savefig(DEFAULT_PATH_ONLINE+'custom/tmp.png')
-    plt.close()
-    with open(DEFAULT_PATH_ONLINE+'custom/tmp.png', 'rb') as f:
-        img_bytes = f.read()
-    f.close()
-    img_base64 = base64.b64encode(img_bytes).decode('utf-8')
-    producer.send('midas-camera-'+TAG, value=img_base64)#.encode('utf-8'))
-    #producer.flush()
-    if verbose:
-        print("DEBUG: image created")
-
-    del im, img_bytes, img_base64, image
-    return 
-
-def pmt_jpg(header, waveform_f, producer, number_of_w_readed = 5, verbose=False):
-    from matplotlib import pyplot as plt
-    import numpy as np
-    import base64
-    
-    fig, ax = plt.subplots(header[0][0], number_of_w_readed, figsize=(10, header[1][0]))
-    for t in range(0, header[0][0]):
-        offset = t*header[1][0]
-        for w in range(0, number_of_w_readed):
-            ax[t,w].plot(np.linspace(0, header[2][0], header[2][0]), waveform_f[offset], label="t: {:d} w{:d}".format(t,w))
-            ax[t,w].legend()
-            offset+=1
-    plt.savefig(DEFAULT_PATH_ONLINE+'custom/pmt.png')
-    plt.close()
-    with open(DEFAULT_PATH_ONLINE+'custom/pmt.png', 'rb') as f:
-        img_bytes = f.read()
-    f.close()
-    img_base64 = base64.b64encode(img_bytes).decode('utf-8')
-    producer.send('midas-pmt-'+TAG, value=img_base64)#.encode('utf-8'))
-    #producer.flush()
-    if verbose:
-        print("DEBUG: pmt created")
-    del fig, ax, img_bytes, img_base64, header, waveform_f
-    return
-
-def main(verbose=True):
     import numpy as np
 
     from datetime import datetime
@@ -80,23 +28,20 @@ def main(verbose=True):
     import midas
     import midas.client
 
-    import mysql.connector
-
     import cygno as cy
 
-    from json import dumps
     from kafka import KafkaProducer
     
     import requests
     import boto3
     from boto3sts import credentials as creds
     import urllib.parse
+    import re 
     
     producer = KafkaProducer(
         bootstrap_servers=['localhost:9092'],
-        value_serializer=lambda x: dumps(x).encode('utf-8')
+        value_serializer=lambda x: json.dumps(x).encode('utf-8')
     )    
-    
     session = creds.assumed_session("infncloud-wlcg", endpoint="https://minio.cloud.infn.it/", verify=True)
     s3 = session.client('s3', endpoint_url="https://minio.cloud.infn.it/", config=boto3.session.Config(signature_version='s3v4'),
                                                 verify=True)
@@ -105,25 +50,33 @@ def main(verbose=True):
     buffer_handle = client.open_event_buffer("SYSTEM",None,1000000000)
     request_id = client.register_event_request(buffer_handle, sampling_type = 2) 
     
-    # init program variables #####
-    vmin         = 95
-    vmax         = 130
     odb_update   = 3 # probabilemnte da mettere in middleware 
     event_info   = {}
     end1 = time.time()
+    fpath = os.path.dirname(os.path.realpath(sys.argv[0]))
     
     
     while True:
-        start1 = time.time()
-        if (start1-end1) > odb_update:
-            # update ODB
-            odb_json = dumps(client.odb_get("/"))
-            producer.send('midas-odb-'+TAG, value=odb_json)
-            end1 = time.time()
-            if verbose:
-                print("DEBUG: ODB elapsed: {:.2f}, payload size {:.1f} kb".format(end1-start1, 
-                                                                                  len(odb_json.encode('utf-8'))/1024))
-            # ######
+#         # 
+#         start1 = time.time()
+#         if (start1-end1) > odb_update:
+#             try:
+#                 # update ODB
+#                 odb = client.odb_get("/")
+#                 # print(odb)
+#                 odb_json = json.dumps(odb)
+#                 producer.send('midas-odb-'+TAG, value=odb_json)
+#                 producer.flush()
+#                 end1 = time.time()
+#                 if verbose:
+#                     print("DEBUG: ODB elapsed: {:.2f}, payload size {:.1f} kb".format(end1-start1,                                                           len(odb_json.encode('utf-8'))/1024))
+#                 del odb, odb_json
+#             except Exception as e:
+#                 print('ERROR >>> Midas ODB: {}'.format(e))
+#                 continue
+
+
+#         # ######
             
         start2 = time.time()
         event = client.receive_event(buffer_handle, async_flag=True)
@@ -144,7 +97,7 @@ def main(verbose=True):
             event_info["trigger_mask"]          = event.header.trigger_mask
             event_info["event_data_size_bytes"] = event.header.event_data_size_bytes
             event_info["run_number"]            = run_number
-            event_info_json = dumps(event_info)
+            event_info_json                     = json.dumps(event_info)
             # #################
             # upload EVENT on S3
             # #################
@@ -182,31 +135,34 @@ def main(verbose=True):
             finally:
                 end2 = time.time()
                 producer.send('midas-event-file-'+TAG, value=event_info_json)
-                #producer.flush()
-                if verbose: print("DEBUG: elapsed: {:.2f}, payload size {:.1f} Mb, timestamp {:}, Run Number {:}, Event Number {:}, Event ID {:} ".format(end2-start2, np.size(payload)/1024/1024, 
+                producer.flush()
+                if verbose: 
+                    print("DEBUG: elapsed: {:.2f}, payload size {:.1f} Mb, timestamp {:}, Run Number {:}, Event Number {:}, Event ID {:} ".format(end2-start2, np.size(payload)/1024/1024, 
                                                         event.header.timestamp, run_number, event_number, 
                                                         event.header.event_id))
 
-            ################
-            ## loacal stuf
-            ################
-            image_update_time = client.odb_get("/middleware/image_update_time")
-            imege_pmt_offset = image_update_time/2
-            if ('CAM0' in bank_names) and (int(time.time())%image_update_time==0): # CAM image
-                try: 
-                    image, _, _ = cy.daq_cam2array(event.banks['CAM0']) # matrice delle imagine
-                    image_jpg(image, vmin, vmax, event_number, event_time, producer, verbose)
-                except Exception as e:
-                    print('ERROR >>> generate IMAGE exception occurred: {}'.format(e))
-                    continue
-            if ('DGH0' in bank_names) and (int(time.time()+imege_pmt_offset)%image_update_time==0): # PMTs wavform 
-                try:
-                    header = cy.daq_dgz_full2header(bank, verbose=False)
-                    waveform_f, waveform_s = cy.daq_dgz_full2array(event.banks['DIG0'], header)
-                    pmt_jpg(header, waveform_f, producer, number_of_w_readed = 5, verbose=verbose)
-                except Exception as e:
-                    print('ERROR >>> generate PMTs exception occurred: {}'.format(e))
-                    continue
+#             ################
+#             ## loacal stuf
+#             ################
+#             image_update_time = client.odb_get("/middleware/image_update_time")
+#             imege_pmt_offset = image_update_time/2
+#             if verbose:
+#                 print("DEBUG: banks", bank_names)
+#             if ('CAM0' in bank_names) and (int(time.time())%image_update_time==0): # CAM image
+#                 try: 
+#                     image, _, _ = cy.daq_cam2array(event.banks['CAM0']) # matrice delle imagine
+#                     image_jpg(image, 95, 130, event_number, event_time, producer, verbose)
+#                 except Exception as e:
+#                     print('ERROR >>> generate IMAGE exception occurred: {}'.format(e))
+#                     continue
+#             if ('DGH0' in bank_names) and (int(time.time()+imege_pmt_offset)%image_update_time==0): # PMTs wavform 
+#                 try:
+#                     header = cy.daq_dgz_full2header(event.banks['DGH0'], verbose=verbose)
+#                     waveform_f, waveform_s = cy.daq_dgz_full2array(event.banks['DIG0'], header)
+#                     pmt_jpg(header, waveform_f, waveform_s, producer, number_of_w_readed = 5, verbose=verbose)
+#                 except Exception as e:
+#                     print('ERROR >>> generate PMTs exception occurred: {}'.format(e))
+#                     continue
                 
         client.communicate(10)
         time.sleep(0.1)

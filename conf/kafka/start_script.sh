@@ -1,4 +1,8 @@
 #!/bin/bash
+#eval `oidc-agent`
+
+unset OIDC_SOCK; unset OIDCD_PID; eval oidc-keychain
+
 eval `oidc-agent`
 
 oidc-gen --client-id $IAM_CLIENT_ID --client-secret $IAM_CLIENT_SECRET --rt $REFRESH_TOKEN --manual --issuer $IAM_SERVER --pw-cmd="echo pwd" \
@@ -9,6 +13,7 @@ oidc-token $OIDC_AGENT > /tmp/token
 
 #
 # Confiig conndor CYGNO queue
+# 173 to the 10 condor
 cat > /etc/condor/condor_config.local << EOF 
 AUTH_SSL_CLIENT_CAFILE = /etc/pki/ca-trust/source/anchors/htcondor_ca.crt
 SCITOKENS_FILE = /tmp/token

@@ -32,7 +32,8 @@ def main(INAPATH, fforce, start, end, verbose):
             #
             run_number = int(file_in_dir[i].split('run')[-1].split('.mid.gz')[0])
             if run_number >=start and run_number <=end:
-                if cy.daq_read_runlog_replica_status(connection, run_number, storage="local", verbose=verbose)==1:
+                if cy.daq_read_runlog_replica_status(connection, run_number, storage="cloud", verbose=verbose)==1 and \
+                cy.daq_read_runlog_replica_status(connection, run_number, storage="tape", verbose=verbose)==1:
                     print ("Removing file: ", file_in_dir[i])
                     if fforce:
                         command = '/bin/rm -f '+ INAPATH+file_in_dir[i]
