@@ -119,8 +119,8 @@ def checkNewRuns(run_number_start):
         list_runs_to_analyze = df.run_number[(df["number_of_events"] > 1) & (df["storage_cloud_status"] == 1) & (df["online_reco_status"] == -1) & (df["run_number"] > run_number_start)].values.tolist()
 
         if len(list_runs_to_analyze) == 0:
-            time.sleep(90)
             print("Waiting 90 seconds to check new files again")
+            time.sleep(90)
         else:
             print("New files to be reconstruced found")
     else:
@@ -146,11 +146,12 @@ def getReconstructionList():
     return items_string
 
 def sql_update_reco_status(run,value,connection):
-    cmd.update_sql_value(connection, table_name="Runlog", row_element="run_number", 
+    status = cmd.update_sql_value(connection, table_name="Runlog", row_element="run_number", 
                      row_element_condition=run, 
                      colum_element="online_reco_status", value=value, 
                      verbose=True)
-
+    return status    
+    
 
 def checkCondorStatus():
     process = subprocess.Popen(
@@ -385,11 +386,10 @@ def forOverPandasCloud_rm(df):# Define the two filters
                 print("Retry")
     return df
 
-def forOverPandasHeld(df):# Define the two filters
+def forOverPandasHeld(df, connection):# Define the two filters
     filter1 = df['Status'] == 'held'
     filter2 = df['Data_transfered'] == 0
-    filter3 = df['Cloud_storage'] == 0
-    
+    filter3 = df['Cloud_storage'] == 0   
 
     # Loop over the rows of the DataFrame and apply the filters
     for index, row in df.iterrows():
@@ -409,11 +409,34 @@ def forOverPandasHeld(df):# Define the two filters
                 if error:
                     raise Exception(f"Error in executing condor_rm: {error}")
                 print("Restoring the job to the Queue")
-                df = df.drop(df.loc[df['Cluster_ID'] == cluster_ID_row].index)
                 sql_update_reco_status(row['Run_number'],-1,connection)
+                df = df.drop(df.loc[df['Cluster_ID'] == cluster_ID_row].index)                
             except:
                 print("Retry")
     return df
+
+def forOverPandasUnknown(df, connection):# Define the two filters
+    filter1 = df['Status'] == 'unknown'
+    filter2 = df['Data_transfered'] == 0
+    filter3 = df['Cloud_storage'] == 0   
+
+    # Loop over the rows of the DataFrame and apply the filters
+    for index, row in df.iterrows():
+        if filter1[index] and filter2[index] and filter3[index]:
+            cluster_ID_row = row['Cluster_ID']
+            print("Removing Job %s from the condor queue" %cluster_ID_row)
+            try:
+                print("Restoring the job to the Queue")
+                sql_update_reco_status(row['Run_number'],-1,connection)
+                df = df.drop(df.loc[df['Cluster_ID'] == cluster_ID_row].index)                
+            except:
+                print("Retry")
+    return df
+
+def createPedLog():
+    #get the most updated table and create the runlog table
+    df = cy.read_cygno_logbook(verbose=False)
+    df.to_csv('../reconstruction/pedestals/runlog_LNGS_auto.csv',index=False)
             
 def reco2cloud(recofilename, recofolder, verbose=False):
       #
@@ -518,7 +541,9 @@ def main(run_number_start, verbose=True):
     ### to fix some problems
     #for j in range(327,923):
     #df_condor.loc[df_condor['Cluster_ID'] == 931, 'Cloud_storage'] = 1
-    #    #df_condor.loc[df_condor['Cluster_ID'] == 328, 'Cloud_storage'] = 1
+    #df_condor.loc[df_condor['Cluster_ID'] == 328, 'Cloud_storage'] = 1
+    #df_condor.loc[df_condor['Cluster_ID'] == 1893, 'JobInQueue'] = 1
+    
     df_condor.to_csv('../submitJobs/df_condor.csv', index=False)
     df_condor.to_json('../dev/df_condor.json', orient="table")
 
@@ -527,13 +552,14 @@ def main(run_number_start, verbose=True):
     maxentries       = -1
 
     # set the initial time
-    start_time = time.time()
+    start_time    = time.time()
+    start_time_rm = time.time()
     
 
     while True:
-    #for i in range(200):
+    #for i in range(5):
         
-        # check if 10 minutes have passed
+        # check if 2 minutes have passed
         elapsed_time = time.time() - start_time
         if elapsed_time >= 120:
             refreshToken()
@@ -544,18 +570,19 @@ def main(run_number_start, verbose=True):
         list_runs_to_analyze = checkNewRuns(run_number_start)
         
         #if i < 50:
-        #for i in range(5):
+        #for i in range(1):
         while len(list_runs_to_analyze) > 0: ## keep send jobs to condor if we have new runs to analyze
             submit_run = list_runs_to_analyze[0] # Get the first run to go to the queue 
 
             print("Sending the Run "+ str(submit_run) + " to the Queue")
-
+            createPedLog()
             writeSubmitFile(submit_path, str(submit_run), str(nproc), str(maxentries))
             submitfile = createCondorSubmit(submit_path, str(submit_run))
 
             cluster_id = sendjob(submit_path,submitfile)
             if cluster_id:
-                sql_update_reco_status(submit_run,0,connection) #Update the online_reco variable to 0, which means "reconstructing"
+                status = sql_update_reco_status(submit_run,0,connection) #Update the online_reco variable to 0, which means "reconstructing"
+                print("Update Table: %d" %status)
                 #print("Run " + str(submit_run)+ "submitted with Cluster_ID: " + str(cluster_id))
 
                 status     = getJobStatus(cluster_id)
@@ -564,7 +591,10 @@ def main(run_number_start, verbose=True):
                 df_condor.loc[df_condor['Cluster_ID'] == cluster_id, 'Run_number'] = submit_run           
 
                 print(df_condor)
+                df_condor.to_csv('../submitJobs/df_condor.csv', index=False)
+                df_condor.to_json('../dev/df_condor.json', orient="table")
             #Checking again the list to see if there is more Run to be analyzed
+            df_condor = forOverPandasStatus(df_condor)
             list_runs_to_analyze = checkNewRuns(run_number_start)
 
         
@@ -573,9 +603,18 @@ def main(run_number_start, verbose=True):
         df_condor = forOverPandasTransfer(df_condor, connection)
         df_condor = forOverPandasCloud(df_condor)
         df_condor.to_csv('../submitJobs/df_condor.csv', index=False)
+        df_condor.to_json('../dev/df_condor.json', orient="table")
         
-        df_condor = forOverPandasCloud_rm(df_condor)
-        df_condor = forOverPandasHeld(df_condor)
+        elapsed_time_rm = time.time() - start_time_rm
+        if elapsed_time >= 600:
+            refreshToken()
+            # reset the start time
+            df_condor = forOverPandasCloud_rm(df_condor)
+            df_condor = forOverPandasHeld(df_condor, connection)
+            df_condor.to_csv('../submitJobs/df_condor.csv', index=False)
+            df_condor.to_json('../dev/df_condor.json', orient="table")
+            start_time_rm = time.time()
+        #df_condor = forOverPandasUnknown(df_condor, connection)
         
         print(df_condor)
         # save the dataframe to a CSV file
