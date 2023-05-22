@@ -113,6 +113,7 @@ def checkNewRuns(run_number_start):
         print("DB connected")
     except:
         print("Error connecting to SQL, trying again in 30s")
+        df = pd.DataFrame()
         list_runs_to_analyze = []
         time.sleep(30)
     if not df.empty:
