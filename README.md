@@ -13,7 +13,7 @@
 
 * (sono aperte su entrambe le macchine anche le porte del DAQ e del RTD)
 * To access Grafana (Just one for both DBs):
-  * 1 - Go to the link: https://131.154.96.196:3000/
+  * 1 - Go to the link: https://grafana.cygno.cloud.infn.it/
   * 2 - Choose "Sign in with IAM"
   * 3 - Use your INFN credentials
   * 4 - Go to the desired Dashboard
