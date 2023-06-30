@@ -102,3 +102,24 @@ host slow-mscb399 {hardware ethernet 00:50:c2:46:d4:16; fixed-address 192.168.99
 host gas-system {hardware ethernet 00:03:27:11:c3:53; fixed-address 192.168.99.20; }
 
 ```
+
+### HTCondor + Kubernetes
+
+#  How to add created WN (worker nodes) to another existent Condor Queue:
+
+1. ssh the WN you want to move from one Queue to another;
+
+2. Then, create the config file:
+  ```
+  vi /etc/condor/condor_config.local
+  ```
+3. Add the line:
+  ```
+  CONDOR_HOST = <IP_Kubernetes>
+  ```
+
+4. Then, run the command:
+
+  ```
+  condor_reconfig
+  ```
