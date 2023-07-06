@@ -33,6 +33,8 @@ services:
       PMA_PORT: 6033
       PMA_ARBITRARY: 1
     restart: always
+    volumes:
+      - ${PWD}/ports.conf:/etc/apache2/ports.conf
 #    ports:
 #      - 8082:80
 
