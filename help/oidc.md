@@ -32,4 +32,9 @@ oidc-gen --client-id $IAM_CLIENT_ID --client-secret $IAM_CLIENT_SECRET --rt $REF
 "openid email wlcg wlcg.groups profile offline_access" $OIDC_AGENT
 ```
 * then relogin...
+* install library:
+```
+pip install git+https://github.com/DODAS-TS/boto3sts
+pip install git+https://github.com/CYGNUS-RD/cygno.git
+```
 
