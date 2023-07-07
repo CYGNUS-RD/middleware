@@ -6,3 +6,4 @@ export ODIR="/root/"
 echo grafana_`date +%Y%m%d`.tar.gz >> ${ODIR}backup.dat
 last=`tail -2 ${ODIR}backup.dat | head -1`
 rm ${ODIR}$last
+/usr/local/bin/cygno_repo put cygno-data ${ODIR}grafana_`date +%Y%m%d`.tar.gz -t BCK -s infncloud-wlcg
