@@ -175,5 +175,5 @@ The MariaDB [documentation](https://mariadb.com/kb/en/library/setting-up-replica
       **Slave_SQL_Running: Yes**
    ```
    
-8. Now you should have you replica Up-to-date and running!
+8. Now you should have your replica Up-to-date and running!
 
