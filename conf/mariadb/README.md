@@ -2,11 +2,12 @@
 
 ## Installation and Configuration Maria DB
 
+Useful links:
+- [Install mariadb ubuntu 22.04](https://www.digitalocean.com/community/tutorials/how-to-install-mariadb-on-ubuntu-22-04)
+- [Install and Secure Phpmyadmin Ubuntu](https://www.digitalocean.com/community/tutorials/how-to-install-and-secure-phpmyadmin-on-ubuntu-20-04)
+- [Install PhpMyAdmin with MariaDB](https://www.server-world.info/en/note?os=Ubuntu_22.04&p=mariadb&f=6)
 
-
-links (https://www.digitalocean.com/community/tutorials/how-to-install-mariadb-on-ubuntu-22-04, https://www.digitalocean.com/community/tutorials/how-to-install-and-secure-phpmyadmin-on-ubuntu-20-04, https://www.server-world.info/en/note?os=Ubuntu_22.04&p=mariadb&f=6)
-
-## Configure mysql_secure_installation
+### Configure mysql_secure_installation
 
 > sudo mysql_secure_installation
 
@@ -75,3 +76,104 @@ installation should now be secure.
 
 Thanks for using MariaDB!
 ```
+
+
+## Solution to replica desynchronization (stopping data acquisition)
+
+Useful link [replication issues](https://dba.stackexchange.com/questions/214102/mysql-replication-issues-duplicate-primary-key-error-and-problems-reading-rel)
+
+### Syncing Master and Slave for Replication.
+
+Syncing a Master and Slave is tricky on a Master which is live, online and constantly being updated.
+The MariaDB [documentation](https://mariadb.com/kb/en/library/setting-up-replication/) and other answers to this question, recommend:
+
+#### Master side: 
+1. Open the VPN to LNGS and connect to the DAQ;
+2. Enter Mariadb with the DAQ password:
+  ```
+  sudo mysql -u root -p
+  ```
+3. Flush and Lock ALL tables by running the following command:
+  ```
+  FLUSH TABLES WITH READ LOCK;
+  ```
+4. Get the current position in the binary log by running SHOW MASTER STATUS:
+   ```
+   SHOW MASTER STATUS;
+   ```
+   Output example:
+   ```
+      MariaDB [(none)]> SHOW MASTER STATUS;
+      +------------------+----------+--------------+------------------+
+      | File             | Position | Binlog_Do_DB | Binlog_Ignore_DB |
+      +------------------+----------+--------------+------------------+
+      | mysql-bin.XXXXXX |  XXXXXXX |              |                  |
+      +------------------+----------+--------------+------------------+
+      1 row in set (0,000 sec)
+   ```
+   
+6. Record the File and Position details. *If binary logging has just been enabled, these will be blank.*
+
+7. [IMPORTANT] Keep this session running - *exiting it will release the lock*.
+
+8. Now, with the lock still in place, open another terminal on the DAQ.
+9. Copy the data from the master:
+   ```
+   sudo mysqldump -u root --master-data <database-name> > ./<backup-file-name>.sql
+   gzip ./<backup-file-name>.sql
+   ```
+10. Once the data has been exported, you can go to the first terminal and release the lock on the master by running UNLOCK TABLES.
+    ```
+    UNLOCK TABLES;
+    ```
+12. You must copy the exported data to the replica VM.
+13. Once the data has been transferred to the VM you should go inside the VM.
+    
+#### Slave side:
+
+1. Inside the VM you have to copy the exported data to the docker container, first check the name of MariaDB container, copy the file and then enter inside the container:
+    ```
+    docker ps
+    docker cp <backup-file-name>.sql <container-name>:/
+    docker exec -it <container-name> bash
+    ```
+2. Inside MariaDB Container you must STOP and [RESET the Slave](https://dev.mysql.com/doc/refman/5.5/en/reset-slave.html) (using MYSQL PWD):
+    ```
+    mysql -u root -p 
+    STOP SLAVE;
+    RESET SLAVE;
+    EXIT;
+    ```
+
+3. Import the SQL file into the SLAVE:
+   ```
+   mysql -u root -p database-name < <backup-file-name>.sql
+   ```
+5. After that you should return to the MariaDB command line and set the Master configuration with the File and Position got on **Step 4 of the Master Side**:
+   ```
+   CHANGE MASTER TO MASTER_HOST = '127.0.0.1', MASTER_PORT = <PORT>, MASTER_USER = 'replication', MASTER_PASSWORD = '<replication-password>', MASTER_LOG_FILE = '<File-Master>', MASTER_LOG_POS = <Position-Master>;
+   START SLAVE;   
+   ```
+6. Test if the SLAVE was started in the right way with the following command:
+   ```
+   SHOW SLAVE STATUS \G
+   ```
+   Output Example:
+   ```
+   *************************** 1. row ***************************
+      Slave_IO_State: Waiting for master to send event
+      Master_Host: <IP>
+      Master_User: <replication-user>
+      Master_Port: <PORT>
+      Connect_Retry: 60
+      Master_Log_File: <File-Master>
+      Read_Master_Log_Pos: <Position-Master>
+      Relay_Log_File: mysql-relay-bin.000002
+      Relay_Log_Pos: 2601
+      Relay_Master_Log_File: <>
+      **Slave_IO_Running: Yes**
+      **Slave_SQL_Running: Yes**
+   ```
+   
+8. Now you should have you replica Up-to-date and running!
+
