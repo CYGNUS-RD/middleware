@@ -1,5 +1,5 @@
 connect to tape:
-  ssh sql 
+  ssh sql (131.154.96.221)
   docker attach tape 
   source oicd-setup.sh
   gfal-ls davs://xfer-archive.cr.cnaf.infn.it:8443/cygno/LNGS/
