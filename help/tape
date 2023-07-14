@@ -1,0 +1,6 @@
+connect to tape:
+ssh sql 
+docker attach tape 
+source oicd-setup.sh
+gfal-ls davs://xfer-archive.cr.cnaf.infn.it:8443/cygno/LNGS/
+TO EXIT CRT-P CTR-Q
