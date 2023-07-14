@@ -4,6 +4,7 @@ go to test notebook (192.135.24.159)
   - edit and update the Dockerfile in the imege folder (lab, wn, tape)
   - cd dodas-docker-images/docker/CYGNO/
   - docker build -t gmazzitelli/cygno-XXX:vX.Y.Z-cygno -f XXX/Dockerfile .
+  - docker push gmazzitelli/cygno-XXX:vX.Y.Z-cygno
 
 example:
 ```
