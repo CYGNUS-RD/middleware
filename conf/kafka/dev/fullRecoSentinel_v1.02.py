@@ -350,7 +350,7 @@ def forOverPandasCloud(df):# Define the two filters
             recofilename = '%s_run%05d_%s.root' % ('reco', run_number_row, '3D')
             recofolder   =  '../submitJobs/' 
             
-            uploadStatus = reco2cloud(recofilename, recofolder, verbose=False)
+            uploadStatus = reco2cloud(recofilename, recofolder, run_number_row, verbose=False)
             
             if uploadStatus:          
                 #Update dataFrame
@@ -439,7 +439,7 @@ def createPedLog():
     df = cy.read_cygno_logbook(verbose=False)
     df.to_csv('../reconstruction/pedestals/runlog_LNGS_auto.csv',index=False)
             
-def reco2cloud(recofilename, recofolder, verbose=False):
+def reco2cloud(recofilename, recofolder, run_number, verbose=False):
       #
     # deault parser value
     #
@@ -473,6 +473,11 @@ def reco2cloud(recofilename, recofolder, verbose=False):
                                  verbose=verbose)
 
                 cy.cmd.rm_file(INAPATH+file_in_dir)
+                
+                cy.cmd.rm_file(INAPATH + 'reconstruction_' + str(run_number) + '.log')
+                cy.cmd.rm_file(INAPATH + 'reconstruction_' + str(run_number) + '.out')
+                cy.cmd.rm_file(INAPATH + 'reconstruction_' + str(run_number) + '.error')
+                
                 if verbose:              
                     print('{:s} file removed: {:s}'.format(dtime, file_in_dir))
 
@@ -517,21 +522,30 @@ def refreshSQL(verbose=False):
 def refreshToken(verbose=False):
     if verbose:
         print("Setting Condor environment")
+        
+    #killall oidc-agent
     process = subprocess.Popen(
-        "source ../start_script.sh", shell=True,
+        "killall oidc-agent", shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+    
+    process = subprocess.Popen(
+        "source ../start_script_2.sh", shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE
     )
     
     output, error = process.communicate()
     
-def main(run_number_start, verbose=False):
+def main(run_number_start, outname='df_condor', just_status=False, verbose=False):
     #Set environment variables
     refreshToken(verbose)
     connection = refreshSQL(verbose)
+    outname    = options.outname
 
     submit_path      = "../submitJobs/"
-    file_path = submit_path + 'df_condor.csv'
+    file_path = submit_path + outname + '.csv'
 
     if os.path.isfile(file_path):
         df_condor = pd.read_csv(file_path)
@@ -550,11 +564,11 @@ def main(run_number_start, verbose=False):
     #df_condor.loc[df_condor['Cluster_ID'] == 328, 'Cloud_storage'] = 1
     #df_condor.loc[df_condor['Cluster_ID'] == 1893, 'JobInQueue'] = 1
     
-    df_condor.to_csv('../submitJobs/df_condor.csv', index=False)
-    df_condor.to_json('../dev/df_condor.json', orient="table")
+    df_condor.to_csv('../submitJobs/'+ outname +'.csv', index=False)
+    df_condor.to_json('../dev/'+ outname +'.json', orient="table")
 
     run_number_start = 16798
-    nproc            = 4
+    nproc            = 3
     maxentries       = -1
 
     # set the initial time
@@ -576,54 +590,54 @@ def main(run_number_start, verbose=False):
         ##Check if the run arrived at the cloud 
         list_runs_to_analyze = checkNewRuns(run_number_start)
         
-        #if i < 50:
+        if just_status == False:
         #for i in range(1):
-        while len(list_runs_to_analyze) > 0: ## keep send jobs to condor if we have new runs to analyze
-            submit_run = list_runs_to_analyze[0] # Get the first run to go to the queue
-            status = sql_update_reco_status(submit_run,-2,connection) #"idle"
+            while len(list_runs_to_analyze) > 0: ## keep send jobs to condor if we have new runs to analyze
+                submit_run = list_runs_to_analyze[0] # Get the first run to go to the queue
+                status = sql_update_reco_status(submit_run,-2,connection) #"idle"
 
-            if verbose:
-                print("Sending the Run "+ str(submit_run) + " to the Queue")
-            createPedLog()
-            writeSubmitFile(submit_path, str(submit_run), str(nproc), str(maxentries))
-            submitfile = createCondorSubmit(submit_path, str(submit_run))
-
-            cluster_id = sendjob(submit_path,submitfile)
-            if cluster_id:
-                status = sql_update_reco_status(submit_run,0,connection) #Update the online_reco variable to 0, which means "reconstructing"
                 if verbose:
-                    print("Update Table: %d" %status)
-                if status == -2:
-                    connection = refreshSQL(verbose)
+                    print("Sending the Run "+ str(submit_run) + " to the Queue")
+                createPedLog()
+                writeSubmitFile(submit_path, str(submit_run), str(nproc), str(maxentries))
+                submitfile = createCondorSubmit(submit_path, str(submit_run))
+
+                cluster_id = sendjob(submit_path,submitfile)
+                if cluster_id:
                     status = sql_update_reco_status(submit_run,0,connection) #Update the online_reco variable to 0, which means "reconstructing"
-               
-                if verbose:
-                    print("Run " + str(submit_run)+ "submitted with Cluster_ID: " + str(cluster_id))
+                    if verbose:
+                        print("Update Table: %d" %status)
+                    if status == -2:
+                        connection = refreshSQL(verbose)
+                        status = sql_update_reco_status(submit_run,0,connection) #Update the online_reco variable to 0, which means "reconstructing"
 
-                status     = getJobStatus(cluster_id)
-                df_condor  = update_job_status(df_condor, cluster_id, status)
-                # Insert run_number information to the dataframe
-                df_condor.loc[df_condor['Cluster_ID'] == cluster_id, 'Run_number'] = submit_run           
+                    if verbose:
+                        print("Run " + str(submit_run)+ "submitted with Cluster_ID: " + str(cluster_id))
 
-                if verbose:
-                    print(df_condor)
-                df_condor.to_csv('../submitJobs/df_condor.csv', index=False)
-                df_condor.to_json('../dev/df_condor.json', orient="table")
-                
-            #Checking again the list to see if there is more Run to be analyzed
-            df_condor = forOverPandasStatus(df_condor)
-            df_condor = forOverPandasTransfer(df_condor, connection)
-            df_condor = forOverPandasCloud(df_condor)
-            df_condor = forOverPandasCloud_rm(df_condor)
-            list_runs_to_analyze = checkNewRuns(run_number_start)
+                    status     = getJobStatus(cluster_id)
+                    df_condor  = update_job_status(df_condor, cluster_id, status)
+                    # Insert run_number information to the dataframe
+                    df_condor.loc[df_condor['Cluster_ID'] == cluster_id, 'Run_number'] = submit_run           
+
+                    if verbose:
+                        print(df_condor)
+                    df_condor.to_csv('../submitJobs/'+ outname +'.csv', index=False)
+                    df_condor.to_json('../dev/'+ outname +'.json', orient="table")
+
+                #Checking again the list to see if there is more Run to be analyzed
+                df_condor = forOverPandasStatus(df_condor)
+                df_condor = forOverPandasTransfer(df_condor, connection)
+                df_condor = forOverPandasCloud(df_condor)
+                df_condor = forOverPandasCloud_rm(df_condor)
+                list_runs_to_analyze = checkNewRuns(run_number_start)
 
         
         
         df_condor = forOverPandasStatus(df_condor)
         df_condor = forOverPandasTransfer(df_condor, connection)
         df_condor = forOverPandasCloud(df_condor)
-        df_condor.to_csv('../submitJobs/df_condor.csv', index=False)
-        df_condor.to_json('../dev/df_condor.json', orient="table")
+        df_condor.to_csv('../submitJobs/'+ outname +'.csv', index=False)
+        df_condor.to_json('../dev/'+ outname +'.json', orient="table")
         
         #elapsed_time_rm = time.time() - start_time_rm
         if aux_rm >= 10:
@@ -634,8 +648,8 @@ def main(run_number_start, verbose=False):
             # reset the start time
             df_condor = forOverPandasCloud_rm(df_condor)
             df_condor = forOverPandasHeld(df_condor, connection)
-            df_condor.to_csv('../submitJobs/df_condor.csv', index=False)
-            df_condor.to_json('../dev/df_condor.json', orient="table")
+            df_condor.to_csv('../submitJobs/'+ outname +'.csv', index=False)
+            df_condor.to_json('../dev/'+ outname +'.json', orient="table")
             aux_rm = 0
         else:
             if verbose:
@@ -646,8 +660,8 @@ def main(run_number_start, verbose=False):
             print(df_condor)
             print("Saving Condor DataFrame Control Monitor")
         # save the dataframe to a CSV file
-        df_condor.to_csv('../submitJobs/df_condor.csv', index=False)
-        df_condor.to_json('../dev/df_condor.json', orient="table")
+        df_condor.to_csv('../submitJobs/'+ outname +'.csv', index=False)
+        df_condor.to_json('../dev/'+ outname +'.json', orient="table")
         if verbose:
             print("Waiting 60 seconds to check Job status")
         aux_rm = aux_rm + 1
@@ -657,6 +671,8 @@ def main(run_number_start, verbose=False):
 if __name__ == "__main__":
     from optparse import OptionParser
     parser = OptionParser(usage='usage: %prog\t [-ubsv] run_number_start')
+    parser.add_option('-o', '--outname', dest='outname', default='df_condor', type='string', help='prefix for the output file name')
+    parser.add_option('-s','--just-status', dest='just_status', action="store_true", default=False, help='just update status, do not send jobs;')
     parser.add_option('-v','--verbose', dest='verbose', action="store_true", default=False, help='verbose output;');
     (options, args) = parser.parse_args()
     #main(verbose=options.verbose)
@@ -666,4 +682,7 @@ if __name__ == "__main__":
         parser.error("incorrect number of arguments")
 
     else:
-        main(int(args[0]), options.verbose)
+        main(int(args[0]), options.outname, options.just_status, options.verbose)
+
+        ## Example:
+        # ./fullRecoSentinel_v1.02.py 17182 -o df_condor_coda1 -s -v
