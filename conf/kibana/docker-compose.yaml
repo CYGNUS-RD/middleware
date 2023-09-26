@@ -1,0 +1,112 @@
+version: '3.7'
+
+services:
+  setup:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.0.0
+    user: "0"
+    command: >
+      bash -c '
+        echo "Setting kibana_system password";
+        until curl -k -s -X POST -u elastic:${ELASTIC_PASSWORD} -H "Content-Type: application/json" http://elastic:9200/_security/user/kibana_system/_password -d "{\"password\":\"${KIBANA_PASSWORD}\"}" | grep -q "^{}"; do sleep 10; done;
+        echo "All done!";
+      '
+    networks:
+      - elastic
+
+  elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION}
+    container_name: elastic
+    depends_on:
+      - setup
+    environment:
+      - node.name=elastic
+      - cluster.name=es-docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - discovery.type=single-node
+      - cluster.routing.allocation.disk.threshold_enabled=true
+      - cluster.routing.allocation.disk.watermark.low=65%
+      - cluster.routing.allocation.disk.watermark.high=70%
+      - xpack.security.enabled=true
+      - xpack.security.audit.enabled=true
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - ${DATA_DIR}:/usr/share/elasticsearch/data
+    networks:
+      - elastic
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.elastic-redirect-ssl.redirectscheme.scheme=https"
+      - "traefik.http.routers.elastic-nossl.middlewares=elastic-redirect-ssl"
+      - "traefik.http.routers.elastic-nossl.rule=Host(`elastic.${HOST_PUBLIC_IP}.myip.cloud.infn.it`)"
+      - "traefik.http.routers.elastic-nossl.entrypoints=web"
+      - "traefik.http.routers.elastic.rule=Host(`elastic.${HOST_PUBLIC_IP}.myip.cloud.infn.it`)"
+      - "traefik.http.routers.elastic.entrypoints=websecure"
+      - "traefik.http.routers.elastic.tls.certresolver=myhttpchallenge"
+      - "traefik.http.routers.elastic.tls=true"
+      - "traefik.http.services.elastic.loadbalancer.server.port=9200"
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:${ELASTIC_VERSION}
+    container_name: kibana
+    depends_on:
+      - elastic
+    environment:
+      ELASTICSEARCH_URL: http://elastic:9200
+      ELASTICSEARCH_HOSTS: '["http://elastic:9200"]'
+      ELASTICSEARCH_USERNAME: kibana_system
+      ELASTICSEARCH_PASSWORD: ${KIBANA_PASSWORD}
+      SERVER_PUBLICBASEURL: https://kibana.${HOST_PUBLIC_IP}.myip.cloud.infn.it
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.kibana-redirect-ssl.redirectscheme.scheme=https"
+      - "traefik.http.routers.kibana-nossl.middlewares=kibana-redirect-ssl"
+      - "traefik.http.routers.kibana-nossl.rule=Host(`kibana.${HOST_PUBLIC_IP}.myip.cloud.infn.it`)"
+      - "traefik.http.routers.kibana-nossl.entrypoints=web"
+      - "traefik.http.routers.kibana.rule=Host(`kibana.${HOST_PUBLIC_IP}.myip.cloud.infn.it`)"
+      - "traefik.http.routers.kibana.entrypoints=websecure"
+      - "traefik.http.routers.kibana.tls.certresolver=myhttpchallenge"
+      - "traefik.http.routers.kibana.tls=true"
+      - "traefik.http.services.kibana.loadbalancer.server.port=5601"
+    networks:
+      - elastic
+
+  proxy:
+    image: traefik:latest
+    container_name: traefik
+    volumes:
+      - letsencrypt:/letsencrypt
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik:/config:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    command:
+#      - "--log.level=DEBUG"
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.file.directory=/config"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--certificatesresolvers.myhttpchallenge.acme.httpchallenge=true"
+      - "--certificatesresolvers.myhttpchallenge.acme.httpchallenge.entrypoint=web"
+# Use this when testing
+#      - "--certificatesresolvers.myhttpchallenge.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory"
+      - "--certificatesresolvers.myhttpchallenge.acme.email=${CERT_EMAIL}"
+      - "--certificatesresolvers.myhttpchallenge.acme.storage=/letsencrypt/acme.json"
+    networks:
+      - elastic
+
+volumes:
+  letsencrypt:
+    driver: local
+
+networks:
+  elastic:
+    driver: bridge
