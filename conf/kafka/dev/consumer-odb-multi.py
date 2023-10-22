@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from kafka import KafkaConsumer
 from kafka.structs import TopicPartition
-from json import loads, dump
+from json import loads, dump, load
 import time
 import os, sys
 import pymongo
@@ -25,8 +25,9 @@ def main(TAG, mongo, verbose=False):
         mongo_col = mongo_db["odb"]  
         
     fpath = get_script_path()
-    consumer.subscribe(['midas-odb-'+TAG, 'midas-camera-'+TAG, 'midas-pmt-'+TAG])
+    consumer.subscribe(['midas-odb-'+TAG, 'midas-camera-'+TAG, 'midas-pmt-s'+TAG, 'midas-pmt-f'+TAG])
     start_mongo = time.time()
+    alive_time  = time.time()
     up_time_mongo = 600
     fpath = get_script_path()
     while True:
@@ -42,6 +43,8 @@ def main(TAG, mongo, verbose=False):
                         print("DEBUG: odb")
 
                     odb = loads(messages[0].value)
+                    odb["middleware_alive"] = 1
+                    alive_time  = time.time()
                     with open(fpath+'/'+TAG+'_odb.json', 'w', encoding='utf-8') as f:
                         dump(odb, f, ensure_ascii=False, indent=4)
 
@@ -58,10 +61,22 @@ def main(TAG, mongo, verbose=False):
                     # write json to file
                     with open(fpath+'/'+TAG+'_image.json', 'w') as f:
                         dump(data, f)
-                elif topic_partition.topic == 'midas-pmt-'+TAG:
+                elif topic_partition.topic == 'midas-pmt-f'+TAG:
                     if verbose:
                         print("DEBUG: pmt")
-                        
+                    img_base64 = messages[0].value#.decode('utf-8')
+                    data = {'image': img_base64}
+                    # write json to file
+                    with open(fpath+'/'+TAG+'_pmt_f.json', 'w') as f:
+                        dump(data, f)
+                elif topic_partition.topic == 'midas-pmt-s'+TAG:
+                    if verbose:
+                        print("DEBUG: pmt")
+                    img_base64 = messages[0].value#.decode('utf-8')
+                    data = {'image': img_base64}
+                    # write json to file
+                    with open(fpath+'/'+TAG+'_pmt_s.json', 'w') as f:
+                        dump(data, f)
         except Exception as e:
             print(f"Error occurred while consuming messages: {e}")
             sys.exit(1)
@@ -70,9 +85,16 @@ def main(TAG, mongo, verbose=False):
             if mongo:
                 mongo_client.close()
             sys.exit(0)
-    
 
-        #time.sleep(0.1)
+        if (time.time()-alive_time)>10:
+            if verbose:
+                print("DEBUG: >>> dead")
+            with open(fpath+'/'+TAG+'_odb.json', 'r') as f:
+                odb = load(f)
+            odb["middleware_alive"] = 0
+            with open(fpath+'/'+TAG+'_odb.json', 'w', encoding='utf-8') as f:
+                dump(odb, f, ensure_ascii=False, indent=4)
+            time.sleep(3)
 
     
 if __name__ == "__main__":

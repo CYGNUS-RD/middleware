@@ -13,7 +13,7 @@
 
 * (sono aperte su entrambe le macchine anche le porte del DAQ e del RTD)
 * To access Grafana (Just one for both DBs):
-  * 1 - Go to the link: https://131.154.96.196:3000/
+  * 1 - Go to the link: https://grafana.cygno.cloud.infn.it/
   * 2 - Choose "Sign in with IAM"
   * 3 - Use your INFN credentials
   * 4 - Go to the desired Dashboard
@@ -102,3 +102,28 @@ host slow-mscb399 {hardware ethernet 00:50:c2:46:d4:16; fixed-address 192.168.99
 host gas-system {hardware ethernet 00:03:27:11:c3:53; fixed-address 192.168.99.20; }
 
 ```
+
+### HTCondor + Kubernetes
+
+#  How to add created WN (worker nodes) to another existent Condor Queue:
+
+1. ssh the WN you want to move from one Queue to another;
+
+2. Then, create the config file:
+  ```
+  vi /etc/condor/condor_config.local
+  ```
+3. Add the line:
+  ```
+  CONDOR_HOST = <IP_Kubernetes>
+  ```
+
+4. Then, run the command:
+
+  ```
+  condor_reconfig
+  ```
+
+
+### Database SQL (MariaDB)
+ Installation and problem solve of the Database can be found here: [README.md](https://github.com/CYGNUS-RD/middleware/blob/master/conf/mariadb/README.md)
