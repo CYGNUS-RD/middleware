@@ -18,7 +18,14 @@ def main(mess, file_tf, dt, verbose=False):
         with open(mess, "rb") as f:
              webhook.add_file(file=f.read(), filename=mess)
      else:
-     	webhook = DiscordWebhook(url=discord_webhook_URL, content=mess)
+        if "\\n" in str(mess):
+            substrings = mess.split("\\n")
+            message = substrings[0]
+            for s in substrings[1:]:
+                message = message + '\n' + s
+        else:
+            message = mess
+        webhook = DiscordWebhook(url=discord_webhook_URL, content=message)
      response = webhook.execute()
      if dt>0:
         thread = threading.Thread(target=del_m(webhook,dt))
