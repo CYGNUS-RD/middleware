@@ -49,6 +49,7 @@ def main(TAG, session, verbose=False):
     vmin         = 95
     vmax         = 130
     connection   =-1
+    attempts     = 0
 
     consumer = KafkaConsumer(
         bootstrap_servers=["localhost:9092"],
@@ -60,10 +61,19 @@ def main(TAG, session, verbose=False):
         consumer_timeout_ms=1000
 
     )
-    session = creds.assumed_session(session, endpoint="https://minio.cloud.infn.it/", verify=True)
-    s3 = session.client('s3', endpoint_url="https://minio.cloud.infn.it/",
-                        config=boto3.session.Config(signature_version='s3v4'),
-                        verify=True)
+    while attempts < 3:
+        try:
+            session = creds.assumed_session(session, endpoint="https://minio.cloud.infn.it/", verify=True)
+            s3 = session.client('s3', endpoint_url="https://minio.cloud.infn.it/",
+                                config=boto3.session.Config(signature_version='s3v4'),
+                                verify=True)
+            attempts = 0
+            break
+        except Exception as e:
+            attempts += 1
+            print("error opening client session:",  attempts, e)
+            time.sleep(10)
+            
     topic = 'midas-event-file-'+TAG
     #
     # reset to the end of the stream
@@ -110,7 +120,16 @@ def main(TAG, session, verbose=False):
                         if (verbose):
                             print(">>> GENERATING jpeg IMAGE")
                         start = time.time()
-                    s3.delete_object(Bucket='cygno-data', Key='EVENTS/'+payload_name)
+                    while attempts < 3:
+                        try:
+                            s3.delete_object(Bucket='cygno-data', Key='EVENTS/'+payload_name)
+                            if verbose: print ("delete file")
+                            attempts = 0
+                            break
+                        except Exception as e:
+                            attempts += 1
+                            print("error removing object:",  attempts, e)
+                            time.sleep(10)
                     #cy.s3.obj_rm(payload_name, TAG, bucket='cygno-data', session=session, verbose=verbose)
                 # if verbose:
                 #     topic_info = f"topic: {mes.partition}|{mes.offset})"

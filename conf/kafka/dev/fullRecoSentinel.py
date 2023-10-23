@@ -107,23 +107,25 @@ def getSQLrun(run,verbose=False):
 def checkNewRuns(run_number_start):
     
     list_runs_to_analyze = []
-    while len(list_runs_to_analyze) == 0:
-        try:
-            df = cy.read_cygno_logbook(verbose=False)
-            print("DB connected")
-        except:
-            print("Error connecting to SQL, trying again in 30s")
-            list_runs_to_analyze = []
-            time.sleep(30)
-        if not df.empty:
-            list_runs_to_analyze = df.run_number[(df["number_of_events"] > 1) & (df["storage_cloud_status"] == 1) & (df["online_reco_status"] == -1) & (df["run_number"] > run_number_start)].values.tolist()            
-            if len(list_runs_to_analyze) == 0:
-                time.sleep(30)
-                print("Waiting 30 seconds to check new files again")
-            else:
-                print("New files to be reconstruced found")
+    #while len(list_runs_to_analyze) == 0:
+    try:
+        df = cy.read_cygno_logbook(verbose=False)
+        print("DB connected")
+    except:
+        print("Error connecting to SQL, trying again in 30s")
+        df = pd.DataFrame()
+        list_runs_to_analyze = []
+        time.sleep(30)
+    if not df.empty:
+        list_runs_to_analyze = df.run_number[(df["number_of_events"] > 1) & (df["storage_cloud_status"] == 1) & (df["online_reco_status"] == -1) & (df["run_number"] > run_number_start)].values.tolist()
+
+        if len(list_runs_to_analyze) == 0:
+            print("Waiting 90 seconds to check new files again")
+            time.sleep(90)
         else:
-            list_runs_to_analyze = []
+            print("New files to be reconstruced found")
+    else:
+        list_runs_to_analyze = []
             
     return list_runs_to_analyze
 
@@ -145,11 +147,12 @@ def getReconstructionList():
     return items_string
 
 def sql_update_reco_status(run,value,connection):
-    cmd.update_sql_value(connection, table_name="Runlog", row_element="run_number", 
+    status = cmd.update_sql_value(connection, table_name="Runlog", row_element="run_number", 
                      row_element_condition=run, 
                      colum_element="online_reco_status", value=value, 
                      verbose=True)
-
+    return status    
+    
 
 def checkCondorStatus():
     process = subprocess.Popen(
@@ -203,31 +206,38 @@ def sendjob_2(path,submitfile):
     return return_code
 
 def sendjob(path, submitfile):
+    refreshToken()
     os.chdir(path)
     fullpath = path+submitfile
-    output = subprocess.check_output(f"source {fullpath} && echo $ClusterID", shell=True)
-    cluster_id_string = output.decode("utf-8").strip()
-    
-    cluster_id = int(cluster_id_string.split(" ")[-1].split(".")[0])
-
-    if cluster_id:
+    try:
+        output = subprocess.check_output(f"source {fullpath} && echo $ClusterID", shell=True)
+        cluster_id_string = output.decode("utf-8").strip()
+        cluster_id = int(cluster_id_string.split(" ")[-1].split(".")[0])
         print(f"Job submitted successfully with ClusterID {cluster_id}")
-    else:
+    except:
         print("Job submission failed.")
+        cluster_id = 0
     
     return cluster_id
 
 def getJobStatus(cluster_id):
-    process = subprocess.Popen(
-        ['condor_q', str(cluster_id)],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
+    
+    for i in range(3):
+        try:
+            process = subprocess.Popen(
+                ['condor_q', str(cluster_id)],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
 
-    output, error = process.communicate()
+            output, error = process.communicate()
 
-    if error:
-        raise Exception(f"Error in executing condor_q: {error}")
+            if error:
+                raise Exception(f"Error in executing condor_q: {error}")
+            break
+        except:
+            print("Token error, retrying %d.." %i)
+            refreshToken()
 
     status = "unknown"
     output = output.decode('utf-8')
@@ -276,7 +286,7 @@ def update_job_status(df, cluster_id, status):
         df.loc[df['Cluster_ID'] == cluster_id, 'Status'] = status
     else:
         # add new row with default values
-        df = df.append({'Cluster_ID': cluster_id, 'Run_number': 0, 'Status': status, 'Data_transfered': 0, 'Cloud_storage': 0}, ignore_index=True)
+        df = df.append({'Cluster_ID': cluster_id, 'Run_number': 0, 'Status': status, 'Data_transfered': 0, 'Cloud_storage': 0, 'JobInQueue': 0}, ignore_index=True)
     
     return df
 
@@ -292,7 +302,7 @@ def condorTransferData(cluster_id, df):
     if error:
         raise Exception(f"Error in executing condor_transfer_data: {error}")
     else:
-        print("Job %s tranferred to Sentinel machine" %cluster_id)
+        print("Job %s transfered to Sentinel machine" %cluster_id)
         #Update Data_transfered column
         df.loc[df['Cluster_ID'] == cluster_id, 'Data_transfered'] = 1
         
@@ -345,7 +355,89 @@ def forOverPandasCloud(df):# Define the two filters
             if uploadStatus:          
                 #Update dataFrame
                 df.loc[df['Cluster_ID'] == cluster_ID_row, 'Cloud_storage'] = 1
+                
     return df
+
+def forOverPandasCloud_rm(df):# Define the two filters
+    filter1 = df['Status'] == 'completed'
+    filter2 = df['Data_transfered'] == 1
+    filter3 = df['Cloud_storage'] == 1
+    filter4 = df['JobInQueue'] == 0
+    
+
+    # Loop over the rows of the DataFrame and apply the filters
+    for index, row in df.iterrows():
+        if filter1[index] and filter2[index] and filter3[index] and filter4[index]:
+            cluster_ID_row = row['Cluster_ID']
+            print("Removing Job %s from the condor queue" %cluster_ID_row)
+            try:
+                process = subprocess.Popen(
+                    ['condor_rm', str(cluster_ID_row)],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE
+                )
+                output, error = process.communicate()
+
+                print(output)
+
+                if error:
+                    raise Exception(f"Error in executing condor_rm: {error}")
+                df.loc[df['Cluster_ID'] == cluster_ID_row, 'JobInQueue'] = 1
+            except:
+                print("Retry")
+    return df
+
+def forOverPandasHeld(df, connection):# Define the two filters
+    filter1 = df['Status'] == 'held'
+    filter2 = df['Data_transfered'] == 0
+    filter3 = df['Cloud_storage'] == 0   
+
+    # Loop over the rows of the DataFrame and apply the filters
+    for index, row in df.iterrows():
+        if filter1[index] and filter2[index] and filter3[index]:
+            cluster_ID_row = row['Cluster_ID']
+            print("Removing Job %s from the condor queue" %cluster_ID_row)
+            try:
+                process = subprocess.Popen(
+                    ['condor_rm', str(cluster_ID_row)],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE
+                )
+                output, error = process.communicate()
+
+                print(output)
+
+                if error:
+                    raise Exception(f"Error in executing condor_rm: {error}")
+                print("Restoring the job to the Queue")
+                sql_update_reco_status(row['Run_number'],-1,connection)
+                df = df.drop(df.loc[df['Cluster_ID'] == cluster_ID_row].index)                
+            except:
+                print("Retry")
+    return df
+
+def forOverPandasUnknown(df, connection):# Define the two filters
+    filter1 = df['Status'] == 'unknown'
+    filter2 = df['Data_transfered'] == 0
+    filter3 = df['Cloud_storage'] == 0   
+
+    # Loop over the rows of the DataFrame and apply the filters
+    for index, row in df.iterrows():
+        if filter1[index] and filter2[index] and filter3[index]:
+            cluster_ID_row = row['Cluster_ID']
+            print("Removing Job %s from the condor queue" %cluster_ID_row)
+            try:
+                print("Restoring the job to the Queue")
+                sql_update_reco_status(row['Run_number'],-1,connection)
+                df = df.drop(df.loc[df['Cluster_ID'] == cluster_ID_row].index)                
+            except:
+                print("Retry")
+    return df
+
+def createPedLog():
+    #get the most updated table and create the runlog table
+    df = cy.read_cygno_logbook(verbose=False)
+    df.to_csv('../reconstruction/pedestals/runlog_LNGS_auto.csv',index=False)
             
 def reco2cloud(recofilename, recofolder, verbose=False):
       #
@@ -397,35 +489,19 @@ def reco2cloud(recofilename, recofolder, verbose=False):
                 aux = 0
     return aux
 
-def refreshToken():
-    print("Setting environment (Condor and SQL)")
-    process = subprocess.Popen(
-        "source ../start_script.sh", shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
+
+def refreshSQL(verbose=False):
+    if verbose:
+        print("Setting SQL environment")
     
     process2 = subprocess.Popen(
         "source ../SQLSetup.sh", shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE
     )
-
-    output, error = process.communicate()
-
-    #if error:
-    #    raise Exception(f"Error in executing condor refresh: {error}")
-        
+    
     output2, error2 = process2.communicate()
     
-    #if error:
-    #    raise Exception(f"Error in executing SQLSetup: {error}")            
-        
-    
-def main(run_number_start, verbose=True):
-    #Set environment variables
-    refreshToken()
-
     # init sql variabile and connector
     connection = mysql.connector.connect(
       host=os.environ['MYSQL_IP'],
@@ -434,23 +510,46 @@ def main(run_number_start, verbose=True):
       database=os.environ['MYSQL_DATABASE'],
       port=int(os.environ['MYSQL_PORT'])
     )
+    
+    return connection
+
+
+def refreshToken(verbose=False):
+    if verbose:
+        print("Setting Condor environment")
+    process = subprocess.Popen(
+        "source ../start_script.sh", shell=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE
+    )
+    
+    output, error = process.communicate()
+    
+def main(run_number_start, verbose=False):
+    #Set environment variables
+    refreshToken(verbose)
+    connection = refreshSQL(verbose)
 
     submit_path      = "../submitJobs/"
     file_path = submit_path + 'df_condor.csv'
 
     if os.path.isfile(file_path):
         df_condor = pd.read_csv(file_path)
-        print("File loaded successfully!")
+        if verbose:
+            print("File loaded successfully!")
     else:
-        print("Creating new DataFrame.")
+        if verbose:
+            print("Creating new DataFrame.")
         # create an empty DataFrame with the desired columns
-        columns_condor = ['Cluster_ID', 'Run_number', 'Status', 'Data_transfered', 'Cloud_storage']
+        columns_condor = ['Cluster_ID', 'Run_number', 'Status', 'Data_transfered', 'Cloud_storage', 'JobInQueue']
         df_condor = pd.DataFrame(columns=columns_condor)
         
     ### to fix some problems
-    for j in range(327,923):
-        df_condor.loc[df_condor['Cluster_ID'] == j, 'Cloud_storage'] = 1
-        #df_condor.loc[df_condor['Cluster_ID'] == 328, 'Cloud_storage'] = 1
+    #for j in range(327,923):
+    #df_condor.loc[df_condor['Cluster_ID'] == 931, 'Cloud_storage'] = 1
+    #df_condor.loc[df_condor['Cluster_ID'] == 328, 'Cloud_storage'] = 1
+    #df_condor.loc[df_condor['Cluster_ID'] == 1893, 'JobInQueue'] = 1
+    
     df_condor.to_csv('../submitJobs/df_condor.csv', index=False)
     df_condor.to_json('../dev/df_condor.json', orient="table")
 
@@ -459,16 +558,18 @@ def main(run_number_start, verbose=True):
     maxentries       = -1
 
     # set the initial time
-    start_time = time.time()
+    start_time    = time.time()
+    aux_rm        = 0
     
 
-    #while True:
-    for i in range(200):
+    while True:
+    #for i in range(5):
         
-        # check if 10 minutes have passed
+        # check if 2 minutes have passed
         elapsed_time = time.time() - start_time
         if elapsed_time >= 120:
-            refreshToken()
+            refreshToken(verbose)
+            connection = refreshSQL(verbose)
             # reset the start time
             start_time = time.time()
         
@@ -476,40 +577,80 @@ def main(run_number_start, verbose=True):
         list_runs_to_analyze = checkNewRuns(run_number_start)
         
         #if i < 50:
-        for i in range(1):
-        #while len(list_runs_to_analyze) > 0: ## keep send jobs to condor if we have new runs to analyze
-            
-            list_runs_to_analyze = checkNewRuns(run_number_start)
-            submit_run = list_runs_to_analyze[0] # Get the first run to go to the queue 
+        #for i in range(1):
+        while len(list_runs_to_analyze) > 0: ## keep send jobs to condor if we have new runs to analyze
+            submit_run = list_runs_to_analyze[0] # Get the first run to go to the queue
+            status = sql_update_reco_status(submit_run,-2,connection) #"idle"
 
-            print("Sending the Run "+ str(submit_run) + " to the Queue")
-
+            if verbose:
+                print("Sending the Run "+ str(submit_run) + " to the Queue")
+            createPedLog()
             writeSubmitFile(submit_path, str(submit_run), str(nproc), str(maxentries))
             submitfile = createCondorSubmit(submit_path, str(submit_run))
 
             cluster_id = sendjob(submit_path,submitfile)
-            sql_update_reco_status(submit_run,0,connection) #Update the online_reco variable to 0, which means "reconstructing"
-            #print("Run " + str(submit_run)+ "submitted with Cluster_ID: " + str(cluster_id))
+            if cluster_id:
+                status = sql_update_reco_status(submit_run,0,connection) #Update the online_reco variable to 0, which means "reconstructing"
+                if verbose:
+                    print("Update Table: %d" %status)
+                if status == -2:
+                    connection = refreshSQL(verbose)
+                    status = sql_update_reco_status(submit_run,0,connection) #Update the online_reco variable to 0, which means "reconstructing"
+               
+                if verbose:
+                    print("Run " + str(submit_run)+ "submitted with Cluster_ID: " + str(cluster_id))
 
-            status     = getJobStatus(cluster_id)
-            df_condor  = update_job_status(df_condor, cluster_id, status)
-            # Insert run_number information to the dataframe
-            df_condor.loc[df_condor['Cluster_ID'] == cluster_id, 'Run_number'] = submit_run           
-          
-            print(df_condor)
+                status     = getJobStatus(cluster_id)
+                df_condor  = update_job_status(df_condor, cluster_id, status)
+                # Insert run_number information to the dataframe
+                df_condor.loc[df_condor['Cluster_ID'] == cluster_id, 'Run_number'] = submit_run           
+
+                if verbose:
+                    print(df_condor)
+                df_condor.to_csv('../submitJobs/df_condor.csv', index=False)
+                df_condor.to_json('../dev/df_condor.json', orient="table")
+                
+            #Checking again the list to see if there is more Run to be analyzed
+            df_condor = forOverPandasStatus(df_condor)
+            df_condor = forOverPandasTransfer(df_condor, connection)
+            df_condor = forOverPandasCloud(df_condor)
+            df_condor = forOverPandasCloud_rm(df_condor)
+            list_runs_to_analyze = checkNewRuns(run_number_start)
 
         
         
         df_condor = forOverPandasStatus(df_condor)
         df_condor = forOverPandasTransfer(df_condor, connection)
         df_condor = forOverPandasCloud(df_condor)
-        
-        print(df_condor)
-        # save the dataframe to a CSV file
-        print("Saving Condor DataFrame Control Monitor")
-        df_condor.to_csv('df_condor.csv', index=False)
+        df_condor.to_csv('../submitJobs/df_condor.csv', index=False)
         df_condor.to_json('../dev/df_condor.json', orient="table")
-        print("Waiting 60 seconds to check Job status")
+        
+        #elapsed_time_rm = time.time() - start_time_rm
+        if aux_rm >= 10:
+            if verbose:
+                print("Checking completed Jobs on Queue")
+            refreshToken()
+            connection = refreshSQL(verbose)
+            # reset the start time
+            df_condor = forOverPandasCloud_rm(df_condor)
+            df_condor = forOverPandasHeld(df_condor, connection)
+            df_condor.to_csv('../submitJobs/df_condor.csv', index=False)
+            df_condor.to_json('../dev/df_condor.json', orient="table")
+            aux_rm = 0
+        else:
+            if verbose:
+                print("Next check of Queue in %d loops" %(10-aux_rm))
+        #df_condor = forOverPandasUnknown(df_condor, connection)
+        
+        if verbose:
+            print(df_condor)
+            print("Saving Condor DataFrame Control Monitor")
+        # save the dataframe to a CSV file
+        df_condor.to_csv('../submitJobs/df_condor.csv', index=False)
+        df_condor.to_json('../dev/df_condor.json', orient="table")
+        if verbose:
+            print("Waiting 60 seconds to check Job status")
+        aux_rm = aux_rm + 1
         time.sleep(60)
 
 
