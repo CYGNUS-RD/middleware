@@ -1,0 +1,106 @@
+version: '2'
+services:
+  sentinel1:
+    image: gmazzitelli/cygno-st:v2.0.0-cygno
+    container_name: sentinel1
+    environment:
+      REFRESH_TOKEN: ${REFRESH_TOKEN}
+      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+      IAM_TOKEN_ENDPOINT: ${IAM_TOKEN_ENDPOINT}
+      ENDPOINT_URL: ${ENDPOINT_URL}
+      SCOPES: ${SCOPES}
+
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_IP: ${MYSQL_IP}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_PORT: ${MYSQL_PORT}
+
+      HTC_IP: 131.154.99.82
+
+    volumes:
+      - ${PWD}/dev/init.sh:/root/init.sh
+      - ${PWD}/dev/:/root/dev/
+      - /tmp/:/tmp/
+
+  sentinel2:
+    image: gmazzitelli/cygno-st:v2.0.0-cygno
+    container_name: sentinel2
+    environment:
+      REFRESH_TOKEN: ${REFRESH_TOKEN}
+      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+      IAM_TOKEN_ENDPOINT: ${IAM_TOKEN_ENDPOINT}
+      ENDPOINT_URL: ${ENDPOINT_URL}
+      SCOPES: ${SCOPES}
+
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_IP: ${MYSQL_IP}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_PORT: ${MYSQL_PORT}
+
+      HTC_IP: 131.154.98.218
+
+    volumes:
+      - ${PWD}/dev/init.sh:/root/init.sh
+      - ${PWD}/dev/:/root/dev/
+      - /tmp/:/tmp/
+
+  sentinel3:
+    image:  gmazzitelli/cygno-st:v2.0.0-cygno
+    container_name: sentinel3
+    environment:
+      REFRESH_TOKEN: ${REFRESH_TOKEN}
+      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+      IAM_TOKEN_ENDPOINT: ${IAM_TOKEN_ENDPOINT}
+      ENDPOINT_URL: ${ENDPOINT_URL}
+      SCOPES: ${SCOPES}
+
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_IP: ${MYSQL_IP}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_PORT: ${MYSQL_PORT}
+
+      HTC_IP: 131.154.96.56
+
+    volumes:
+      - ${PWD}/dev/init.sh:/root/init.sh
+      - ${PWD}/dev/:/root/dev/
+      - /tmp/:/tmp/
+
+  tokener:
+    image: gmazzitelli/tokener:v0.1
+    container_name: tokener
+    environment:
+      REFRESH_TOKEN: ${REFRESH_TOKEN}
+      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+      IAM_TOKEN_ENDPOINT: ${IAM_TOKEN_ENDPOINT}
+      SCOPES: ${SCOPES}
+
+    volumes:
+      - /tmp/:/tmp/
+
+  editor:
+    image: jupyter/minimal-notebook
+    container_name: editor
+    user: root
+    volumes:
+      - ${PWD}/dev:/home/jovyan/work/
+    ports:
+      - "8890:8888"
+
+  web:
+     image: nginx:latest
+     container_name: web
+     ports:
+       - "80:80"
+     volumes:
+       - ${PWD}/dev:/usr/share/nginx/html

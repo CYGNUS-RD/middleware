@@ -1,0 +1,15 @@
+  tokener:
+    image: gmazzitelli/tokener:v0.1
+    container_name: tokener
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
+    environment:
+      REFRESH_TOKEN: ${REFRESH_TOKEN}
+      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+      IAM_TOKEN_ENDPOINT: ${IAM_TOKEN_ENDPOINT}
+      SCOPES: ${SCOPES}
+
+    volumes:
+      - /tmp/:/tmp/
+#    command: /bin/sh -c "/root/startup.sh && tail -f /dev/null"
