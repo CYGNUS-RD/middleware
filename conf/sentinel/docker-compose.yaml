@@ -97,10 +97,10 @@ services:
     ports:
       - "8890:8888"
 
-  web:
-     image: nginx:latest
-     container_name: web
-     ports:
-       - "80:80"
-     volumes:
-       - ${PWD}/dev:/usr/share/nginx/html
+#  web:
+#     image: nginx:latest
+#     container_name: web
+#     ports:
+#       - "80:80"
+#     volumes:
+#       - ${PWD}/dev:/usr/share/nginx/html
