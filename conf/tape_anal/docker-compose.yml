@@ -1,0 +1,69 @@
+version: "3"
+
+services:
+  tape:
+    image: gmazzitelli/cygno-tape:v1.0.5-cygno
+    container_name: tape
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
+    environment:
+#      OIDC_AGENT: ${OIDC_AGENT}
+#      REFRESH_TOKEN: ${REFRESH_TOKEN}
+#      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+#      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+#      IAM_SERVER: ${IAM_SERVER}
+#      SCOPES: 'openid profile email offline_access wlcg wlcg.groups'
+      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+      ENDPOINT_URL: ${ENDPOINT_URL}
+
+      MYSQL_IP: ${MYSQL_IP}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_PORT: ${MYSQL_PORT}
+    volumes:
+      - $PWD/dev/:/root/dev
+      - /tmp/:/tmp/
+  notebook:
+    image: jupyter/scipy-notebook
+    container_name: editor
+    ports:
+      - 10000:8888
+    volumes:
+      - $PWD/dev:/home/jovyan/work/
+  analisys:
+    image: gmazzitelli/cygno-st:v2.0.0-cygno
+    container_name: sentinel1
+    environment:
+      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+      ENDPOINT_URL: ${ENDPOINT_URL}
+
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_IP: ${MYSQL_IP}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_PORT: ${MYSQL_PORT}
+# generic queue for test
+      HTC_IP: 131.154.99.182
+
+    volumes:
+      - ${PWD}/dev/init.sh:/root/init.sh
+      - ${PWD}/dev/.bashrc:/root/.bashrc
+      - ${PWD}/dev/:/root/dev/
+      - /tmp/:/tmp/
+
+  tokener:
+    image: gmazzitelli/tokener:v0.1
+    container_name: tokener
+    environment:
+      REFRESH_TOKEN: ${REFRESH_TOKEN}
+      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+      IAM_TOKEN_ENDPOINT: ${IAM_TOKEN_ENDPOINT}
+      SCOPES: ${SCOPES}
+
+    volumes:
+      - /tmp/:/tmp/

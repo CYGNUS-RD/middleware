@@ -1,0 +1,36 @@
+FROM dodasts/mini-htc:v0
+
+COPY assets/base_packages /tmp/
+COPY assets/packages /tmp/
+
+# clean metadata: https://srvfail.com/yum-doesnt-work-in-clean-centos-7-install-exiting-on-user-cancel/
+RUN yum -y clean metadata \
+    && yum --exclude=\*oidc-agent\* -y update \
+    && yum --exclude=\*oidc-agent\* -y upgrade \
+    && xargs yum -y install < /tmp/base_packages \
+    && xargs yum -y install < /tmp/packages \
+    && yum -y clean all \
+    && rm -f /tmp/*packages
+
+# Install boto
+RUN pip3 install --no-cache-dir -U git+https://github.com/DODAS-TS/boto3sts
+
+# Install ca
+RUN wget "https://crt.sh/?d=2475254782" --progress=bar -O /etc/pki/ca-trust/source/anchors/ca.crt \
+    && update-ca-trust \
+    && update-ca-trust force-enable
+
+# Install 
+RUN pip3 install --upgrade pip
+RUN pip3 install --no-cache-dir \
+    scipy==1.5.4 \
+    kafka-python==2.0.2 \
+    root_numpy==4.8.0 \
+    uproot==4.3.7 \
+    mysql-connector==2.2.9 \
+    && pip3 install --no-cache-dir -U git+https://github.com/CYGNUS-RD/cygno.git@v1.0.14 \
+    && pip3 install 'https://github.com/CYGNUS-RD/middleware/blob/master/midas/midaslib.tar.gz?raw=true'
+
+WORKDIR /root/
+# COPY ./wn/startup.sh /bin/
+# ENTRYPOINT ["/bin/startup.sh"]
