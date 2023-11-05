@@ -5,6 +5,7 @@ it need a valid token in /tmp/token
       IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
       IAM_CLIENT_ID: ${IAM_CLIENT_ID}
       ENDPOINT_URL: ${ENDPOINT_URL}
+      HTC_IP=XXX.XXX.XXX.XXX
 ```
 
 
