@@ -4,12 +4,9 @@ services:
     image: gmazzitelli/cygno-st:v2.0.0-cygno
     container_name: sentinel1
     environment:
-      REFRESH_TOKEN: ${REFRESH_TOKEN}
       IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
       IAM_CLIENT_ID: ${IAM_CLIENT_ID}
-      IAM_TOKEN_ENDPOINT: ${IAM_TOKEN_ENDPOINT}
       ENDPOINT_URL: ${ENDPOINT_URL}
-      SCOPES: ${SCOPES}
 
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
@@ -22,6 +19,7 @@ services:
 
     volumes:
       - ${PWD}/dev/init.sh:/root/init.sh
+      - ${PWD}/dev/.bashrc:/root/.bashrc
       - ${PWD}/dev/:/root/dev/
       - /tmp/:/tmp/
 
@@ -29,12 +27,9 @@ services:
     image: gmazzitelli/cygno-st:v2.0.0-cygno
     container_name: sentinel2
     environment:
-      REFRESH_TOKEN: ${REFRESH_TOKEN}
       IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
       IAM_CLIENT_ID: ${IAM_CLIENT_ID}
-      IAM_TOKEN_ENDPOINT: ${IAM_TOKEN_ENDPOINT}
       ENDPOINT_URL: ${ENDPOINT_URL}
-      SCOPES: ${SCOPES}
 
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
@@ -47,6 +42,7 @@ services:
 
     volumes:
       - ${PWD}/dev/init.sh:/root/init.sh
+      - ${PWD}/dev/.bashrc:/root/.bashrc
       - ${PWD}/dev/:/root/dev/
       - /tmp/:/tmp/
 
@@ -54,12 +50,9 @@ services:
     image:  gmazzitelli/cygno-st:v2.0.0-cygno
     container_name: sentinel3
     environment:
-      REFRESH_TOKEN: ${REFRESH_TOKEN}
       IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
       IAM_CLIENT_ID: ${IAM_CLIENT_ID}
-      IAM_TOKEN_ENDPOINT: ${IAM_TOKEN_ENDPOINT}
       ENDPOINT_URL: ${ENDPOINT_URL}
-      SCOPES: ${SCOPES}
 
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
@@ -72,6 +65,7 @@ services:
 
     volumes:
       - ${PWD}/dev/init.sh:/root/init.sh
+      - ${PWD}/dev/.bashrc:/root/.bashrc
       - ${PWD}/dev/:/root/dev/
       - /tmp/:/tmp/
 
