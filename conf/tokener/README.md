@@ -12,6 +12,8 @@ and write in /tmp/token to be exploit by other service
 ``` 
 docker run -e IAM_CLIENT_SECRET=... -e IAM_CLIENT_SECRET=... -e IAM_CLIENT_ID:... \
 -e IAM_TOKEN_ENDPOINT:.. -e SCOPES=.. -v /tmp:/tmp gmazzitelli/tokener:v0.1
+
+docker run -d --name tokener --env-file <( env| cut -f1 -d= ) -v /tmp:/tmp gmazzitelli/tokener:v0.2
 ```
 or if defined in VM eviroument:
 ```

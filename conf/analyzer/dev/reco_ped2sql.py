@@ -59,8 +59,8 @@ def main(verbose=False):
           port=int(os.environ['MYSQL_PORT'])
     )
     
-    sqlLog = "SELECT * FROM `Runlog`  WHERE `online_reco_status` = 1 AND `pedestal_run` = 1 ORDER BY `run_number` DESC LIMIT 100000;"
-    sqlRec = "SELECT * FROM `SlowPed` ORDER BY `run_mean` DESC  LIMIT 100000;"
+    sqlLog = "SELECT * FROM `Runlog`  WHERE `online_reco_status` = 1 AND `pedestal_run` = 1 ORDER BY `run_number` DESC LIMIT 100;"
+    sqlRec = "SELECT * FROM `SlowPed` ORDER BY `run_mean` DESC  LIMIT 100;"
     sql_Log = pd.read_sql(sqlLog, connection)
     try:
         sql_Rec = pd.read_sql(sqlRec, connection)

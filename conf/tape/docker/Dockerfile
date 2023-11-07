@@ -36,6 +36,6 @@ RUN pip3 install git+https://github.com/CYGNUS-RD/cygno.git
 RUN pip3 install mysql-connector
 RUN pip2 install numpy==1.16.6
 
-RUN mkdir /root/script
-WORKDIR /root/script
+RUN mkdir /root/dev
+WORKDIR /root/dev
 

@@ -48,11 +48,11 @@ def main(bucket, TAG, session, fcopy, fsql, fforce, verbose):
                 print("tocken {:.0f} s".format(end-start))
 
             if (end-start)>1200 or (start-end)==0:
-                output = subprocess.check_output("source "+script_path+"/oicd-setup.sh > "+script_path+"/token.dat", shell=True)
-                with open(script_path+"/token.dat") as file:
+                # output = subprocess.check_output("source "+script_path+"/oicd-setup.sh > "+script_path+"/token.dat", shell=True)
+                with open("/tmp/tapetoken") as file:
                     lines = [line.rstrip() for line in file]
-                os.environ["BEARER_TOKEN"] = lines[1]
-                if (verbose): print(lines[1])
+                os.environ["BEARER_TOKEN"] = lines[0]
+                if (verbose): print(lines[0])
                 start = time.time()
             end = time.time()
             try:

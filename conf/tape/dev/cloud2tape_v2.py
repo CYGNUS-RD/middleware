@@ -5,7 +5,41 @@
 # cheker and sql update Nov 22 
 #
 
-def main(bucket, TAG, session, fcopy, fsql, fforce, verbose):
+def kb2valueformat(val):
+    import numpy as np
+    if int(val/1024./1024/1024.)>0:
+        return val/1024./1024./1024., "Gb"
+    if int(val/1024./1024.)>0:
+        return val/1024./1024., "Mb"
+    if int(val/1024.)>0:
+        return val/1024., "Kb"
+    return val, "byte"
+
+def get_s3_client(client_id, client_secret, endpoint_url, session_token):
+    # Specify the session token, access key, and secret key received from the STS
+    import boto3
+    sts_client = boto3.client('sts',
+            endpoint_url = endpoint_url,
+            region_name  = ''
+            )
+
+    response_sts = sts_client.assume_role_with_web_identity(
+            RoleArn          = "arn:aws:iam:::role/S3AccessIAM200",
+            RoleSessionName  = 'cygno',
+            DurationSeconds  = 3600,
+            WebIdentityToken = session_token # qua ci va il token IAM
+            )
+
+    s3 = boto3.client('s3',
+            aws_access_key_id     = response_sts['Credentials']['AccessKeyId'],
+            aws_secret_access_key = response_sts['Credentials']['SecretAccessKey'],
+            aws_session_token     = response_sts['Credentials']['SessionToken'],
+            endpoint_url          = endpoint_url,
+            region_name           = '')
+    return s3
+
+
+def main(bucket, TAG, fcopy, fsql, fforce, verbose):
     #
 
     import os,sys
@@ -25,7 +59,14 @@ def main(bucket, TAG, session, fcopy, fsql, fforce, verbose):
         if not connection:
             print ("ERROR: Sql connetion")
             sys.exit(1)
-    
+    client_id = os.environ['IAM_CLIENT_ID']
+    client_secret= os.environ['IAM_CLIENT_SECRET']
+    endpoint_url=os.environ['ENDPOINT_URL']
+    with open("/tmp/token") as file:
+        token = file.readline().strip('\n')
+    session_token= token
+    if (verbose): print(session_token)
+
 
     runs = cy.daq_not_on_tape_runs(connection, verbose=verbose) 
     print("missing runs", runs)    
@@ -35,7 +76,9 @@ def main(bucket, TAG, session, fcopy, fsql, fforce, verbose):
         if (verbose): 
             print("-------------------------")
         run_number = run
-
+# da fare
+	s3 = get_s3_client(client_id, client_secret, endpoint_url, session_token)
+	
         if not fforce and cy.daq_read_runlog_replica_status(connection, run_number, storage="tape", verbose=verbose)==1:
                 print ("File ", file_in, " ok, nothing done")
         else:
@@ -47,14 +90,10 @@ def main(bucket, TAG, session, fcopy, fsql, fforce, verbose):
                 print("SQL actual status", cy.daq_read_runlog_replica_status(connection, run_number, storage="tape", verbose=verbose))
                 print("tocken {:.0f} s".format(end-start))
 
-            if (end-start)>1200 or (start-end)==0:
-                output = subprocess.check_output("source "+script_path+"/oicd-setup.sh > "+script_path+"/token.dat", shell=True)
-                with open(script_path+"/token.dat") as file:
-                    lines = [line.rstrip() for line in file]
-                os.environ["BEARER_TOKEN"] = lines[1]
-                if (verbose): print(lines[1])
-                start = time.time()
-            end = time.time()
+            with open("/tmp/tapetoken") as file:
+                lines = [line.rstrip() for line in file]
+            os.environ["BEARER_TOKEN"] = lines[0]
+            if (verbose): print("token: "+lines[0])
             try:
                 tape_data_file = subprocess.check_output("gfal-ls -l "+tape_path\
                                  +TAG+"/"+file_in+" | awk '{print $5\" \"$9}'", shell=True)
@@ -113,7 +152,6 @@ if __name__ == "__main__":
     parser.add_option('-b','--bucket', dest='bucket', type='string', default=BUCKET, help='PATH to raw data')
     parser.add_option('-t','--tag', dest='tag', type='string', default=TAG, help='tag where dir for data')
     parser.add_option('-c','--copy', dest='copy', action="store_true", default=False, help='upload data to TAPE if not present')
-    parser.add_option('-s','--session', dest='session', type='string', default=SESSION, help='token profile [infncloud-iam];');
     parser.add_option('-q','--sql', dest='sql', action="store_true", default=False, help='update sql')
     parser.add_option('-f','--force', dest='force', action="store_true", default=False, help='force full recheck of data')
     parser.add_option('-v','--verbose', dest='verbose', action="store_true", default=False, help='verbose output')
@@ -122,4 +160,4 @@ if __name__ == "__main__":
         print ("options", options)
         print ("args", args)
      
-    main(options.bucket, options.tag, options.session, options.copy, options.sql, options.force, options.verbose)
+    main(options.bucket, options.tag, options.copy, options.sql, options.force, options.verbose)
