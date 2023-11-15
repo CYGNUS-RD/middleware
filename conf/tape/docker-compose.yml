@@ -2,20 +2,16 @@ version: "3"
 
 services:
   tape:
-    image: gmazzitelli/cygno-tape:v1.0.5-cygno
+    image: gmazzitelli/cygno-tape:v1.0.6-cygno
     container_name: tape
     stdin_open: true # docker run -i
     tty: true        # docker run -t
     environment:
-#      OIDC_AGENT: ${OIDC_AGENT}
-#      REFRESH_TOKEN: ${REFRESH_TOKEN}
-#      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
-#      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
-#      IAM_SERVER: ${IAM_SERVER}
-#      SCOPES: 'openid profile email offline_access wlcg wlcg.groups'
       IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
       IAM_CLIENT_ID: ${IAM_CLIENT_ID}
       ENDPOINT_URL: ${ENDPOINT_URL}
+      TAPE_TOKEN_FILE: '/tmp/tape_token'
+      S3_TOKEN_FILE: '/tmp/token'
 
       MYSQL_IP: ${MYSQL_IP}
       MYSQL_USER: ${MYSQL_USER}
@@ -25,13 +21,6 @@ services:
     volumes:
       - $PWD/dev/:/root/dev
       - /tmp/:/tmp/
-#  notebook:
-#    image: jupyter/scipy-notebook
-#    container_name: editor
-#    ports:
-#      - 10000:8888
-#    volumes:
-#      - $PWD/dev:/home/jovyan/work/
 
   tokener_s3:
     image: gmazzitelli/tokener:v0.2
@@ -42,6 +31,7 @@ services:
       IAM_CLIENT_ID: ${IAM_CLIENT_ID}
       IAM_TOKEN_ENDPOINT: ${IAM_TOKEN_ENDPOINT}
       SCOPES: ${SCOPES}
+      TOKEN_FILE: '/tmp/token'
 
     volumes:
       - /tmp/:/tmp/
@@ -56,7 +46,7 @@ services:
       IAM_CLIENT_ID: ${TAPE_IAM_CLIENT_ID}
       IAM_TOKEN_ENDPOINT: ${TAPE_IAM_TOKEN_ENDPOINT}
       SCOPES: ${TAPE_SCOPES}
-      TOKEN_FILE: '/tmp/tapetoken'
+      TOKEN_FILE: '/tmp/tape_token'
 
     volumes:
       - /tmp/:/tmp/

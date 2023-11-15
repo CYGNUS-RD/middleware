@@ -49,7 +49,7 @@ def main(bucket, TAG, session, fcopy, fsql, fforce, verbose):
 
             if (end-start)>1200 or (start-end)==0:
                 # output = subprocess.check_output("source "+script_path+"/oicd-setup.sh > "+script_path+"/token.dat", shell=True)
-                with open("/tmp/tapetoken") as file:
+                with open("/tmp/tape_token") as file:
                     lines = [line.rstrip() for line in file]
                 os.environ["BEARER_TOKEN"] = lines[0]
                 if (verbose): print(lines[0])
