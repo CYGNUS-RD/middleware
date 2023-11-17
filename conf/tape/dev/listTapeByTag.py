@@ -5,18 +5,8 @@
 # cheker and sql update Nov 22 
 #
 
-def kb2valueformat(val):
-    import numpy as np
-    if int(val/1024./1024/1024.)>0:
-        return val/1024./1024./1024., "Gb"
-    if int(val/1024./1024.)>0:
-        return val/1024./1024., "Mb"
-    if int(val/1024.)>0:
-        return val/1024., "Kb"
-    return val, "byte"
 
-
-def get_s3_client(client_id, client_secret, endpoint_url, session_token):
+def get_s3_sts(client_id, client_secret, endpoint_url, session_token):
     # Specify the session token, access key, and secret key received from the STS
     import boto3
     sts_client = boto3.client('sts',
@@ -39,14 +29,25 @@ def get_s3_client(client_id, client_secret, endpoint_url, session_token):
             region_name           = '')
     return s3
 
+def daq_read_runlog_file_size(connection, run_number, verbose=False):
+    import cygno as cy
+    return cy.cmd.read_sql_value(connection, table_name="Runlog", row_element="run_number", 
+                     row_element_condition=str(run_number), 
+                     colum_element="file_size", 
+                     verbose=verbose)
 
-def main(tag, verbose):
+def main(tag, start_run, verbose):
     #
 
     import os,sys
 
     import numpy as np
     import subprocess
+    import cygno as cy
+    connection = cy.daq_sql_cennection(verbose)
+    if not connection:
+        print ("ERROR: Sql connetion")
+        exit(1)
     script_path = os.path.dirname(os.path.realpath(__file__))
     tape_path = 'davs://xfer-archive.cr.cnaf.infn.it:8443/cygno/'
     client_id     = os.environ['IAM_CLIENT_ID']
@@ -64,12 +65,22 @@ def main(tag, verbose):
         tape_data_file = subprocess.check_output("gfal-ls -l "+tape_path+tag+"/ | awk '{print $9\" \"$5}'", shell=True)
         datas = np.sort(np.array(tape_data_file.decode("utf-8").split('\n')))
         #print (type(datas), len(datas))
-        
+        k = 0
+        j = 0
         for i, data in enumerate(datas):
-            run, size = np.array(data.split(' '))
-            print (i, run, size)
+            if data:
+                run, size = np.array(data.split(' '))
+                run_number = int(run.split('run')[1].split('.')[0])
+                if run_number>=start_run:
+                    j +=1
+                    rsize = daq_read_runlog_file_size(connection, run_number, verbose=verbose)
+                    if verbose: print (i, run, size, rsize)
+                    if (int(rsize)-int(size)):
+                        print (i, run, size, rsize, j)
+                        k+=1
+        print(">>> Total file:", i, "mismatch:", k)
     except Exception as e: 
-        print("WARNING/EROOR in tape size:", e)
+        print("EROOR in getting tape size:", e)
         exit(1)
     exit(0)
     
@@ -80,9 +91,8 @@ if __name__ == "__main__":
     # deault parser value
     #
 
-
-
     parser = OptionParser(usage='usage: %prog <tag> -v')
+    parser.add_option('-r','--run', dest='run', type="string", default='-1', help='start run for rechek')
     parser.add_option('-v','--verbose', dest='verbose', action="store_true", default=False, help='verbose output')
     (options, args) = parser.parse_args()
     if options.verbose: 
@@ -91,4 +101,4 @@ if __name__ == "__main__":
     if len(args)<1:
         parser.print_help()
         exit(1)
-    main(args[0], options.verbose)
+    main(args[0], int(options.run), options.verbose)
