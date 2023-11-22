@@ -5,7 +5,7 @@ docker run -v /root/.ssh/daq_id:/id_rsa -e REMOTE_PORT=8081 -e LOCAL_APP_NAME=we
 -e USER=mazzitel -e REMOTE_IP=grafana.cygno.cloud.infn.it gmazzitelli/sshtunnel
 
 ```
-example of compose to share the 'web' on port 80 
+example of compose file to share the 'web' app listening on port 80 on remote port 8081 of grafana.cygno.cloud.infn.it
 ```
   tunnel:
     restart: always
