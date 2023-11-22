@@ -44,35 +44,35 @@ def main(start_run, verbose=False):
     for i, run in enumerate(runInfo[runInfo.run_number>=start_run].run_number):
         if (runInfo[runInfo.run_number==run].online_reco_status.values[0]==1):
             print("analyzing run: ",run)
-#            try:
-            file_url = BASE_URL+'cygno-analysis/RECO/Winter23/reco_run{:5d}_3D.root'.format(run)
-            tf = uproot.open(file_url)
-            names = tf["Events;1"].keys()
-            values = []
-            columns = []
-            for i, name in enumerate(names):
-                var = tf["Events;1/"+name].array(library="np")
-                if var[0].ndim == 0:
-                    # print(i, name, var.mean(), var.std())
-                    columns.append(name+"_mean")
-                    values.append(var.mean())
-                    if columns[-1]=='run_mean':
-                       columns.append(name+"_epoch")
-                       values.append(get_epoch(file_url))
-                    else:
-                       columns.append(name+"_std")
-                       values.append(var.std())
-            val_LY = GetLY(tf, verbose)
-            columns.append("LY_mean")
-            values.append(val_LY[0])
-            columns.append("LY_std")
-            values.append(val_LY[1])
-            print(values)
-            df = pd.DataFrame(columns = columns)
-            df.loc[0] = values
-            # except Exception as e:
-            #     print('ERROR >>> {}'.format(e))
-            #     continue
+            try:
+                file_url = BASE_URL+'cygno-analysis/RECO/Winter23/reco_run{:5d}_3D.root'.format(run)
+                tf = uproot.open(file_url)
+                names = tf["Events;1"].keys()
+                values = []
+                columns = []
+                for i, name in enumerate(names):
+                    var = tf["Events;1/"+name].array(library="np")
+                    if var[0].ndim == 0:
+                        # print(i, name, var.mean(), var.std())
+                        columns.append(name+"_mean")
+                        values.append(var.mean())
+                        if columns[-1]=='run_mean':
+                           columns.append(name+"_epoch")
+                           values.append(get_epoch(file_url))
+                        else:
+                           columns.append(name+"_std")
+                           values.append(var.std())
+                val_LY = GetLY(tf, verbose)
+                columns.append("LY_mean")
+                values.append(val_LY[0])
+                columns.append("LY_std")
+                values.append(val_LY[1])
+                print(values)
+                df = pd.DataFrame(columns = columns)
+                df.loc[0] = values
+            except Exception as e:
+                print('ERROR >>> {}'.format(e))
+                continue
     print("DONE")
     exit(0)
 if __name__ == "__main__":
