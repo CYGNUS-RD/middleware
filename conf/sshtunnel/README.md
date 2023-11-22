@@ -1,5 +1,5 @@
-# SSH revers Tunnel 
-to share local contaner (LOCAL_APP_NAME) port (LOCAL_PORT) to a remore port (REMOTE_PORT) example:
+# SSH reverse Tunnel 
+share local contaner (LOCAL_APP_NAME) port (LOCAL_PORT) to a remore port (REMOTE_PORT) via ssh tunnel, example:
 ```
 docker run -v /root/.ssh/daq_id:/id_rsa -e REMOTE_PORT=8081 -e LOCAL_APP_NAME=web -e LOCAL_PORT=80 \
 -e USER=mazzitel -e REMOTE_IP=grafana.cygno.cloud.infn.it gmazzitelli/sshtunnel
