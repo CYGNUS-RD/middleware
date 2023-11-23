@@ -1,0 +1,16 @@
+version: '2'
+services:
+  web:
+     image: nginx:latest
+     container_name: web
+     ports:
+       - "80:80"
+     volumes:
+       - ${PWD}:/usr/share/nginx/html
+  tunnel:
+     image: gmazzitelli/bastion
+     container_name: bastion
+     ports:
+       - "3000:22"
+     volumes:
+       - /home/mazzite/.ssh/authorized_keys:/home/daq/.ssh/authorized_keys
