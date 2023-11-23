@@ -10,8 +10,8 @@ RUN yum -y clean metadata \
 #
 RUN pip3 install --upgrade pip
 RUN pip3 install --no-cache-dir -U \
-    kafka-python==2.0.2 \
-    mysql-connector==2.2.9 \
+    kafka-python \
+    mysql-connector \
     numpy \
     pandas \
     boto3 \

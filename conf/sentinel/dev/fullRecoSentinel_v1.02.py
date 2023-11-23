@@ -66,31 +66,6 @@ def createCondorSubmit(submit_path,submit_run):
     return submitfile
 
         
-def get_put_2cloud(fun, localpath, key, url, bucket, session, verbose):
-    
-    import boto3
-    import requests
-    from boto3sts import credentials as creds
-    import urllib.parse
-
-    session = creds.assumed_session(session, endpoint=url,verify=True)
-    s3 = session.client('s3', endpoint_url=url, config=boto3.session.Config(signature_version='s3v4'), verify=True)
-    if fun == "get":
-        url_out = s3.generate_presigned_url('get_object', 
-                                        Params={'Bucket': bucket,
-                                                'Key': key}, 
-                                        ExpiresIn=3600)
-    elif fun == "put":
-        url_out = s3.generate_presigned_post(bucket, key, ExpiresIn=3600)
-        with open(localpath, 'rb') as f:
-            files = {'file': (localpath, f)}
-            http_response = requests.post(url_out['url'], data=url_out['fields'], files=files)
-    else:
-        url_out = ''
-    
-    return url_out
-
-
 def getSQLrun(run,verbose=False):
     
     df = []
@@ -132,7 +107,7 @@ def checkNewRuns(run_number_start):
 
 def getReconstructionList():
 
-    folder_path = "../reconstruction/"
+    folder_path = "./reconstruction/"
     folder_to_exclude = ".git"
 
     # Get list of all files and folders in folder
@@ -207,7 +182,6 @@ def sendjob_2(path,submitfile):
     return return_code
 
 def sendjob(path, submitfile):
-    refreshToken()
     os.chdir(path)
     fullpath = path+submitfile
     try:
@@ -250,7 +224,6 @@ def getJobStatus(cluster_id):
             break
         except:
             print("Token error, retrying %d.." %i)
-            refreshToken()
 
     status = "unknown"
     output = output.decode('utf-8')
@@ -450,8 +423,47 @@ def forOverPandasUnknown(df, connection):# Define the two filters
 def createPedLog():
     #get the most updated table and create the runlog table
     df = cy.read_cygno_logbook(verbose=False)
-    df.to_csv('../reconstruction/pedestals/runlog_LNGS_auto.csv',index=False)
-            
+    df.to_csv('./reconstruction/pedestals/runlog_LNGS_auto.csv',index=False)
+
+def s3_session(tfile='/tmp/token'):
+    import os
+    import sys
+    client_id     = os.environ['IAM_CLIENT_ID']
+    client_secret = os.environ['IAM_CLIENT_SECRET']
+    endpoint_url  = os.environ['ENDPOINT_URL']
+    
+    with open(tfile) as file:
+        token = file.readline().strip('\n')
+    session_token = token
+    if (verbose): print("TOKEN > ",tfile, token)
+    s3 = get_s3_sts(client_id, client_secret, endpoint_url, session_token)
+
+    return s3
+
+def get_s3_sts(client_id, client_secret, endpoint_url, session_token):
+    # Specify the session token, access key, and secret key received from the STS
+    import boto3
+    sts_client = boto3.client('sts',
+            endpoint_url = endpoint_url,
+            region_name  = ''
+            )
+
+    response_sts = sts_client.assume_role_with_web_identity(
+            RoleArn          = "arn:aws:iam:::role/S3AccessIAM200",
+            RoleSessionName  = 'cygno',
+            DurationSeconds  = 3600,
+            WebIdentityToken = session_token # qua ci va il token IAM
+            )
+
+    s3 = boto3.client('s3',
+            aws_access_key_id     = response_sts['Credentials']['AccessKeyId'],
+            aws_secret_access_key = response_sts['Credentials']['SecretAccessKey'],
+            aws_session_token     = response_sts['Credentials']['SessionToken'],
+            endpoint_url          = endpoint_url,
+            region_name           = '')
+    return s3
+
+
 def reco2cloud(recofilename, recofolder, run_number, verbose=False):
       #
     # deault parser value
@@ -468,29 +480,28 @@ def reco2cloud(recofilename, recofolder, run_number, verbose=False):
     dtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     #if verbose:              
     print('{:s} Transferring file: {:s}'.format(dtime, file_in_dir))
+    ## Get Token
+    s3 = s3_session()
     
     current_try = 0
     aux         = 0
-    status, isthere = False, False # flag to know if to go to next run
+    #status, isthere = False, False # flag to know if to go to next run
     while(not status):   
         #tries many times for errors of connection or others that may be worth another try
         if verbose: 
             print(INAPATH+file_in_dir,TAG, bucket, session, verbose, filesize)
-        status, isthere = cy.s3.obj_put(INAPATH+file_in_dir,tag=TAG, 
-                                     bucket=bucket, session=session, 
-                                     verbose=verbose)
-        if status:
-            if isthere:
-                remotesize = cy.s3.obj_size(file_in_dir,tag=TAG, 
-                                 bucket=bucket, session=session, 
-                                 verbose=verbose)
 
+        try:
+            s3.upload_file(INAPATH+file_in_dir, Bucket=bucket, Key=TAG+'/'+file_in_dir)
+
+            remotesize = s3.head_object(Bucket=bucket, Key=TAG+'/'+file_in_dir)['ContentLength']
+
+            if remotesize == filesize:
                 cy.cmd.rm_file(INAPATH+file_in_dir)
-                
                 cy.cmd.rm_file(INAPATH + 'reconstruction_' + str(run_number) + '.log')
                 cy.cmd.rm_file(INAPATH + 'reconstruction_' + str(run_number) + '.out')
                 cy.cmd.rm_file(INAPATH + 'reconstruction_' + str(run_number) + '.error')
-                
+
                 if verbose:              
                     print('{:s} file removed: {:s}'.format(dtime, file_in_dir))
 
@@ -498,66 +509,35 @@ def reco2cloud(recofilename, recofolder, run_number, verbose=False):
                 if verbose: 
                     print('{:s} Upload done: {:s}'.format(dtime, file_in_dir))
                 aux = 1
-
-        else:
+                
+            status = True
+        except Exception as e:
+            print('ERROR file: {:s} --> '.format(INAPATH+file_in_dir), e)
             current_try = current_try+1
             if current_try==max_tries:
                 print('{:s} ERROR: Max try number reached: {:d}'.format(dtime, current_try))
-                status=True
-                aux = 0
+                status = True
+                aux = 0            
     return aux
 
 
 def refreshSQL(verbose=False):
     if verbose:
         print("Setting SQL environment")
-    
-    process2 = subprocess.Popen(
-        "source ../SQLSetup.sh", shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
-    
-    output2, error2 = process2.communicate()
+
+    print(os.environ['MYSQL_IP'])
+    print("-----------")
     
     # init sql variabile and connector
     connection = mysql.connector.connect(
-      host=os.environ['MYSQL_IP'],
-      user=os.environ['MYSQL_USER'],
-      password=os.environ['MYSQL_PASSWORD'],
-      database=os.environ['MYSQL_DATABASE'],
-      port=int(os.environ['MYSQL_PORT'])
+      host     = os.environ['MYSQL_IP'],
+      user     = os.environ['MYSQL_USER'],
+      password = os.environ['MYSQL_PASSWORD'],
+      database = os.environ['MYSQL_DATABASE'],
+      port     = int(os.environ['MYSQL_PORT'])
     )
     
-    return connection
-
-def killagent(verbose=False):
-    if verbose:
-        print("Cleaning oidc-agent")
-    
-    #killall oidc-agent
-    process = subprocess.Popen(
-        "killall oidc-agent", shell=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
-    )
-
-    output, error = process.communicate()
-
-def refreshToken(verbose=False):
-    if verbose:
-        print("Setting Condor environment")
-    
-    #process = subprocess.Popen(
-    #    "source ../start_script_2.sh", shell=True,
-    #    stdout=subprocess.PIPE,
-    #    stderr=subprocess.PIPE
-    #)
-    
-    #output, error = process.communicate()
-    
-    output = subprocess.check_output("source ../start_script.sh", shell=True)
-    
+    return connection    
 
 def create_json_with_date_time(outname):
     
@@ -584,7 +564,6 @@ def savetables(df_condor, outname):
     
 def main(run_number_start, outname='df_condor', just_status=False, verbose=False):
     #Set environment variables
-    refreshToken(verbose)
     connection = refreshSQL(verbose)
     outname    = options.outname
 
@@ -634,7 +613,6 @@ def main(run_number_start, outname='df_condor', just_status=False, verbose=False
         # check if 2 minutes have passed
         elapsed_time = time.time() - start_time
         if elapsed_time >= 3000:
-            refreshToken(verbose)
             connection = refreshSQL(verbose)
             # reset the start time
             start_time = time.time()
@@ -714,7 +692,6 @@ def main(run_number_start, outname='df_condor', just_status=False, verbose=False
         if aux_held >= nheld:
             if verbose:
                 print("Checking completed Jobs on Queue")
-            #refreshToken()
             connection = refreshSQL(verbose)
             # reset the start time
             df_condor = forOverPandasCloud_rm(df_condor)
@@ -731,9 +708,7 @@ def main(run_number_start, outname='df_condor', just_status=False, verbose=False
         if aux_rm >= nfresh:
             if verbose:
                 print("Killing agent and refreshing token")
-            killagent()
             time.sleep(120)
-            refreshToken()
             connection = refreshSQL(verbose)
             # reset the start time
             aux_rm = 0

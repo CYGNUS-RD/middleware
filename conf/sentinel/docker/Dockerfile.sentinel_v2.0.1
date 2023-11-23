@@ -15,6 +15,7 @@ RUN pip3 install --no-cache-dir -U \
     numpy \
     pandas \
     boto3 \
+    uproot \
     git+https://github.com/DODAS-TS/boto3sts \
     git+https://github.com/CYGNUS-RD/cygno.git@v1.0.14 \
     'https://github.com/CYGNUS-RD/middleware/blob/master/midas/midaslib.tar.gz?raw=true'
