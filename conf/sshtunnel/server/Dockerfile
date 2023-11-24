@@ -10,8 +10,8 @@ RUN apk add curl \
 
 RUN ssh-keygen -A
 # Add an SSH user (replace 'username' and 'password' with your desired credentials)
-RUN adduser -D daq
-RUN echo "daq:test" | chpasswd
+# RUN adduser -D daq
+# RUN echo "daq:test" | chpasswd
 
 # Copy SSH configuration file
 COPY sshd_config /etc/ssh/sshd_config
@@ -21,4 +21,6 @@ COPY sshd_config /etc/ssh/sshd_config
 EXPOSE 22
 
 # Start SSH service
-CMD ["/usr/sbin/sshd", "-D"]
+# CMD ["/usr/sbin/sshd", "-D"]
+COPY startup.sh /opt/startup.sh
+ENTRYPOINT ["/opt/startup.sh"]

@@ -10,7 +10,10 @@ services:
   tunnel:
      image: gmazzitelli/bastion
      container_name: bastion
+     environment:
+       BASTION_USER: daq
+       BASTION_PASWD: daq
      ports:
-       - "3000:22"
+       - "9022:22"
      volumes:
-       - /home/mazzite/.ssh/authorized_keys:/home/daq/.ssh/authorized_keys
+       - /home/mazzitel/.ssh/authorized_keys:/home/daq/.ssh/authorized_keys
