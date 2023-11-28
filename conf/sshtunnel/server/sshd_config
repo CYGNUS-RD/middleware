@@ -1,0 +1,4 @@
+# Example sshd_config - Customize as needed
+Port 22
+PermitRootLogin no
+PasswordAuthentication no

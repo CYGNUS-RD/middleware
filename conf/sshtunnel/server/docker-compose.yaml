@@ -1,0 +1,19 @@
+version: '2'
+services:
+  web:
+     image: nginx:latest
+     container_name: web
+     ports:
+       - "80:80"
+     volumes:
+       - ${PWD}:/usr/share/nginx/html
+  tunnel:
+     image: gmazzitelli/bastion
+     container_name: bastion
+     environment:
+       BASTION_USER: daq
+       BASTION_PASWD: daq
+     ports:
+       - "9022:22"
+     volumes:
+       - /home/mazzitel/.ssh/authorized_keys:/home/daq/.ssh/authorized_keys
