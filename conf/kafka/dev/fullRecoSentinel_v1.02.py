@@ -16,6 +16,10 @@ import time
 import pandas as pd
 import subprocess
 import re
+<<<<<<< HEAD
+=======
+import json
+>>>>>>> 180e335a10a33401fff4cbad7c20a749a5737c12
 
 import midas
 import midas.client
@@ -518,17 +522,25 @@ def refreshSQL(verbose=False):
     
     return connection
 
+<<<<<<< HEAD
 
 def refreshToken(verbose=False):
     if verbose:
         print("Setting Condor environment")
         
+=======
+def killagent(verbose=False):
+    if verbose:
+        print("Cleaning oidc-agent")
+    
+>>>>>>> 180e335a10a33401fff4cbad7c20a749a5737c12
     #killall oidc-agent
     process = subprocess.Popen(
         "killall oidc-agent", shell=True,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE
     )
+<<<<<<< HEAD
     
     process = subprocess.Popen(
         "source ../start_script_2.sh", shell=True,
@@ -537,6 +549,48 @@ def refreshToken(verbose=False):
     )
     
     output, error = process.communicate()
+=======
+
+    output, error = process.communicate()
+
+def refreshToken(verbose=False):
+    if verbose:
+        print("Setting Condor environment")
+    
+    #process = subprocess.Popen(
+    #    "source ../start_script_2.sh", shell=True,
+    #    stdout=subprocess.PIPE,
+    #    stderr=subprocess.PIPE
+    #)
+    
+    #output, error = process.communicate()
+    
+    output = subprocess.check_output("source ../start_script_2.sh", shell=True)
+    
+
+def create_json_with_date_time(outname):
+    
+    # Get the current date and time
+    current_date_time = datetime.datetime.now()
+
+    # Add two hours to the current date and time
+    new_date_time = current_date_time + datetime.timedelta(hours=2)
+
+    # Create a dictionary containing the modified date and time information
+    data = {
+        'last_update': new_date_time.strftime('%Y-%m-%d %H:%M:%S')
+    }
+
+    # Write the dictionary to a JSON file
+    with open('../dev/lu_'+ outname +'.json', 'w') as json_file:
+        json.dump(data, json_file, indent=4)
+        
+def savetables(df_condor, outname):
+    df_condor.to_csv('../submitJobs/'+ outname +'.csv', index=False)
+    df_condor.to_json('../dev/'+ outname +'.json', orient="table")
+    create_json_with_date_time(outname)
+    
+>>>>>>> 180e335a10a33401fff4cbad7c20a749a5737c12
     
 def main(run_number_start, outname='df_condor', just_status=False, verbose=False):
     #Set environment variables
@@ -560,6 +614,7 @@ def main(run_number_start, outname='df_condor', just_status=False, verbose=False
         
     ### to fix some problems
     #for j in range(327,923):
+<<<<<<< HEAD
     #df_condor.loc[df_condor['Cluster_ID'] == 931, 'Cloud_storage'] = 1
     #df_condor.loc[df_condor['Cluster_ID'] == 328, 'Cloud_storage'] = 1
     #df_condor.loc[df_condor['Cluster_ID'] == 1893, 'JobInQueue'] = 1
@@ -569,11 +624,29 @@ def main(run_number_start, outname='df_condor', just_status=False, verbose=False
 
     run_number_start = 16798
     nproc            = 3
+=======
+    #df_condor.loc[df_condor['Cluster_ID'] == 5979, 'Cloud_storage'] = 1
+    #df_condor.loc[df_condor['Cluster_ID'] == 5980, 'Cloud_storage'] = 1
+    #df_condor.loc[df_condor['Cluster_ID'] == 328, 'Cloud_storage'] = 1
+    #df_condor.loc[df_condor['Cluster_ID'] == 1893, 'JobInQueue'] = 1
+    
+    ####Saving Tables
+    #df_condor.to_csv('../submitJobs/'+ outname +'.csv', index=False)
+    #df_condor.to_json('../dev/'+ outname +'.json', orient="table")    
+    savetables(df_condor, outname)
+
+    #run_number_start = 16798
+    nproc            = 4
+>>>>>>> 180e335a10a33401fff4cbad7c20a749a5737c12
     maxentries       = -1
 
     # set the initial time
     start_time    = time.time()
     aux_rm        = 0
+<<<<<<< HEAD
+=======
+    aux_held        = 0
+>>>>>>> 180e335a10a33401fff4cbad7c20a749a5737c12
     
 
     while True:
@@ -620,9 +693,17 @@ def main(run_number_start, outname='df_condor', just_status=False, verbose=False
                     df_condor.loc[df_condor['Cluster_ID'] == cluster_id, 'Run_number'] = submit_run           
 
                     if verbose:
+<<<<<<< HEAD
                         print(df_condor)
                     df_condor.to_csv('../submitJobs/'+ outname +'.csv', index=False)
                     df_condor.to_json('../dev/'+ outname +'.json', orient="table")
+=======
+                        print("Saving Condor DataFrame Control Monitor")
+                        print(df_condor)
+                    #df_condor.to_csv('../submitJobs/'+ outname +'.csv', index=False)
+                    #df_condor.to_json('../dev/'+ outname +'.json', orient="table")
+                    savetables(df_condor, outname)
+>>>>>>> 180e335a10a33401fff4cbad7c20a749a5737c12
 
                 #Checking again the list to see if there is more Run to be analyzed
                 df_condor = forOverPandasStatus(df_condor)
@@ -636,11 +717,21 @@ def main(run_number_start, outname='df_condor', just_status=False, verbose=False
         df_condor = forOverPandasStatus(df_condor)
         df_condor = forOverPandasTransfer(df_condor, connection)
         df_condor = forOverPandasCloud(df_condor)
+<<<<<<< HEAD
         df_condor.to_csv('../submitJobs/'+ outname +'.csv', index=False)
         df_condor.to_json('../dev/'+ outname +'.json', orient="table")
         
         #elapsed_time_rm = time.time() - start_time_rm
         if aux_rm >= 10:
+=======
+        #df_condor.to_csv('../submitJobs/'+ outname +'.csv', index=False)
+        #df_condor.to_json('../dev/'+ outname +'.json', orient="table")
+        savetables(df_condor, outname)
+        
+        
+        nheld = 10
+        if aux_held >= nheld:
+>>>>>>> 180e335a10a33401fff4cbad7c20a749a5737c12
             if verbose:
                 print("Checking completed Jobs on Queue")
             refreshToken()
@@ -648,23 +739,57 @@ def main(run_number_start, outname='df_condor', just_status=False, verbose=False
             # reset the start time
             df_condor = forOverPandasCloud_rm(df_condor)
             df_condor = forOverPandasHeld(df_condor, connection)
+<<<<<<< HEAD
             df_condor.to_csv('../submitJobs/'+ outname +'.csv', index=False)
             df_condor.to_json('../dev/'+ outname +'.json', orient="table")
             aux_rm = 0
         else:
             if verbose:
                 print("Next check of Queue in %d loops" %(10-aux_rm))
+=======
+            savetables(df_condor, outname)
+            aux_held = 0
+        else:
+            if verbose:
+                print("Next check of Queue in %d loops" %(nheld-aux_held))
+        
+        
+        #elapsed_time_rm = time.time() - start_time_rm
+        nfresh = 500
+        if aux_rm >= nfresh:
+            if verbose:
+                print("Killing agent and refreshing token")
+            #killagent()
+            time.sleep(120)
+            refreshToken()
+            connection = refreshSQL(verbose)
+            # reset the start time
+            aux_rm = 0
+        else:
+            if verbose:
+                print("Next cleaning in %d loops" %(nfresh-aux_rm))
+>>>>>>> 180e335a10a33401fff4cbad7c20a749a5737c12
         #df_condor = forOverPandasUnknown(df_condor, connection)
         
         if verbose:
             print(df_condor)
             print("Saving Condor DataFrame Control Monitor")
         # save the dataframe to a CSV file
+<<<<<<< HEAD
         df_condor.to_csv('../submitJobs/'+ outname +'.csv', index=False)
         df_condor.to_json('../dev/'+ outname +'.json', orient="table")
         if verbose:
             print("Waiting 60 seconds to check Job status")
         aux_rm = aux_rm + 1
+=======
+        savetables(df_condor, outname)
+        #df_condor.to_csv('../submitJobs/'+ outname +'.csv', index=False)
+        #df_condor.to_json('../dev/'+ outname +'.json', orient="table")
+        if verbose:
+            print("Waiting 60 seconds to check Job status")
+        aux_rm = aux_rm + 1
+        aux_held = aux_held + 1
+>>>>>>> 180e335a10a33401fff4cbad7c20a749a5737c12
         time.sleep(60)
 
 

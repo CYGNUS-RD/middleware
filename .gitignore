@@ -132,3 +132,6 @@ dmypy.json
 *.png
 data/
 cygno_conf.py
+
+# no reconstruction code
+conf/sentinel/dev/reconstruction/

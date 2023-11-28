@@ -145,19 +145,19 @@ def main():
                 ipload = 1 # index of file uploaded
                 # if verbose : print(file_in_dir)
 
-                for i in range(0, np.size(file_in_dir)):
-                    if ('run' in str(file_in_dir[i]))   and \
-                    ('.mid' in str(file_in_dir[i]))  and \
-                    (not ('.gz' in str(file_in_dir[i]))) and \
-                    (not('.crc32c' in str(file_in_dir[i]))) and\
-                    ((str(file_in_dir[i]).split('.mid')[0] + '.crc32c') in file_in_dir) and \
-                    (not ( (str(file_in_dir[i]) + '.gz') in file_in_dir)) and \
-                    (not file_in_dir[i].startswith('.')):
-                        if compressing_files < 6:
-                            dtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                            print('{:s} Compressing file: {:s}'.format(dtime, file_in_dir[i]))
-                            os.system('gzip ' + INAPATH + file_in_dir[i] +' &')
-                            compressing_files += 1
+                #for i in range(0, np.size(file_in_dir)):
+                #    if ('run' in str(file_in_dir[i]))   and \
+                #    ('.mid' in str(file_in_dir[i]))  and \
+                #    (not ('.gz' in str(file_in_dir[i]))) and \
+                #    (not('.crc32c' in str(file_in_dir[i]))) and\
+                #    ((str(file_in_dir[i]).split('.mid')[0] + '.crc32c') in file_in_dir) and \
+                #    (not ( (str(file_in_dir[i]) + '.gz') in file_in_dir)) and \
+                #    (not file_in_dir[i].startswith('.')):
+                #        if compressing_files < 5:
+                #            dtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                #            print('{:s} Compressing file: {:s}'.format(dtime, file_in_dir[i]))
+                #            os.system('gzip ' + INAPATH + file_in_dir[i] +' &')
+                #            compressing_files += 1
             except:
                 print('{:s} ERROR: Compressing files'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
             # upload statment
@@ -199,7 +199,8 @@ def main():
                         if not(runN == runC and state == midas.STATE_RUNNING) or midas.STATE_STOPPED:
                             dtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                             print('{:s} Transferring file: {:s}'.format(dtime, file_in_dir[i]))
-                            compressing_files -= 1
+                            if compressing_files > 0:
+                            	compressing_files -= 1
                             current_try = 0
                             status, isthere = False, False # flag to know if to go to next run
                             #try:

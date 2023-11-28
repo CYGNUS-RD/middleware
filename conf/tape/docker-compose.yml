@@ -1,0 +1,52 @@
+version: "3"
+
+services:
+  tape:
+    image: gmazzitelli/cygno-tape:v1.0.6-cygno
+    container_name: tape
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
+    environment:
+      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+      ENDPOINT_URL: ${ENDPOINT_URL}
+      TAPE_TOKEN_FILE: '/tmp/tape_token'
+      S3_TOKEN_FILE: '/tmp/token'
+
+      MYSQL_IP: ${MYSQL_IP}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_PORT: ${MYSQL_PORT}
+    volumes:
+      - $PWD/dev/:/root/dev
+      - /tmp/:/tmp/
+
+  tokener_s3:
+    image: gmazzitelli/tokener:v0.2
+    container_name: tokener_s3
+    environment:
+      REFRESH_TOKEN: ${REFRESH_TOKEN}
+      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+      IAM_TOKEN_ENDPOINT: ${IAM_TOKEN_ENDPOINT}
+      SCOPES: ${SCOPES}
+      TOKEN_FILE: '/tmp/token'
+
+    volumes:
+      - /tmp/:/tmp/
+
+  tokener_tape:
+    image: gmazzitelli/tokener:v0.2
+    container_name: tokener_tape
+    environment:
+# RESPONSE="$(curl -s -u ${TAPE_IAM_CLIENT_ID}:${TAPE_IAM_CLIENT_SECRET} -d scopes="\"${TAPE_SCOPES}"\" -d grant_type=refresh_token -d refresh_token=${TAPE_REFRESH_TOKEN} ${TAPE_IAM_TOKEN_ENDPOINT})"
+      REFRESH_TOKEN: ${TAPE_REFRESH_TOKEN}
+      IAM_CLIENT_SECRET: ${TAPE_IAM_CLIENT_SECRET}
+      IAM_CLIENT_ID: ${TAPE_IAM_CLIENT_ID}
+      IAM_TOKEN_ENDPOINT: ${TAPE_IAM_TOKEN_ENDPOINT}
+      SCOPES: ${TAPE_SCOPES}
+      TOKEN_FILE: '/tmp/tape_token'
+
+    volumes:
+      - /tmp/:/tmp/

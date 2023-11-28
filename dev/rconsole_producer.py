@@ -46,8 +46,11 @@ def pmt_jpg(header, waveform_f, waveform_s, producer, number_of_w_readed = 8, ve
         offset = t*header[1][0]
         for w in range(0, number_of_w_readed):
             ax[t,w].plot(np.linspace(0, header[2][0], header[2][0]), waveform_f[offset], label="t: {:d} w{:d}".format(t,w))
-            #ax[t,w].legend()
+#             ax[t,w].legend()
+#             ax[t,w].set_yscale("log")
+#             ax[t,w].set_ylim(top=4000)
             offset+=1
+
     plt.savefig(DEFAULT_PATH_ONLINE+'custom/pmt_f.png', bbox_inches='tight')
     plt.close()
     with open(DEFAULT_PATH_ONLINE+'custom/pmt_f.png', 'rb') as f:
@@ -63,8 +66,11 @@ def pmt_jpg(header, waveform_f, waveform_s, producer, number_of_w_readed = 8, ve
         offset = t*header[1][1]
         for w in range(0, number_of_w_readed):
             ax[t,w].plot(np.linspace(0, header[2][1], header[2][1]), waveform_s[offset], label="t: {:d} w{:d}".format(t,w))
-            #ax[t,w].legend()
+#             ax[t,w].legend()
+#             ax[t,w].set_yscale("log")
+#             ax[t,w].ylim(top=3000)
             offset+=1
+    
     plt.savefig(DEFAULT_PATH_ONLINE+'custom/pmt_s.png', bbox_inches='tight')
     plt.close()
     with open(DEFAULT_PATH_ONLINE+'custom/pmt_s.png', 'rb') as f:
@@ -110,7 +116,7 @@ def main(verbose=False):
 
     
     client = midas.client.MidasClient("rconsole")
-    buffer_handle = client.open_event_buffer("SYSTEM",None,1000000000)
+    buffer_handle = client.open_event_buffer("SYSTEM",None,100000000)
     request_id = client.register_event_request(buffer_handle, sampling_type = 2) 
     
     odb_update   = 3 # probabilemnte da mettere in middleware 
