@@ -17,6 +17,6 @@ do
 #        IFS=$'\n';for line in `cat EVENTS.txt`; do cygno_repo rm cygno-data `echo ${line} | cut -d'/' -f2` -t EVENTS -s sentinel-wlcg; done
 	echo "Press [CTRL+C] to stop.."
 	i=$((i+1))
-	sleep 10
+	sleep 21600
 done
 

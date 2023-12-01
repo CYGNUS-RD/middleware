@@ -1,13 +1,43 @@
 version: '2'
 services:
+#  # Redpanda cluster
+#  redpanda-1:
+#    image: docker.redpanda.com/vectorized/redpanda:v22.3.5
+#    container_name: redpanda
+#    command:
+#      - redpanda
+#      - start
+#      - --smp
+#      - '1'
+#      - --reserve-memory
+#      - 0M
+#      - --overprovisioned
+#      - --node-id
+#      - '1'
+#      - --kafka-addr
+#      - PLAINTEXT://0.0.0.0:29092,OUTSIDE://0.0.0.0:9092
+#      - --advertise-kafka-addr
+#      - PLAINTEXT://redpanda-1:29092,OUTSIDE://localhost:9092
+#      - --pandaproxy-addr
+#      - PLAINTEXT://0.0.0.0:28082,OUTSIDE://0.0.0.0:8082
+#      - --advertise-pandaproxy-addr
+#      - PLAINTEXT://redpanda-1:28082,OUTSIDE://localhost:8082
+#      - --rpc-addr
+#      - 0.0.0.0:33145
+#      - --advertise-rpc-addr
+#      - redpanda-1:33145
+#      - --set redpanda.kafka_batch_max_bytes=31457280
+#      - --set redpanda.kafka_request_max_bytes=31457280
   zookeeper:
     image: wurstmeister/zookeeper:3.4.6
+#    image: bitnami/zookeeper
     container_name: zookeeper
     ports:
      - "2181:2181"
 
   kafka:
     image: wurstmeister/kafka
+#    image: bitnami/kafka:3.6.0
     container_name: kafka
     ports:
      - "9092:9092"
@@ -19,7 +49,7 @@ services:
       KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_CREATE_TOPICS: "online:1:1"
+##      KAFKA_CREATE_TOPICS: "online:1:1"
 ####      KAFKA_REPLICA_FETCH_MAX_BYTES: 31457280 / 15728640
       KAFKA_PRODUCER_MAX_REQUEST_SIZE: 31457280
       KAFKA_CONSUMER_MAX_PARTITION_FETCH_BYTES: 31457280
@@ -34,25 +64,6 @@ services:
     volumes:
      - /var/run/docker.sock:/var/run/docker.sock
 
-  sentinel:
-    image: gmazzitelli/cygno-st:v1.0.4-cygno
-    container_name: sentinel
-    stdin_open: true # docker run -i
-    tty: true        # docker run -t
-    environment:
-      OIDC_AGENT: ${OIDC_AGENT}
-      REFRESH_TOKEN: ${REFRESH_TOKEN}
-      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
-      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
-      IAM_SERVER: ${IAM_SERVER}
-      IAM_SCOPES: "'openid profile email offline_access wlcg wlcg.groups'"
-    volumes:
-      - ${PWD}/dev/:/root/dev
-      - ${PWD}/start_script.sh:/root/start_script.sh
-      - /tmp/:/tmp/
-    command: /bin/sh -c "/root/start_script.sh && tail -f /dev/null"
-#    command: /bin/sh -c "echo \"source /root/start_script.sh\" >> /root/.bashrc && tail -f /dev/null"
-
   editor:
     image: jupyter/minimal-notebook
     container_name: editor
@@ -64,7 +75,29 @@ services:
 
   web:
      image: nginx:latest
+     container_name: web
      ports:
        - "80:80"
      volumes:
        - ${PWD}/dev:/usr/share/nginx/html
+
+  mongo:
+    image: mongo
+    container_name: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+     - "27017:27017"
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
