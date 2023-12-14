@@ -11,3 +11,7 @@
 - 90.147.174.164  sentinel  BACKBONE-BARI
 - 131.154.99.115  gmtest
 ## set up kafka/mongo server 
+- https://github.com/CYGNUS-RD/middleware/tree/master/conf/kafka
+
+## set up backend server
+
