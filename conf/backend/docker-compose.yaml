@@ -1,0 +1,64 @@
+version: '3'
+
+services:
+
+  s3cleaner:
+    image: gmazzitelli/cygno-st:v2.0.1-cygno
+    container_name: s3cleaner
+    environment:
+      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+      ENDPOINT_URL: ${ENDPOINT_URL}
+      WAIT_TIME: 300
+    volumes:
+      - ${PWD}/dev/cleanEVENTS.sh:/root/init.sh
+#      - ${PWD}/dev/.bashrc:/root/.bashrc
+      - ${PWD}/dev/:/root/dev/
+      - /tmp/:/tmp/
+
+  consumer_event_s3:
+    image: gmazzitelli/cygno-st:v2.0.1-cygno
+    container_name: consumer_event_s3
+    environment:
+      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+      ENDPOINT_URL: ${ENDPOINT_URL}
+      OPTIONS: 'tunnel_kafka -v'
+    volumes:
+      - ${PWD}/dev/consumer_event_s3.sh:/root/init.sh
+#      - ${PWD}/dev/.bashrc:/root/.bashrc
+      - ${PWD}/dev/:/root/dev/
+      - /tmp/:/tmp/
+
+
+  tunnel:
+    restart: always
+    image: gmazzitelli/sshtunnel
+    container_name: tunnel_kafka
+    environment: 
+       REMOTE_PORT: 29092
+       REMOTE_APP_NAME: 127.0.0.1
+       LOCAL_PORT: 29092
+       USER: mazzitel
+       REMOTE_IP: ${KAFKA_IP}
+    ports:
+       - "29092:29092"
+    volumes:
+       - /root/.ssh/daq_id:/root/.ssh/id_rsa 
+
+  tokener:
+    image: gmazzitelli/tokener:v0.2
+    container_name: tokener
+    environment:
+      REFRESH_TOKEN: ${REFRESH_TOKEN}
+      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+      IAM_TOKEN_ENDPOINT: ${IAM_TOKEN_ENDPOINT}
+      SCOPES: ${SCOPES}
+
+    volumes:
+      - /tmp/:/tmp/
+
+volumes:
+   dbdata:
+
