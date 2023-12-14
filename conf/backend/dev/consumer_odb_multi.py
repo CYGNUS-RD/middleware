@@ -92,7 +92,7 @@ def main(kafka_ip, tag, mongo, verbose=False):
             with open(fpath+'/'+tag+'_odb.json', 'r') as f:
                 odb = load(f)
             odb["middleware_alive"] = 0
-            with open(fpath+'/'+TAG+'_odb.json', 'w', encoding='utf-8') as f:
+            with open(fpath+'/'+tag+'_odb.json', 'w', encoding='utf-8') as f:
                 dump(odb, f, ensure_ascii=False, indent=4)
             time.sleep(3)
 
