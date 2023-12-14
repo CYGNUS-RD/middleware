@@ -31,6 +31,8 @@ def main(kafka_ip, tag, mongo, verbose=False):
     up_time_mongo = 600
     fpath = get_script_path()
     fmongo = True
+    if verbose:
+        print(">>", kafka_ip, tag, mongo, fmongo)
     while True:
         
         try:
@@ -39,6 +41,8 @@ def main(kafka_ip, tag, mongo, verbose=False):
             )
             for topic_partition, messages in raw_messages.items():
                 end = time.time()
+                if verbose:
+                    print(messages)
                 if topic_partition.topic == 'midas-odb-'+tag:
                     if verbose:
                         print("DEBUG: odb")
@@ -91,7 +95,7 @@ def main(kafka_ip, tag, mongo, verbose=False):
         if (time.time()-alive_time)>10:
             if verbose:
                 print("DEBUG: >>> dead")
-            with open(fpath+'/'+tag+'_odb.json', 'r') as f:
+            with open(fpath+'/'+tag+'_odb.json', 'r', encoding='utf-8') as f:
                 odb = load(f)
             odb["middleware_alive"] = 0
             with open(fpath+'/'+tag+'_odb.json', 'w', encoding='utf-8') as f:

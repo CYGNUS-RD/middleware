@@ -93,7 +93,7 @@
         "Transition connect timeout": 10000,
         "Transition timeout": 120000,
         "Run Parameters": {
-            "Run description": "Standard"
+            "Run description": "Standard - LOW Gain"
         },
         "Edit on start": {
             "Write data": "/Logger/Write data",
@@ -151,12 +151,6 @@
                 "Hardware type": 44,
                 "Server Port": 39327
             },
-            "658523": {
-                "Name": "rconsole",
-                "Host": "localhost",
-                "Hardware type": 44,
-                "Server Port": 45757
-            },
             "769097": {
                 "Name": "mhttpd",
                 "Host": "localhost",
@@ -180,33 +174,39 @@
                 "Hardware type": 44,
                 "Server Port": 36115
             },
-            "776633": {
-                "Name": "cygnus_daq",
-                "Host": "localhost",
-                "Hardware type": 44,
-                "Server Port": 42703,
-                "Transition START": 500,
-                "Transition STOP": 500,
-                "Transition PAUSE": 500,
-                "Transition RESUME": 500,
-                "Run state": 3
-            },
-            "979334": {
+            "1229312": {
                 "Name": "SC Frontend",
                 "Host": "localhost",
                 "Hardware type": 44,
-                "Server Port": 44885,
+                "Server Port": 43931,
                 "Transition START": 500,
                 "Transition STOP": 500,
                 "Transition PAUSE": 500,
                 "Transition RESUME": 500,
                 "Run state": 3
             },
-            "3432613": {
+            "1229443": {
+                "Name": "cygnus_daq",
+                "Host": "localhost",
+                "Hardware type": 44,
+                "Server Port": 46691,
+                "Transition START": 500,
+                "Transition STOP": 500,
+                "Transition PAUSE": 500,
+                "Transition RESUME": 500,
+                "Run state": 3
+            },
+            "3479211": {
                 "Name": "middleware",
                 "Host": "localhost",
                 "Hardware type": 44,
-                "Server Port": 34747
+                "Server Port": 43809
+            },
+            "3490986": {
+                "Name": "rconsole",
+                "Host": "localhost",
+                "Hardware type": 44,
+                "Server Port": 38731
             }
         },
         "Tmp": {},
@@ -214,8 +214,8 @@
         "Buffers": {
             "SYSMSG": {
                 "Size": 100000,
-                "Write pointer": 90448,
-                "Read pointer": 90576,
+                "Write pointer": 24768,
+                "Read pointer": 24896,
                 "Filled": 99872,
                 "Filled pct": 99.872,
                 "Clients": {
@@ -235,7 +235,7 @@
                         "last_updated": 1557457560
                     },
                     "SC Frontend": {
-                        "count_lock": 394902,
+                        "count_lock": 128796,
                         "count_sent": 6,
                         "bytes_sent": 512,
                         "count_write_wait": 0,
@@ -244,15 +244,15 @@
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 47632,
-                        "bytes_used": 42816,
-                        "pct_used": 42.815999999999995,
-                        "last_updated": 1720461867
+                        "read_pointer": 7816,
+                        "bytes_used": 16952,
+                        "pct_used": 16.952,
+                        "last_updated": 1786305557
                     },
                     "Logger": {
-                        "count_lock": 322525,
-                        "count_sent": 2,
-                        "bytes_sent": 296,
+                        "count_lock": 452773,
+                        "count_sent": 20,
+                        "bytes_sent": 3824,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
@@ -260,29 +260,29 @@
                         "bytes_read": 0,
                         "get_all_flag": false,
                         "read_pointer": 43928,
-                        "bytes_used": 46520,
-                        "pct_used": 46.52,
-                        "last_updated": 1720461891
+                        "bytes_used": 80840,
+                        "pct_used": 80.84,
+                        "last_updated": 1786305533
                     },
                     "cygnus_daq": {
-                        "count_lock": 355983,
+                        "count_lock": 114539,
                         "count_sent": 3,
-                        "bytes_sent": 464,
+                        "bytes_sent": 440,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 44352,
-                        "bytes_used": 46096,
-                        "pct_used": 46.096,
-                        "last_updated": 1720461329
+                        "read_pointer": 7816,
+                        "bytes_used": 16952,
+                        "pct_used": 16.952,
+                        "last_updated": 1786304996
                     },
                     "mhttpd": {
-                        "count_lock": 406491,
-                        "count_sent": 3,
-                        "bytes_sent": 168,
+                        "count_lock": 570473,
+                        "count_sent": 44,
+                        "bytes_sent": 6656,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
@@ -290,14 +290,14 @@
                         "bytes_read": 0,
                         "get_all_flag": false,
                         "read_pointer": 43928,
-                        "bytes_used": 46520,
-                        "pct_used": 46.52,
-                        "last_updated": 1720462797
+                        "bytes_used": 80840,
+                        "pct_used": 80.84,
+                        "last_updated": 1786305079
                     },
                     "Sequencer": {
-                        "count_lock": 310179,
-                        "count_sent": 748,
-                        "bytes_sent": 43072,
+                        "count_lock": 435684,
+                        "count_sent": 1067,
+                        "bytes_sent": 62408,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
@@ -305,9 +305,9 @@
                         "bytes_read": 0,
                         "get_all_flag": false,
                         "read_pointer": 43928,
-                        "bytes_used": 46520,
-                        "pct_used": 46.52,
-                        "last_updated": 1720462500
+                        "bytes_used": 80840,
+                        "pct_used": 80.84,
+                        "last_updated": 1786305192
                     },
                     "Analyzer": {
                         "count_lock": 699,
@@ -490,7 +490,7 @@
                         "last_updated": 1366237858
                     },
                     "middleware": {
-                        "count_lock": 37239,
+                        "count_lock": 8004,
                         "count_sent": 0,
                         "bytes_sent": 0,
                         "count_write_wait": 0,
@@ -499,13 +499,13 @@
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 84064,
-                        "bytes_used": 6384,
-                        "pct_used": 6.3839999999999995,
-                        "last_updated": 1720368506
+                        "read_pointer": 22504,
+                        "bytes_used": 2264,
+                        "pct_used": 2.2640000000000002,
+                        "last_updated": 1786304394
                     },
                     "midas2cloud": {
-                        "count_lock": 1372318,
+                        "count_lock": 1406305,
                         "count_sent": 3,
                         "bytes_sent": 240,
                         "count_write_wait": 0,
@@ -514,10 +514,10 @@
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 90576,
+                        "read_pointer": 24896,
                         "bytes_used": 99872,
                         "pct_used": 99.872,
-                        "last_updated": 1720366706
+                        "last_updated": 1786198055
                     },
                     "Logger1": {
                         "count_lock": 6,
@@ -550,7 +550,7 @@
                         "last_updated": 2171265427
                     },
                     "middleware1": {
-                        "count_lock": 713089,
+                        "count_lock": 40,
                         "count_sent": 0,
                         "bytes_sent": 0,
                         "count_write_wait": 0,
@@ -559,10 +559,10 @@
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 7112,
-                        "bytes_used": 99880,
-                        "pct_used": 99.88,
-                        "last_updated": 1124229660
+                        "read_pointer": 94864,
+                        "bytes_used": 0,
+                        "pct_used": 0,
+                        "last_updated": 1731839232
                     },
                     "db_display2": {
                         "count_lock": 1,
@@ -655,7 +655,7 @@
                         "last_updated": 3170687961
                     },
                     "checkGasController": {
-                        "count_lock": 727106,
+                        "count_lock": 762172,
                         "count_sent": 135,
                         "bytes_sent": 13104,
                         "count_write_wait": 0,
@@ -664,25 +664,25 @@
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 90576,
+                        "read_pointer": 24896,
                         "bytes_used": 99872,
                         "pct_used": 99.872,
-                        "last_updated": 1720431055
+                        "last_updated": 1786254332
                     },
                     "rconsole": {
-                        "count_lock": 342231,
-                        "count_sent": 1,
-                        "bytes_sent": 88,
+                        "count_lock": 13466,
+                        "count_sent": 0,
+                        "bytes_sent": 0,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 38664,
-                        "bytes_used": 51784,
-                        "pct_used": 51.784,
-                        "last_updated": 1720461972
+                        "read_pointer": 23424,
+                        "bytes_used": 1344,
+                        "pct_used": 1.344,
+                        "last_updated": 1786304824
                     },
                     "rconsole1": {
                         "count_lock": 49,
@@ -715,22 +715,22 @@
                         "last_updated": 1126730884
                     },
                     "python_fe": {
-                        "count_lock": 4993783,
-                        "count_sent": 42,
-                        "bytes_sent": 3920,
+                        "count_lock": 5118083,
+                        "count_sent": 54,
+                        "bytes_sent": 5960,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 90576,
+                        "read_pointer": 24896,
                         "bytes_used": 99872,
                         "pct_used": 99.872,
-                        "last_updated": 1720462465
+                        "last_updated": 1786305105
                     },
                     "fileCompressor": {
-                        "count_lock": 1476493,
+                        "count_lock": 1513325,
                         "count_sent": 13,
                         "bytes_sent": 1128,
                         "count_write_wait": 0,
@@ -739,50 +739,50 @@
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 90576,
+                        "read_pointer": 24896,
                         "bytes_used": 99872,
                         "pct_used": 99.872,
-                        "last_updated": 1720452437
+                        "last_updated": 1786303879
                     }
                 },
-                "Last updated": 1720462797
+                "Last updated": 1786305557
             },
             "SYSTEM": {
                 "Size": 2097152000,
-                "Write pointer": 390735352,
-                "Read pointer": 394216104,
-                "Filled": 2093671248,
-                "Filled pct": 99.834024810791,
+                "Write pointer": 475293864,
+                "Read pointer": 481355056,
+                "Filled": 2091090808,
+                "Filled pct": 99.71097984313964,
                 "Clients": {
                     "SC Frontend": {
-                        "count_lock": 406885,
-                        "count_sent": 11994,
-                        "bytes_sent": 10936304,
+                        "count_lock": 132665,
+                        "count_sent": 3880,
+                        "bytes_sent": 3529104,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 383469448,
-                        "bytes_used": 2093671248,
-                        "pct_used": 99.834024810791,
-                        "last_updated": 1720461867
+                        "read_pointer": 481355056,
+                        "bytes_used": 2091090808,
+                        "pct_used": 99.71097984313964,
+                        "last_updated": 1786305557
                     },
                     "cygnus_daq": {
-                        "count_lock": 493930,
-                        "count_sent": 137955,
-                        "bytes_sent": 1343808255960.0,
+                        "count_lock": 155354,
+                        "count_sent": 40823,
+                        "bytes_sent": 398986082112.0,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 383469448,
-                        "bytes_used": 2093671248,
-                        "pct_used": 99.834024810791,
-                        "last_updated": 1720461329
+                        "read_pointer": 470608400,
+                        "bytes_used": 2091090672,
+                        "pct_used": 99.71097335815429,
+                        "last_updated": 1786304996
                     },
                     "ODBEdit": {
                         "count_lock": 6,
@@ -815,19 +815,19 @@
                         "last_updated": 1025424473
                     },
                     "Logger": {
-                        "count_lock": 12769,
+                        "count_lock": 7298,
                         "count_sent": 0,
                         "bytes_sent": 0,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
-                        "count_read": 278,
-                        "bytes_read": 2223670168.0,
+                        "count_read": 137,
+                        "bytes_read": 1013046016,
                         "get_all_flag": true,
-                        "read_pointer": 390735352,
+                        "read_pointer": 464547208,
                         "bytes_used": 0,
                         "pct_used": 0,
-                        "last_updated": 1720461891
+                        "last_updated": 1786305533
                     },
                     "db_display": {
                         "count_lock": 94,
@@ -920,34 +920,34 @@
                         "last_updated": 1366237859
                     },
                     "middleware": {
-                        "count_lock": 73007,
+                        "count_lock": 13358,
                         "count_sent": 0,
                         "bytes_sent": 0,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
-                        "count_read": 19052,
-                        "bytes_read": 153393663320.0,
+                        "count_read": 4261,
+                        "bytes_read": 32878639792.0,
                         "get_all_flag": false,
-                        "read_pointer": 1732443376,
-                        "bytes_used": 10746720,
-                        "pct_used": 0.5124435424804688,
-                        "last_updated": 1720368506
+                        "read_pointer": 1850340424,
+                        "bytes_used": 711358648,
+                        "pct_used": 33.92022361755372,
+                        "last_updated": 1786304394
                     },
                     "middleware1": {
-                        "count_lock": 1089677,
+                        "count_lock": 39,
                         "count_sent": 0,
                         "bytes_sent": 0,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
-                        "count_read": 347846,
-                        "bytes_read": 4118338092780.0,
+                        "count_read": 1,
+                        "bytes_read": 10746652,
                         "get_all_flag": false,
-                        "read_pointer": 1396296152,
-                        "bytes_used": 0,
-                        "pct_used": 0,
-                        "last_updated": 1124229660
+                        "read_pointer": 47435688,
+                        "bytes_used": 474929832,
+                        "pct_used": 22.64641914367676,
+                        "last_updated": 1731839232
                     },
                     "db_display2": {
                         "count_lock": 1,
@@ -1025,19 +1025,19 @@
                         "last_updated": 2994062216
                     },
                     "rconsole": {
-                        "count_lock": 1439303,
+                        "count_lock": 57373,
                         "count_sent": 0,
                         "bytes_sent": 0,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
-                        "count_read": 164702,
-                        "bytes_read": 1326218794640.0,
+                        "count_read": 5941,
+                        "bytes_read": 46138472856.0,
                         "get_all_flag": false,
-                        "read_pointer": 390735352,
+                        "read_pointer": 464547072,
                         "bytes_used": 0,
                         "pct_used": 0,
-                        "last_updated": 1720461972
+                        "last_updated": 1786304824
                     },
                     "rconsole1": {
                         "count_lock": 193,
@@ -1055,19 +1055,19 @@
                         "last_updated": 3945737404
                     },
                     "python_fe": {
-                        "count_lock": 5260626,
-                        "count_sent": 266889,
-                        "bytes_sent": 17080896,
+                        "count_lock": 5391637,
+                        "count_sent": 273612,
+                        "bytes_sent": 17511168,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 394216104,
-                        "bytes_used": 2093671248,
-                        "pct_used": 99.834024810791,
-                        "last_updated": 1720462465
+                        "read_pointer": 470608400,
+                        "bytes_used": 2091090672,
+                        "pct_used": 99.71097335815429,
+                        "last_updated": 1786305105
                     },
                     "pytest": {
                         "count_lock": 556,
@@ -1085,15 +1085,15 @@
                         "last_updated": 4069829645
                     }
                 },
-                "Last updated": 1720462465
+                "Last updated": 1786305557
             }
         },
         "Prompt": "[%h:%e:%s]%p>",
         "Transition": {
             "transition": 1,
-            "run_number": 42760,
-            "start_time": 1720194756,
-            "end_time": 1720198286,
+            "run_number": 42901,
+            "start_time": 1786148496,
+            "end_time": 1786152043,
             "status": 1,
             "error": "Success",
             "deferred": "",
@@ -1103,72 +1103,72 @@
                     "client_name": "Logger",
                     "host_name": "localhost",
                     "port": 45453,
-                    "init_time": 1720194757,
+                    "init_time": 1786148496,
                     "waiting_for_client": "",
                     "connect_timeout": 10000,
-                    "connect_start_time": 1720194758,
-                    "connect_end_time": 1720194758,
+                    "connect_start_time": 1786148497,
+                    "connect_end_time": 1786148498,
                     "rpc_timeout": 120000,
-                    "rpc_start_time": 1720194758,
-                    "rpc_end_time": 1720194782,
-                    "end_time": 1720194782,
+                    "rpc_start_time": 1786148498,
+                    "rpc_end_time": 1786148524,
+                    "end_time": 1786148524,
                     "status": 1,
                     "error": "",
-                    "last_updated": 1720194782
+                    "last_updated": 1786148524
                 },
                 "python_fe_500": {
                     "sequence_number": 500,
                     "client_name": "python_fe",
                     "host_name": "localhost",
                     "port": 40055,
-                    "init_time": 1720194757,
+                    "init_time": 1786148496,
                     "waiting_for_client": "",
                     "connect_timeout": 10000,
-                    "connect_start_time": 1720194858,
-                    "connect_end_time": 1720194859,
+                    "connect_start_time": 1786148598,
+                    "connect_end_time": 1786148598,
                     "rpc_timeout": 120000,
-                    "rpc_start_time": 1720194859,
-                    "rpc_end_time": 1720198285,
-                    "end_time": 1720198286,
+                    "rpc_start_time": 1786148598,
+                    "rpc_end_time": 1786152042,
+                    "end_time": 1786152042,
                     "status": 1,
                     "error": "",
-                    "last_updated": 1720198286
-                },
-                "cygnus_daq_500": {
-                    "sequence_number": 500,
-                    "client_name": "cygnus_daq",
-                    "host_name": "localhost",
-                    "port": 42703,
-                    "init_time": 1720194757,
-                    "waiting_for_client": "",
-                    "connect_timeout": 10000,
-                    "connect_start_time": 1720194859,
-                    "connect_end_time": 1720194859,
-                    "rpc_timeout": 120000,
-                    "rpc_start_time": 1720194859,
-                    "rpc_end_time": 1720195010,
-                    "end_time": 1720195010,
-                    "status": 1,
-                    "error": "",
-                    "last_updated": 1720195010
+                    "last_updated": 1786152042
                 },
                 "SC Frontend_500": {
                     "sequence_number": 500,
                     "client_name": "SC Frontend",
                     "host_name": "localhost",
-                    "port": 44885,
-                    "init_time": 1720194757,
+                    "port": 43931,
+                    "init_time": 1786148496,
                     "waiting_for_client": "",
                     "connect_timeout": 10000,
-                    "connect_start_time": 1720194858,
-                    "connect_end_time": 1720194858,
+                    "connect_start_time": 1786148598,
+                    "connect_end_time": 1786148598,
                     "rpc_timeout": 120000,
-                    "rpc_start_time": 1720194859,
-                    "rpc_end_time": 1720194879,
-                    "end_time": 1720194880,
+                    "rpc_start_time": 1786148598,
+                    "rpc_end_time": 1786148618,
+                    "end_time": 1786148618,
                     "status": 1,
                     "error": "",
-                    "last_updated": 1720194880
+                    "last_updated": 1786148618
+                },
+                "cygnus_daq_500": {
+                    "sequence_number": 500,
+                    "client_name": "cygnus_daq",
+                    "host_name": "localhost",
+                    "port": 46691,
+                    "init_time": 1786148496,
+                    "waiting_for_client": "",
+                    "connect_timeout": 10000,
+                    "connect_start_time": 1786148598,
+                    "connect_end_time": 1786148598,
+                    "rpc_timeout": 120000,
+                    "rpc_start_time": 1786148598,
+                    "rpc_end_time": 1786148751,
+                    "end_time": 1786148751,
+                    "status": 1,
+                    "error": "",
+                    "last_updated": 1786148751
                 }
             }
         }
@@ -1456,7 +1456,7 @@
                     "Subrun Byte limit": 0,
                     "Tape capacity": 0,
                     "Subdir format": "",
-                    "Current filename": "run42760.mid",
+                    "Current filename": "run42901.mid",
                     "Data checksum": "CRC32C (one of: NONE CRC32C SHA256 SHA512 ZLIB)",
                     "Options Data checksum": [
                         "NONE",
@@ -1496,13 +1496,13 @@
                     "Pbzip2 options": ""
                 },
                 "Statistics": {
-                    "Events written": 279,
-                    "Bytes written": 2224056146.0,
-                    "Bytes written uncompressed": 2224056146.0,
-                    "Bytes written total": 136997774002313.0,
-                    "Bytes written subrun": 2224056146.0,
-                    "Files written": 37001,
-                    "Disk level": 0.4710833135714668
+                    "Events written": 138,
+                    "Bytes written": 1013429832,
+                    "Bytes written uncompressed": 1013429832,
+                    "Bytes written total": 137505466207776.0,
+                    "Bytes written subrun": 1013429832,
+                    "Files written": 37142,
+                    "Disk level": 0.49194554515255506
                 }
             }
         },
@@ -1536,9 +1536,9 @@
                     "drs4_correction_active": "/Configurations/DRS4Correction",
                     "shielding_configuration": "/Configurations/shielding_configuration",
                     "pmt_acquisition": "/Configurations/pmt_acquisition",
-                    "GEM3_V": 440,
-                    "GEM2_V": 440,
-                    "GEM1_V": 440,
+                    "GEM3_V": 400,
+                    "GEM2_V": 400,
+                    "GEM1_V": 400,
                     "T2_V": 500,
                     "T1_V": 500,
                     "DRIFT_V": 960,
@@ -1634,13 +1634,13 @@
     "Runinfo": {
         "State": 3,
         "Online Mode": 1,
-        "Run number": 42760,
+        "Run number": 42901,
         "Transition in progress": 0,
         "Start abort": 0,
         "Requested transition": 0,
-        "Start time": "Thu Dec 14 05:14:03 2023",
-        "Start time binary": 1702527243,
-        "Stop time": "Thu Dec 14 05:14:00 2023",
+        "Start time": "Thu Dec 14 23:33:17 2023",
+        "Start time binary": 1702593197,
+        "Stop time": "Thu Dec 14 23:33:14 2023",
         "Stop time binary": 0
     },
     "Equipment": {
@@ -1670,11 +1670,11 @@
                 "Recovery": 1,
                 "Demand": [
                     10,
-                    440,
+                    400,
                     500,
-                    440,
+                    400,
                     500,
-                    440,
+                    400,
                     960,
                     0,
                     0,
@@ -1697,31 +1697,31 @@
                     0
                 ],
                 "Measured": [
-                    10.44,
-                    440.20001,
+                    9.8199997,
+                    400.17999,
                     500.32001,
-                    440.22,
-                    500.38,
-                    440.14001,
-                    960.71997,
-                    0.02,
-                    0.1,
+                    400.20001,
+                    500.39999,
+                    400.06,
+                    960.70001,
+                    0,
+                    0.079999998,
                     0,
                     0,
                     0.039999999,
-                    0.2,
+                    0.18000001,
                     0,
                     772.5,
                     773.25,
                     1,
                     0,
                     767.75,
-                    45.75,
+                    71,
                     800.5,
                     1,
                     0,
-                    0.5,
-                    0,
+                    0.25,
+                    0.25,
                     0.25
                 ],
                 "Current": [
@@ -1732,13 +1732,13 @@
                     0,
                     0,
                     0,
-                    -0.0176,
-                    0.0107,
-                    -0.0031000001,
-                    0.00030000001,
-                    0.0027999999,
-                    -0.0096000005,
-                    0.0054000001,
+                    -0.0113,
+                    0.0098000001,
+                    0.0011,
+                    -0.0020000001,
+                    9.9999997e-05,
+                    -0.0065000001,
+                    0.0031999999,
                     180.2,
                     180.8,
                     0.2,
@@ -1810,7 +1810,7 @@
                 ]
             },
             "Statistics": {
-                "Events sent": 5,
+                "Events sent": 3,
                 "Events per sec.": 0,
                 "kBytes per sec.": 0
             },
@@ -2146,14 +2146,14 @@
                 "Write cache size": 0
             },
             "Variables": {
-                "Demand": 41370,
-                "Measured": -41409.801,
-                "Current": -9.75,
+                "Demand": 41250,
+                "Measured": -41291,
+                "Current": -9.6999998,
                 "ChState": 1,
                 "ChStatus": 0
             },
             "Statistics": {
-                "Events sent": 5,
+                "Events sent": 3,
                 "Events per sec.": 0,
                 "kBytes per sec.": 0
             },
@@ -2207,34 +2207,34 @@
             },
             "Variables": {
                 "Input": [
-                    9.697773,
-                    0.0012350618,
-                    4.4967546,
-                    12.87947,
-                    0.0013670418,
-                    12.964219,
-                    0.0013254932,
-                    0.0010806136,
-                    1.9315925,
-                    2.6824768,
-                    1.1636484,
-                    0.56457788,
-                    1.2617477,
-                    0.88274658,
-                    0.34257159,
-                    0.41945806,
-                    8.7895746,
-                    8.7889519,
-                    10.33175,
-                    10.622717,
-                    0.00033252873,
-                    10.997308,
-                    6.2222815,
-                    6.351532
+                    9.700902,
+                    0.0012255274,
+                    4.5086441,
+                    12.980146,
+                    0.0012583914,
+                    13.042763,
+                    0.0013721059,
+                    0.0011202879,
+                    1.9677782,
+                    2.6809347,
+                    1.1632733,
+                    0.56210542,
+                    1.2623887,
+                    0.87999064,
+                    0.34375516,
+                    0.41948321,
+                    8.7039766,
+                    8.703186,
+                    10.318619,
+                    10.609814,
+                    0.00033921096,
+                    10.996096,
+                    6.2433143,
+                    6.3741465
                 ]
             },
             "Statistics": {
-                "Events sent": 4,
+                "Events sent": 3,
                 "Events per sec.": 0,
                 "kBytes per sec.": 0
             },
@@ -2473,9 +2473,9 @@
                     2,
                     0,
                     1,
-                    64.502419,
-                    0.98005497,
-                    0.90008193,
+                    64.277809,
+                    1.1304033,
+                    0.90809089,
                     30,
                     0,
                     0,
@@ -2576,7 +2576,7 @@
                     40,
                     0,
                     3,
-                    0.89999998,
+                    0.90799999,
                     0,
                     0,
                     100,
@@ -2712,43 +2712,43 @@
                     30,
                     0,
                     0,
-                    1302.0833,
+                    1277.4885,
                     0,
-                    0.43402779,
-                    19.917366,
-                    5.0234737,
+                    0.3978588,
+                    19.966084,
+                    5.0228949,
                     0,
-                    3.0179398,
+                    3.0133102,
                     0,
-                    2.0113571,
+                    2.006655,
                     0,
-                    0.0003616898,
+                    0.00010850695,
                     0,
-                    26.230829,
+                    26.079643,
                     0,
-                    61.713593,
+                    60.447678,
                     0,
-                    2.9248924,
+                    2.9288709,
                     0,
-                    13.659485,
+                    13.040995,
                     0,
-                    3.8367126,
-                    0,
-                    1.013,
+                    3.8349037,
                     0,
                     1.013,
                     0,
-                    0.90258968,
+                    1.013,
                     0,
-                    0.89906317,
+                    0.91053599,
                     0,
-                    0.89835793,
+                    0.90700954,
                     0,
-                    0.69955873,
+                    0.90639824,
                     0,
-                    2.7556214,
+                    0.70228583,
                     0,
-                    20.354362,
+                    2.4691632,
+                    0,
+                    22.513651,
                     1,
                     1,
                     1,
@@ -2805,9 +2805,9 @@
                     2,
                     0,
                     1,
-                    64.502419,
-                    0.98005497,
-                    0.90008193,
+                    64.803879,
+                    1.1038778,
+                    0.90799695,
                     30,
                     0,
                     0,
@@ -2908,7 +2908,7 @@
                     40,
                     0,
                     3,
-                    0.89999998,
+                    0.90799999,
                     0,
                     0,
                     100,
@@ -3044,43 +3044,43 @@
                     30,
                     0,
                     0,
-                    1302.0833,
+                    1277.4885,
                     0,
-                    0.3978588,
-                    20.075705,
-                    5.0296588,
+                    0.36168981,
+                    19.966084,
+                    5.0182657,
                     0,
-                    3.0179398,
+                    3.0127316,
                     0,
-                    2.0113571,
+                    2.0048466,
                     0,
-                    0.0003616898,
+                    3.6168982e-05,
                     0,
-                    26.230829,
+                    26.087601,
                     0,
-                    61.713593,
+                    60.429596,
                     0,
-                    2.9248924,
+                    2.9288709,
                     0,
-                    13.659485,
+                    12.992167,
                     0,
-                    3.8367126,
-                    0,
-                    1.013,
+                    3.8352656,
                     0,
                     1.013,
                     0,
-                    0.90258968,
+                    1.013,
                     0,
-                    0.89906317,
+                    0.91063005,
                     0,
-                    0.89835793,
+                    0.90700954,
                     0,
-                    0.69955873,
+                    0.90668035,
                     0,
-                    2.7556214,
+                    0.69927663,
                     0,
-                    20.354362,
+                    2.4697058,
+                    0,
+                    22.513651,
                     1,
                     1,
                     1,
@@ -3126,7 +3126,7 @@
                 ]
             },
             "Statistics": {
-                "Events sent": 5,
+                "Events sent": 3,
                 "Events per sec.": 0,
                 "kBytes per sec.": 0
             },
@@ -3806,7 +3806,7 @@
                     1,
                     1
                 ],
-                "seconds_from_last_GC_save": 49.064807
+                "seconds_from_last_GC_save": 34.687961
             }
         },
         "Trigger": {
@@ -3833,9 +3833,9 @@
             },
             "Variables": {},
             "Statistics": {
-                "Events sent": 205,
-                "Events per sec.": 0.63,
-                "kBytes per sec.": 6716.657
+                "Events sent": 94,
+                "Events per sec.": 0.32,
+                "kBytes per sec.": 3389.042
             }
         },
         "CameraStatus": {
@@ -3865,9 +3865,9 @@
                 "TCAM": -19
             },
             "Statistics": {
-                "Events sent": 26,
-                "Events per sec.": 0.31,
-                "kBytes per sec.": 0.012
+                "Events sent": 15,
+                "Events per sec.": 0.32,
+                "kBytes per sec.": 0.013
             }
         },
         "TriggerModule": {
@@ -3893,24 +3893,24 @@
                 "Write cache size": 100000
             },
             "Statistics": {
-                "Events sent": 27,
+                "Events sent": 16,
                 "Events per sec.": 0,
                 "kBytes per sec.": 0
             },
             "Variables": {
                 "TMOD": [
-                    1.8,
+                    0.89999998,
                     0,
                     0,
                     0,
-                    18.200001
+                    4.5
                 ],
                 "TriggerModuleRate": [
-                    1.8,
+                    0.89999998,
                     0,
                     0,
                     0,
-                    18.200001
+                    4.5
                 ]
             },
             "Settings": {
@@ -6032,7 +6032,7 @@
                 "Triggered": 0,
                 "Type": 3,
                 "Check interval": 60,
-                "Checked last": 1702527503,
+                "Checked last": 1702593317,
                 "Time triggered first": "",
                 "Time triggered last": "",
                 "Condition": "/Equipment/GasSystem/Variables/Measured[300] > 0",
@@ -6044,7 +6044,7 @@
                 "Triggered": 0,
                 "Type": 3,
                 "Check interval": 60,
-                "Checked last": 1702527503,
+                "Checked last": 1702593317,
                 "Time triggered first": "",
                 "Time triggered last": "",
                 "Condition": "/Equipment/GasSystem/Variables/Measured[299] > 0",
@@ -6056,7 +6056,7 @@
                 "Triggered": 0,
                 "Type": 3,
                 "Check interval": 60,
-                "Checked last": 1702527503,
+                "Checked last": 1702593317,
                 "Time triggered first": "",
                 "Time triggered last": "",
                 "Condition": "/Equipment/GasSystem/Variables/Measured[301] > 0",
@@ -6068,7 +6068,7 @@
                 "Triggered": 0,
                 "Type": 3,
                 "Check interval": 60,
-                "Checked last": 1702527503,
+                "Checked last": 1702593317,
                 "Time triggered first": "",
                 "Time triggered last": "",
                 "Condition": "/Equipment/GasSystem/Variables/Measured[302] > 0",
@@ -6080,7 +6080,7 @@
                 "Triggered": 0,
                 "Type": 3,
                 "Check interval": 60,
-                "Checked last": 1702527503,
+                "Checked last": 1702593317,
                 "Time triggered first": "",
                 "Time triggered last": "",
                 "Condition": "/Equipment/GasSystem/Variables/Measured[303] > 0",
@@ -6092,7 +6092,7 @@
                 "Triggered": 0,
                 "Type": 3,
                 "Check interval": 60,
-                "Checked last": 1702527503,
+                "Checked last": 1702593317,
                 "Time triggered first": "",
                 "Time triggered last": "",
                 "Condition": "/Equipment/GasSystem/Variables/Measured[304] > 0",
@@ -6104,7 +6104,7 @@
                 "Triggered": 0,
                 "Type": 3,
                 "Check interval": 60,
-                "Checked last": 1702527503,
+                "Checked last": 1702593317,
                 "Time triggered first": "",
                 "Time triggered last": "",
                 "Condition": "/Equipment/GasSystem/Variables/Measured[305] > 0",
@@ -6172,7 +6172,7 @@
                 "Alarm Message": "Program rconsole is not running"
             },
             "middleware": {
-                "Active": true,
+                "Active": false,
                 "Triggered": 0,
                 "Type": 2,
                 "Check interval": 60,
@@ -6180,7 +6180,7 @@
                 "Time triggered first": "",
                 "Time triggered last": "",
                 "Condition": "Program not running",
-                "Alarm Class": "",
+                "Alarm Class": "Software Alarm",
                 "Alarm Message": "Program middleware is not running"
             },
             "SC Frontend": {
@@ -6224,7 +6224,7 @@
                 "Triggered": 0,
                 "Type": 3,
                 "Check interval": 60,
-                "Checked last": 1702527503,
+                "Checked last": 1702593317,
                 "Time triggered first": "",
                 "Time triggered last": "",
                 "Condition": "/Equipment/GasSystem/Settings/seconds_from_last_GC_save > 3600",
@@ -6252,26 +6252,10 @@
                 "Display FGColor": "black"
             },
             "Gas Alarm": {
-                "Write system message": true,
-                "Write Elog message": false,
-                "System message interval": 60,
-                "System message last": 0,
-                "Execute command": "",
-                "Execute interval": 0,
-                "Execute last": 0,
-                "Stop run": false,
                 "Display BGColor": "red",
                 "Display FGColor": "black"
             },
             "DAQ Alarm": {
-                "Write system message": true,
-                "Write Elog message": false,
-                "System message interval": 60,
-                "System message last": 0,
-                "Execute command": "",
-                "Execute interval": 0,
-                "Execute last": 0,
-                "Stop run": false,
                 "Display BGColor": "red",
                 "Display FGColor": "black"
             },
@@ -6498,7 +6482,7 @@
         "State": {
             "New File": false,
             "Path": "/home/standard/daq/online/",
-            "Filename": "S017_Run_4_Standard_Sequence.msl",
+            "Filename": "S019_Run_4_LowGain_Standard_Sequence.msl",
             "Error": "",
             "Error line": 0,
             "SError line": 0,
@@ -6561,8 +6545,8 @@
                 0
             ],
             "Loop counter": [
-                12,
-                4,
+                6,
+                3,
                 0,
                 0,
                 0,
@@ -6655,21 +6639,21 @@
                 "",
                 ""
             ],
-            "Wait value": 205,
+            "Wait value": 94,
             "Wait limit": 400,
             "Start time": 0,
             "Wait type": "Events",
             "Wait ODB": "",
-            "Last msg": "05:14:07"
+            "Last msg": "23:33:21"
         },
         "Command": {
             "Start script": false,
             "Stop immediately": false,
             "Load new file": false,
-            "Load filename": "S017_Run_4_Standard_Sequence.msl"
+            "Load filename": "S019_Run_4_LowGain_Standard_Sequence.msl"
         },
         "Script": {
-            "XML": "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<RunSequence xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"\">\n<Comment l=\"1\">TEST v0.1</Comment>\n<ODBSet l=\"3\" path=\"/Configurations/Exposure\">0.3</ODBSet>\n<ODBSet l=\"4\" path=\"/Logger/Write data\">1</ODBSet>\n<ODBSet l=\"7\" path=\"/Configurations/SourceState/source_type\">0</ODBSet>\n<ODBSet l=\"8\" path=\"/Configurations/SourceState/source_position\">0</ODBSet>\n<ODBSet l=\"11\" path=\"/Configurations/run_type\">0</ODBSet>\n<RunDescription l=\"14\">Standard</RunDescription>\n<Loop l=\"16\" le=\"74\" n=\"infinite\">\n<ODBSet l=\"20\" path=\"/Configurations/FreeRunning\">0</ODBSet>\n<ODBSet l=\"21\" path=\"/Configurations/pmt_acquisition\">1</ODBSet>\n<ODBSet l=\"22\" path=\"/Configurations/Pedestal\">1</ODBSet>\n<ODBSet l=\"25\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[0]\">15</ODBSet>\n<ODBSet l=\"26\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[1]\">1</ODBSet>\n<ODBSet l=\"27\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[2]\">1</ODBSet>\n<ODBSet l=\"28\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[3]\">2</ODBSet>\n<ODBSet l=\"29\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[4]\">3</ODBSet>\n<ODBSet l=\"30\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[5]\">1</ODBSet>\n<ODBSet l=\"31\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[6]\">2</ODBSet>\n<ODBSet l=\"32\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[7]\">1</ODBSet>\n<ODBSet l=\"34\" path=\"/Equipment/HV/Variables/ChState[0-6]\">0</ODBSet>\n<Wait l=\"35\" for=\"seconds\">50</Wait>\n<Wait l=\"36\" for=\"ODBvalue\" path=\"/Equipment/HV/Variables/ChStatus[6]\" op=\"==\">0</Wait>\n<Transition l=\"38\">START</Transition>\n<Wait l=\"39\" for=\"events\">100</Wait>\n<Transition l=\"40\">STOP</Transition>\n<ODBSet l=\"43\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[0]\">240</ODBSet>\n<ODBSet l=\"44\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[1]\">240</ODBSet>\n<ODBSet l=\"45\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[2]\">240</ODBSet>\n<ODBSet l=\"46\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[3]\">2</ODBSet>\n<ODBSet l=\"47\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[4]\">2</ODBSet>\n<ODBSet l=\"48\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[5]\">1</ODBSet>\n<ODBSet l=\"49\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[6]\">2</ODBSet>\n<ODBSet l=\"50\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[7]\">1</ODBSet>\n<ODBSet l=\"52\" path=\"/Equipment/HV/Variables/ChState[0-6]\">1</ODBSet>\n<Wait l=\"53\" for=\"seconds\">50</Wait>\n<Wait l=\"54\" for=\"ODBvalue\" path=\"/Equipment/HV/Variables/ChStatus[6]\" op=\"==\">1</Wait>\n<ODBSet l=\"58\" path=\"/Configurations/FreeRunning\">0</ODBSet>\n<ODBSet l=\"59\" path=\"/Configurations/pmt_acquisition\">1</ODBSet>\n<ODBSet l=\"60\" path=\"/Configurations/Pedestal\">0</ODBSet>\n<Loop l=\"62\" le=\"72\" n=\"6\">\n<Transition l=\"64\">START</Transition>\n<Wait l=\"65\" for=\"events\">400</Wait>\n<Transition l=\"66\">STOP</Transition>\n</Loop>\n</Loop>\n</RunSequence>\n",
+            "XML": "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<RunSequence xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"\">\n<Comment l=\"1\">TEST v0.1</Comment>\n<ODBSet l=\"3\" path=\"/Configurations/Exposure\">0.3</ODBSet>\n<ODBSet l=\"4\" path=\"/Logger/Write data\">1</ODBSet>\n<ODBSet l=\"7\" path=\"/Configurations/SourceState/source_type\">0</ODBSet>\n<ODBSet l=\"8\" path=\"/Configurations/SourceState/source_position\">0</ODBSet>\n<ODBSet l=\"11\" path=\"/Configurations/run_type\">0</ODBSet>\n<RunDescription l=\"14\">Standard - LOW Gain</RunDescription>\n<Loop l=\"16\" le=\"74\" n=\"infinite\">\n<ODBSet l=\"20\" path=\"/Configurations/FreeRunning\">0</ODBSet>\n<ODBSet l=\"21\" path=\"/Configurations/pmt_acquisition\">1</ODBSet>\n<ODBSet l=\"22\" path=\"/Configurations/Pedestal\">1</ODBSet>\n<ODBSet l=\"25\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[0]\">15</ODBSet>\n<ODBSet l=\"26\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[1]\">1</ODBSet>\n<ODBSet l=\"27\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[2]\">1</ODBSet>\n<ODBSet l=\"28\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[3]\">2</ODBSet>\n<ODBSet l=\"29\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[4]\">3</ODBSet>\n<ODBSet l=\"30\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[5]\">1</ODBSet>\n<ODBSet l=\"31\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[6]\">2</ODBSet>\n<ODBSet l=\"32\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[7]\">1</ODBSet>\n<ODBSet l=\"34\" path=\"/Equipment/HV/Variables/ChState[0-6]\">0</ODBSet>\n<Wait l=\"35\" for=\"seconds\">50</Wait>\n<Wait l=\"36\" for=\"ODBvalue\" path=\"/Equipment/HV/Variables/ChStatus[6]\" op=\"==\">0</Wait>\n<Transition l=\"38\">START</Transition>\n<Wait l=\"39\" for=\"events\">100</Wait>\n<Transition l=\"40\">STOP</Transition>\n<ODBSet l=\"43\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[0]\">240</ODBSet>\n<ODBSet l=\"44\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[1]\">240</ODBSet>\n<ODBSet l=\"45\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[2]\">240</ODBSet>\n<ODBSet l=\"46\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[3]\">2</ODBSet>\n<ODBSet l=\"47\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[4]\">2</ODBSet>\n<ODBSet l=\"48\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[5]\">1</ODBSet>\n<ODBSet l=\"49\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[6]\">2</ODBSet>\n<ODBSet l=\"50\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[7]\">1</ODBSet>\n<ODBSet l=\"52\" path=\"/Equipment/HV/Variables/ChState[0-6]\">1</ODBSet>\n<Wait l=\"53\" for=\"seconds\">50</Wait>\n<Wait l=\"54\" for=\"ODBvalue\" path=\"/Equipment/HV/Variables/ChStatus[6]\" op=\"==\">1</Wait>\n<ODBSet l=\"58\" path=\"/Configurations/FreeRunning\">0</ODBSet>\n<ODBSet l=\"59\" path=\"/Configurations/pmt_acquisition\">1</ODBSet>\n<ODBSet l=\"60\" path=\"/Configurations/Pedestal\">0</ODBSet>\n<Loop l=\"62\" le=\"72\" n=\"6\">\n<Transition l=\"64\">START</Transition>\n<Wait l=\"65\" for=\"events\">400</Wait>\n<Transition l=\"66\">STOP</Transition>\n</Loop>\n</Loop>\n</RunSequence>\n",
             "Lines": [
                 "COMMENT \"TEST v0.1\"",
                 "",
@@ -6684,7 +6668,7 @@
                 "ODBSET \"/Configurations/run_type\", \"0\" ",
                 "",
                 "# Run description",
-                "RUNDESCRIPTION \"Standard\"",
+                "RUNDESCRIPTION \"Standard - LOW Gain\"",
                 "",
                 "LOOP infinite",
                 "    ",
