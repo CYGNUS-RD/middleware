@@ -84,14 +84,14 @@ def image_jpg(image, vmin, vmax, event_number, event_time):
         
     return
 
-def main(kafka_ip, TAG, verbose=False):
+def main(kafka_ip, tag, verbose=False):
     vmin         = 95
     vmax         = 130
     connection   =-1
     attempts     = 0
-    if verbose: print('kafka_ip:'+kafka_ip)
+    if verbose: print('>>> kafka_ip:'+kafka_ip)
     consumer = KafkaConsumer(
-        bootstrap_servers=[kafka_ip+":9092"],
+        bootstrap_servers=[kafka_ip],
 	api_version=(0,11,5),
         group_id="demo-group",
         auto_offset_reset="earliest",
@@ -111,7 +111,7 @@ def main(kafka_ip, TAG, verbose=False):
             print("error opening client session:",  attempts, e)
             time.sleep(10)
             
-    topic = 'midas-event-file-'+TAG
+    topic = 'midas-event-file-'+tag
     #
     # reset to the end of the stream
     # consumer.poll()
@@ -120,7 +120,7 @@ def main(kafka_ip, TAG, verbose=False):
     event = midas.event.Event()
     consumer.subscribe(topic)
     start = time.time()
-    
+    if verbose: print('topic',topic)
     while True:
         try:
             for mes in consumer:
@@ -130,7 +130,7 @@ def main(kafka_ip, TAG, verbose=False):
                 # if verbose:
                 #     print(event_info_json)
                 
-                payload_name =  "{}_{}_{}.dat".format(TAG, event_info_json["timestamp"], event_info_json["serial_number"])
+                payload_name =  "{}_{}_{}.dat".format(tag, event_info_json["timestamp"], event_info_json["serial_number"])
 
                 url = baseurl+payload_name 
                 response = requests.get(url)
@@ -188,4 +188,4 @@ if __name__ == "__main__":
     if len(args)<1:
         parser.print_help()
         exit(1)	
-    main(args[0], TAG=options.tag, verbose=options.verbose)
+    main(args[0], tag=options.tag, verbose=options.verbose)
