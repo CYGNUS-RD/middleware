@@ -82,7 +82,7 @@ services:
        REMOTE_APP_NAME: localhost
        LOCAL_PORT: 80
        USER: mazzitel
-       REMOTE_IP: 131.154.96.175
+       REMOTE_IP: 131.154.98.101
     volumes:
        - /root/.ssh/daq_id:/root/.ssh/id_rsa
 
