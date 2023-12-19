@@ -23,6 +23,7 @@ services:
       IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
       IAM_CLIENT_ID: ${IAM_CLIENT_ID}
       ENDPOINT_URL: ${ENDPOINT_URL}
+# attenzione sicronizzato al momento con il nome del servizio che puo' accedere a kafka
       OPTIONS: 'tunnel_kafka:29092 -v'
     volumes:
 #      - ${PWD}/dev/consumer_event_s3.sh:/root/init.sh
@@ -31,16 +32,16 @@ services:
       - /tmp/:/tmp/
 
 
-  tunnel:
+  localhost:
     restart: always
     image: gmazzitelli/sshtunnel
-    container_name: tunnel_kafka
+    container_name: localhost
     environment: 
        REMOTE_PORT: 9092
        REMOTE_APP_NAME: 127.0.0.1
        LOCAL_PORT: 9092
        USER: mazzitel
-       REMOTE_IP: ${KAFKA_IP}
+       REMOTE_IP: kafka.cygno.cloud.infn.it
     ports:
        - "9092:9092"
     volumes:
