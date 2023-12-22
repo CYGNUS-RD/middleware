@@ -30,16 +30,18 @@ sentinel.cygno.cloud.infn.it
 - https://github.com/CYGNUS-RD/middleware/tree/master/conf/sentinel
 
 ## set up grafana and SQL(LNF) server
-grafana.cygno.cloud.infn.it
-grafana server host grafana in docker file cof/grafna and LNF db in conf/mariadb
+grafana.cygno.cloud.infn.it, grafana server host grafana in docker file cof/grafna and LNF db in conf/mariadb
 - https://github.com/CYGNUS-RD/middleware/tree/master/conf/grafana
 - https://github.com/CYGNUS-RD/middleware/tree/master/conf/mariadb
  
 ## set up SQL (LNGS) server
-sql.cygno.cloud.infn.it host LNGS SQL, analyzer for online reco historization, tape data managment
+sql.cygno.cloud.infn.it, host LNGS SQL, analyzer for online reco historization, tape data managment
 - https://github.com/CYGNUS-RD/middleware/tree/master/conf/mariadb
 - https://github.com/CYGNUS-RD/middleware/tree/master/conf/analizer
 - https://github.com/CYGNUS-RD/middleware/tree/master/conf/tape
+## set up backend server
+backend.cygno.cloud.infn.it, kafka consumer
+- https://github.com/CYGNUS-RD/middleware/tree/master/conf/backend
 
 ## open issues
 /afs/lnf.infn.it/user/m/mazzitel/www/php/cygno_sql_query.php
