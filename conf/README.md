@@ -43,6 +43,7 @@ sql.cygno.cloud.infn.it, host LNGS SQL, analyzer for online reco historization, 
 backend.cygno.cloud.infn.it, kafka consumer
 - https://github.com/CYGNUS-RD/middleware/tree/master/conf/backend
 
-## open issues
+## open issues, to do list
 /afs/lnf.infn.it/user/m/mazzitel/www/php/cygno_sql_query.php
+aggiornare tutto by name (sql.cygno.cloud.infn.it)
 
