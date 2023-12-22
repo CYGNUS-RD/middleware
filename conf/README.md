@@ -14,7 +14,7 @@
 - 90.147.174.175  cygno_jupyter01  BACKBONE-BARI notebook.cygno.cloud.infn.it  notebook01.cygno.cloud.infn.it
 - 192.135.24.178  cygno_jupyter02  BACKBONE-CNAF notebook02.cygno.cloud.infn.it
 
-# to start all services on the VM, please use 
+## to start all services on the VM, please use 
 ```
 cd /home/mazzitel/middleware/conf 
 ./start_vm.sh 
