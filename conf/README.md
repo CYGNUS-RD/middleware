@@ -1,6 +1,6 @@
 # configuration
 - [install docker compose on unbutu](https://docs.docker.com/engine/install/ubuntu/)
-- [certbot](https://servicedesk.infn.it/servicedesk/customer/portal/50/INFNCLOUD-540)
+- [certbot](https://servicedesk.infn.it/servicedesk/customer/portal/50/INFNCLOUD-540), and then add to crontab: ```0 */12 * * * certbot -q renew```
 - 192.135.24.159  cygno-jupyter00-dev **certificte, ports, dns**
 - ~~131.154.96.196  grafana_0  CLOUD-CNAF  **migrated ready to shutdown**~~
 - ~~131.154.96.221  sqllngs_0  CLOUD-CNAF  **migrated ready to shutdown**~~
