@@ -1,0 +1,33 @@
+Will use pedestal run 35136 which has comment: 'Calibration - No Collimator' and n of events: '105'
+Downloading MIDAS.gz file for run 35138
+WARNING: pedestal file with full resolution  pedestals/pedmap_run35136_rebin1.root  not existing. First calculate them...
+download or open midas file for run  35136
+https://s3.cloud.infn.it/v1/AUTH_2ebf769785574195bde2ff418deac08a/cygno-data/LNGS/run35136.mid.gz
+https://s3.cloud.infn.it/v1/AUTH_2ebf769785574195bde2ff418deac08a/cygno-data/LNGS/run35136.mid.gz
+downloading: /tmp///run35136.mid.gz
+Calc pedestal mean with event:  0
+Calc pedestal mean with event:  20
+Calc pedestal mean with event:  40
+Calc pedestal mean with event:  60
+Calc pedestal mean with event:  80
+Calc pedestal mean with event:  100
+Calc pedestal rms with event:  0
+Calc pedestal rms with event:  20
+Calc pedestal rms with event:  40
+Calc pedestal rms with event:  60
+Calc pedestal rms with event:  80
+Calc pedestal rms with event:  100
+Pedestal calculated and saved into  pedestals/pedmap_run35136_rebin1.root
+Pulling pedestals...
+Loading vignette map from: data/vignette_runs03930to03932.root...
+py ndim =  2
+Macro-pixel of the vignetting map has size =  (8, 8)
+download or open midas file for run  35138
+https://s3.cloud.infn.it/v1/AUTH_2ebf769785574195bde2ff418deac08a/cygno-data/LNGS/run35138.mid.gz
+https://s3.cloud.infn.it/v1/AUTH_2ebf769785574195bde2ff418deac08a/cygno-data/LNGS/run35138.mid.gz
+downloading: /tmp///run35138.mid.gz
+This run has  152  events.
+Will save plots to  ./
+Analyzing from event 0 to event 152
+RUNNING USING  4  THREADS.
+Chunks =  [(0, 0, 37), (1, 38, 75), (2, 76, 113), (3, 114, 151)]

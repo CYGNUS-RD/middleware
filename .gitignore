@@ -132,3 +132,10 @@ dmypy.json
 *.png
 data/
 cygno_conf.py
+
+# no reconstruction code
+conf/sentinel/dev/reconstruction/
+conf/kafka/dev/LNGS_image.json
+conf/kafka/dev/LNGS_odb.json
+conf/kafka/dev/LNGS_pmt_f.json
+conf/kafka/dev/LNGS_pmt_s.json

@@ -93,7 +93,7 @@
         "Transition connect timeout": 10000,
         "Transition timeout": 120000,
         "Run Parameters": {
-            "Run description": "Eu Campaign"
+            "Run description": "Standard - LOW Gain"
         },
         "Edit on start": {
             "Write data": "/Logger/Write data",
@@ -123,90 +123,90 @@
     },
     "System": {
         "Clients": {
-            "5569": {
+            "6259": {
+                "Name": "midas2cloud",
+                "Host": "localhost",
+                "Hardware type": 44,
+                "Server Port": 34429
+            },
+            "7026": {
+                "Name": "python_fe",
+                "Host": "localhost",
+                "Hardware type": 44,
+                "Server Port": 40055,
+                "Transition START": 500,
+                "Transition STOP": 500,
+                "Transition PAUSE": 500,
+                "Transition RESUME": 500
+            },
+            "7198": {
+                "Name": "fileCompressor",
+                "Host": "localhost",
+                "Hardware type": 44,
+                "Server Port": 35017
+            },
+            "145291": {
+                "Name": "checkGasController",
+                "Host": "localhost",
+                "Hardware type": 44,
+                "Server Port": 39327
+            },
+            "769097": {
                 "Name": "mhttpd",
                 "Host": "localhost",
                 "Hardware type": 44,
-                "Server Port": 44407
+                "Server Port": 36435
             },
-            "5582": {
+            "769433": {
                 "Name": "Logger",
                 "Host": "localhost",
                 "Hardware type": 44,
-                "Server Port": 45723,
+                "Server Port": 45453,
                 "Transition START": 200,
                 "Transition STARTABORT": 800,
                 "Transition STOP": 800,
                 "Transition PAUSE": 800,
                 "Transition RESUME": 200
             },
-            "5584": {
+            "769435": {
                 "Name": "Sequencer",
                 "Host": "localhost",
                 "Hardware type": 44,
-                "Server Port": 32799
+                "Server Port": 36115
             },
-            "5736": {
-                "Name": "checkGasController",
-                "Host": "localhost",
-                "Hardware type": 44,
-                "Server Port": 37275
-            },
-            "5925": {
-                "Name": "rconsole",
-                "Host": "localhost",
-                "Hardware type": 44,
-                "Server Port": 42713
-            },
-            "12395": {
-                "Name": "python_fe",
-                "Host": "localhost",
-                "Hardware type": 44,
-                "Server Port": 44093,
-                "Transition START": 500,
-                "Transition STOP": 500,
-                "Transition PAUSE": 500,
-                "Transition RESUME": 500
-            },
-            "13423": {
-                "Name": "fileCompressor",
-                "Host": "localhost",
-                "Hardware type": 44,
-                "Server Port": 44971
-            },
-            "14013": {
-                "Name": "cygnus_daq",
-                "Host": "localhost",
-                "Hardware type": 44,
-                "Server Port": 40599,
-                "Transition START": 500,
-                "Transition STOP": 500,
-                "Transition PAUSE": 500,
-                "Transition RESUME": 500,
-                "Run state": 3
-            },
-            "238235": {
-                "Name": "middleware",
-                "Host": "localhost",
-                "Hardware type": 44,
-                "Server Port": 33825
-            },
-            "240143": {
+            "1229312": {
                 "Name": "SC Frontend",
                 "Host": "localhost",
                 "Hardware type": 44,
-                "Server Port": 43735,
+                "Server Port": 43931,
                 "Transition START": 500,
                 "Transition STOP": 500,
                 "Transition PAUSE": 500,
                 "Transition RESUME": 500,
                 "Run state": 3
             },
-            "364538": {
-                "Name": "midas2cloud",
+            "1229443": {
+                "Name": "cygnus_daq",
                 "Host": "localhost",
                 "Hardware type": 44,
-                "Server Port": 35829
+                "Server Port": 46691,
+                "Transition START": 500,
+                "Transition STOP": 500,
+                "Transition PAUSE": 500,
+                "Transition RESUME": 500,
+                "Run state": 3
+            },
+            "3479211": {
+                "Name": "middleware",
+                "Host": "localhost",
+                "Hardware type": 44,
+                "Server Port": 43809
+            },
+            "3490986": {
+                "Name": "rconsole",
+                "Host": "localhost",
+                "Hardware type": 44,
+                "Server Port": 38731
             }
         },
         "Tmp": {},
@@ -214,10 +214,10 @@
         "Buffers": {
             "SYSMSG": {
                 "Size": 100000,
-                "Write pointer": 27800,
-                "Read pointer": 27936,
-                "Filled": 99864,
-                "Filled pct": 99.864,
+                "Write pointer": 24768,
+                "Read pointer": 24896,
+                "Filled": 99872,
+                "Filled pct": 99.872,
                 "Clients": {
                     "ODBEdit": {
                         "count_lock": 16,
@@ -229,85 +229,85 @@
                         "count_read": 1,
                         "bytes_read": 74,
                         "get_all_flag": false,
-                        "read_pointer": 80,
+                        "read_pointer": 43928,
                         "bytes_used": 0,
                         "pct_used": 0,
-                        "last_updated": 611620091
+                        "last_updated": 1557457560
                     },
                     "SC Frontend": {
-                        "count_lock": 815868,
-                        "count_sent": 8,
-                        "bytes_sent": 696,
+                        "count_lock": 128796,
+                        "count_sent": 6,
+                        "bytes_sent": 512,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 27936,
-                        "bytes_used": 99864,
-                        "pct_used": 99.864,
-                        "last_updated": 1457300858
+                        "read_pointer": 7816,
+                        "bytes_used": 16952,
+                        "pct_used": 16.952,
+                        "last_updated": 1786305557
                     },
                     "Logger": {
-                        "count_lock": 1678684,
-                        "count_sent": 7,
-                        "bytes_sent": 744,
+                        "count_lock": 452773,
+                        "count_sent": 20,
+                        "bytes_sent": 3824,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 27936,
-                        "bytes_used": 99864,
-                        "pct_used": 99.864,
-                        "last_updated": 1457300503
+                        "read_pointer": 43928,
+                        "bytes_used": 80840,
+                        "pct_used": 80.84,
+                        "last_updated": 1786305533
                     },
                     "cygnus_daq": {
-                        "count_lock": 1834031,
-                        "count_sent": 0,
-                        "bytes_sent": 0,
+                        "count_lock": 114539,
+                        "count_sent": 3,
+                        "bytes_sent": 440,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 27936,
-                        "bytes_used": 99864,
-                        "pct_used": 99.864,
-                        "last_updated": 1457300490
+                        "read_pointer": 7816,
+                        "bytes_used": 16952,
+                        "pct_used": 16.952,
+                        "last_updated": 1786304996
                     },
                     "mhttpd": {
-                        "count_lock": 2104582,
-                        "count_sent": 23,
-                        "bytes_sent": 1296,
+                        "count_lock": 570473,
+                        "count_sent": 44,
+                        "bytes_sent": 6656,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 27936,
-                        "bytes_used": 99864,
-                        "pct_used": 99.864,
-                        "last_updated": 1457300780
+                        "read_pointer": 43928,
+                        "bytes_used": 80840,
+                        "pct_used": 80.84,
+                        "last_updated": 1786305079
                     },
                     "Sequencer": {
-                        "count_lock": 1608372,
-                        "count_sent": 9337,
-                        "bytes_sent": 524024,
+                        "count_lock": 435684,
+                        "count_sent": 1067,
+                        "bytes_sent": 62408,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 27936,
-                        "bytes_used": 99864,
-                        "pct_used": 99.864,
-                        "last_updated": 1457300502
+                        "read_pointer": 43928,
+                        "bytes_used": 80840,
+                        "pct_used": 80.84,
+                        "last_updated": 1786305192
                     },
                     "Analyzer": {
                         "count_lock": 699,
@@ -340,19 +340,19 @@
                         "last_updated": 1638026651
                     },
                     "ODBEdit1": {
-                        "count_lock": 54231,
+                        "count_lock": 2018,
                         "count_sent": 0,
                         "bytes_sent": 0,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
-                        "count_read": 2,
-                        "bytes_read": 324,
+                        "count_read": 0,
+                        "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 6056,
+                        "read_pointer": 43224,
                         "bytes_used": 0,
                         "pct_used": 0,
-                        "last_updated": 2892416838
+                        "last_updated": 356775249
                     },
                     "ODBEdit2": {
                         "count_lock": 38213,
@@ -370,7 +370,7 @@
                         "last_updated": 2892418523
                     },
                     "db_display": {
-                        "count_lock": 29,
+                        "count_lock": 54,
                         "count_sent": 0,
                         "bytes_sent": 0,
                         "count_write_wait": 0,
@@ -379,13 +379,13 @@
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 71320,
-                        "bytes_used": 0,
-                        "pct_used": 0,
-                        "last_updated": 419312886
+                        "read_pointer": 7688,
+                        "bytes_used": 224,
+                        "pct_used": 0.22399999999999998,
+                        "last_updated": 4134916812
                     },
                     "cygnus_daq1": {
-                        "count_lock": 20,
+                        "count_lock": 22,
                         "count_sent": 2,
                         "bytes_sent": 272,
                         "count_write_wait": 0,
@@ -394,13 +394,13 @@
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 96736,
+                        "read_pointer": 18024,
                         "bytes_used": 272,
                         "pct_used": 0.272,
-                        "last_updated": 2357816462
+                        "last_updated": 1913705363
                     },
                     "pytest": {
-                        "count_lock": 1,
+                        "count_lock": 23,
                         "count_sent": 0,
                         "bytes_sent": 0,
                         "count_write_wait": 0,
@@ -409,13 +409,13 @@
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 53656,
+                        "read_pointer": 99888,
                         "bytes_used": 0,
                         "pct_used": 0,
-                        "last_updated": 1666759205
+                        "last_updated": 4069829644
                     },
                     "db_display1": {
-                        "count_lock": 367,
+                        "count_lock": 55,
                         "count_sent": 0,
                         "bytes_sent": 0,
                         "count_write_wait": 0,
@@ -424,10 +424,10 @@
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 94992,
-                        "bytes_used": 656,
-                        "pct_used": 0.6560000000000001,
-                        "last_updated": 879876192
+                        "read_pointer": 52624,
+                        "bytes_used": 0,
+                        "pct_used": 0,
+                        "last_updated": 2589260099
                     },
                     "mhist": {
                         "count_lock": 6,
@@ -490,7 +490,7 @@
                         "last_updated": 1366237858
                     },
                     "middleware": {
-                        "count_lock": 402152,
+                        "count_lock": 8004,
                         "count_sent": 0,
                         "bytes_sent": 0,
                         "count_write_wait": 0,
@@ -499,25 +499,25 @@
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 27936,
-                        "bytes_used": 99864,
-                        "pct_used": 99.864,
-                        "last_updated": 1457300975
+                        "read_pointer": 22504,
+                        "bytes_used": 2264,
+                        "pct_used": 2.2640000000000002,
+                        "last_updated": 1786304394
                     },
                     "midas2cloud": {
-                        "count_lock": 2,
-                        "count_sent": 0,
-                        "bytes_sent": 0,
+                        "count_lock": 1406305,
+                        "count_sent": 3,
+                        "bytes_sent": 240,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 24160,
-                        "bytes_used": 0,
-                        "pct_used": 0,
-                        "last_updated": 1452095408
+                        "read_pointer": 24896,
+                        "bytes_used": 99872,
+                        "pct_used": 99.872,
+                        "last_updated": 1786198055
                     },
                     "Logger1": {
                         "count_lock": 6,
@@ -550,7 +550,7 @@
                         "last_updated": 2171265427
                     },
                     "middleware1": {
-                        "count_lock": 713089,
+                        "count_lock": 40,
                         "count_sent": 0,
                         "bytes_sent": 0,
                         "count_write_wait": 0,
@@ -559,10 +559,10 @@
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 7112,
-                        "bytes_used": 99880,
-                        "pct_used": 99.88,
-                        "last_updated": 1124229660
+                        "read_pointer": 94864,
+                        "bytes_used": 0,
+                        "pct_used": 0,
+                        "last_updated": 1731839232
                     },
                     "db_display2": {
                         "count_lock": 1,
@@ -580,19 +580,19 @@
                         "last_updated": 3324728712
                     },
                     "SC Frontend1": {
-                        "count_lock": 38,
-                        "count_sent": 7,
-                        "bytes_sent": 680,
+                        "count_lock": 918,
+                        "count_sent": 6,
+                        "bytes_sent": 512,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 74120,
-                        "bytes_used": 680,
-                        "pct_used": 0.68,
-                        "last_updated": 2808194093
+                        "read_pointer": 37680,
+                        "bytes_used": 976,
+                        "pct_used": 0.976,
+                        "last_updated": 3374309617
                     },
                     "midas2cloud1": {
                         "count_lock": 256,
@@ -655,22 +655,22 @@
                         "last_updated": 3170687961
                     },
                     "checkGasController": {
-                        "count_lock": 450512,
-                        "count_sent": 1,
-                        "bytes_sent": 152,
+                        "count_lock": 762172,
+                        "count_sent": 135,
+                        "bytes_sent": 13104,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 27824,
-                        "bytes_used": 99864,
-                        "pct_used": 99.864,
-                        "last_updated": 1457259594
+                        "read_pointer": 24896,
+                        "bytes_used": 99872,
+                        "pct_used": 99.872,
+                        "last_updated": 1786254332
                     },
                     "rconsole": {
-                        "count_lock": 1213725,
+                        "count_lock": 13466,
                         "count_sent": 0,
                         "bytes_sent": 0,
                         "count_write_wait": 0,
@@ -679,10 +679,10 @@
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 27936,
-                        "bytes_used": 99864,
-                        "pct_used": 99.864,
-                        "last_updated": 1457300024
+                        "read_pointer": 23424,
+                        "bytes_used": 1344,
+                        "pct_used": 1.344,
+                        "last_updated": 1786304824
                     },
                     "rconsole1": {
                         "count_lock": 49,
@@ -715,74 +715,74 @@
                         "last_updated": 1126730884
                     },
                     "python_fe": {
-                        "count_lock": 1582497,
-                        "count_sent": 2,
-                        "bytes_sent": 184,
+                        "count_lock": 5118083,
+                        "count_sent": 54,
+                        "bytes_sent": 5960,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 27936,
-                        "bytes_used": 99864,
-                        "pct_used": 99.864,
-                        "last_updated": 1457300409
+                        "read_pointer": 24896,
+                        "bytes_used": 99872,
+                        "pct_used": 99.872,
+                        "last_updated": 1786305105
                     },
                     "fileCompressor": {
-                        "count_lock": 472585,
-                        "count_sent": 0,
-                        "bytes_sent": 0,
+                        "count_lock": 1513325,
+                        "count_sent": 13,
+                        "bytes_sent": 1128,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 27880,
-                        "bytes_used": 99864,
-                        "pct_used": 99.864,
-                        "last_updated": 1457296513
+                        "read_pointer": 24896,
+                        "bytes_used": 99872,
+                        "pct_used": 99.872,
+                        "last_updated": 1786303879
                     }
                 },
-                "Last updated": 1457300975
+                "Last updated": 1786305557
             },
             "SYSTEM": {
                 "Size": 2097152000,
-                "Write pointer": 2081102080,
-                "Read pointer": 2087125752,
-                "Filled": 2091128328,
-                "Filled pct": 99.71276893615723,
+                "Write pointer": 475293864,
+                "Read pointer": 481355056,
+                "Filled": 2091090808,
+                "Filled pct": 99.71097984313964,
                 "Clients": {
                     "SC Frontend": {
-                        "count_lock": 844832,
-                        "count_sent": 28977,
-                        "bytes_sent": 27353272,
+                        "count_lock": 132665,
+                        "count_sent": 3880,
+                        "bytes_sent": 3529104,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 2087125752,
-                        "bytes_used": 2091128328,
-                        "pct_used": 99.71276893615723,
-                        "last_updated": 1457300858
+                        "read_pointer": 481355056,
+                        "bytes_used": 2091090808,
+                        "pct_used": 99.71097984313964,
+                        "last_updated": 1786305557
                     },
                     "cygnus_daq": {
-                        "count_lock": 3261369,
-                        "count_sent": 1427343,
-                        "bytes_sent": 18412980408424.0,
+                        "count_lock": 155354,
+                        "count_sent": 40823,
+                        "bytes_sent": 398986082112.0,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 2087125752,
-                        "bytes_used": 2091128328,
-                        "pct_used": 99.71276893615723,
-                        "last_updated": 1457300491
+                        "read_pointer": 470608400,
+                        "bytes_used": 2091090672,
+                        "pct_used": 99.71097335815429,
+                        "last_updated": 1786304996
                     },
                     "ODBEdit": {
                         "count_lock": 6,
@@ -794,10 +794,10 @@
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 0,
+                        "read_pointer": 834151976,
                         "bytes_used": 0,
                         "pct_used": 0,
-                        "last_updated": 611619859
+                        "last_updated": 1557457559
                     },
                     "Analyzer": {
                         "count_lock": 17,
@@ -815,37 +815,37 @@
                         "last_updated": 1025424473
                     },
                     "Logger": {
-                        "count_lock": 308,
+                        "count_lock": 7298,
                         "count_sent": 0,
                         "bytes_sent": 0,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
-                        "count_read": 16,
-                        "bytes_read": 129039132,
+                        "count_read": 137,
+                        "bytes_read": 1013046016,
                         "get_all_flag": true,
-                        "read_pointer": 2081102080,
+                        "read_pointer": 464547208,
                         "bytes_used": 0,
                         "pct_used": 0,
-                        "last_updated": 1457300503
+                        "last_updated": 1786305533
                     },
                     "db_display": {
-                        "count_lock": 36,
+                        "count_lock": 94,
                         "count_sent": 0,
                         "bytes_sent": 0,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
-                        "count_read": 9,
-                        "bytes_read": 84934984,
+                        "count_read": 41,
+                        "bytes_read": 318513092,
                         "get_all_flag": false,
-                        "read_pointer": 1907824736,
-                        "bytes_used": 191103760,
-                        "pct_used": 9.112537384033203,
-                        "last_updated": 419312886
+                        "read_pointer": 1822473984,
+                        "bytes_used": 42474392,
+                        "pct_used": 2.0253368377685548,
+                        "last_updated": 4134916812
                     },
                     "cygnus_daq1": {
-                        "count_lock": 13,
+                        "count_lock": 15,
                         "count_sent": 0,
                         "bytes_sent": 0,
                         "count_write_wait": 0,
@@ -854,25 +854,25 @@
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 2026049000,
-                        "bytes_used": 64,
-                        "pct_used": 3.0517578125e-06,
-                        "last_updated": 2357816462
+                        "read_pointer": 1018277448,
+                        "bytes_used": 0,
+                        "pct_used": 0,
+                        "last_updated": 1913705363
                     },
                     "db_display1": {
-                        "count_lock": 1099,
+                        "count_lock": 76,
                         "count_sent": 0,
                         "bytes_sent": 0,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
-                        "count_read": 46,
-                        "bytes_read": 39432,
+                        "count_read": 18,
+                        "bytes_read": 139965912,
                         "get_all_flag": false,
-                        "read_pointer": 1020073088,
-                        "bytes_used": 0,
-                        "pct_used": 0,
-                        "last_updated": 879876192
+                        "read_pointer": 199914368,
+                        "bytes_used": 215840224,
+                        "pct_used": 10.292063903808593,
+                        "last_updated": 2589260100
                     },
                     "db_producer_v0.1": {
                         "count_lock": 4868,
@@ -920,34 +920,34 @@
                         "last_updated": 1366237859
                     },
                     "middleware": {
-                        "count_lock": 660019,
+                        "count_lock": 13358,
                         "count_sent": 0,
                         "bytes_sent": 0,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
-                        "count_read": 170652,
-                        "bytes_read": 1904365646328.0,
+                        "count_read": 4261,
+                        "bytes_read": 32878639792.0,
                         "get_all_flag": false,
-                        "read_pointer": 2087125752,
-                        "bytes_used": 2091128328,
-                        "pct_used": 99.71276893615723,
-                        "last_updated": 1457300975
+                        "read_pointer": 1850340424,
+                        "bytes_used": 711358648,
+                        "pct_used": 33.92022361755372,
+                        "last_updated": 1786304394
                     },
                     "middleware1": {
-                        "count_lock": 1089677,
+                        "count_lock": 39,
                         "count_sent": 0,
                         "bytes_sent": 0,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
-                        "count_read": 347846,
-                        "bytes_read": 4118338092780.0,
+                        "count_read": 1,
+                        "bytes_read": 10746652,
                         "get_all_flag": false,
-                        "read_pointer": 1396296152,
-                        "bytes_used": 0,
-                        "pct_used": 0,
-                        "last_updated": 1124229660
+                        "read_pointer": 47435688,
+                        "bytes_used": 474929832,
+                        "pct_used": 22.64641914367676,
+                        "last_updated": 1731839232
                     },
                     "db_display2": {
                         "count_lock": 1,
@@ -965,19 +965,19 @@
                         "last_updated": 3324728712
                     },
                     "SC Frontend1": {
-                        "count_lock": 28,
-                        "count_sent": 2,
-                        "bytes_sent": 712,
+                        "count_lock": 931,
+                        "count_sent": 24,
+                        "bytes_sent": 5712,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 1407672104,
-                        "bytes_used": 712,
-                        "pct_used": 3.39508056640625e-05,
-                        "last_updated": 2808194093
+                        "read_pointer": 1931402904,
+                        "bytes_used": 8208,
+                        "pct_used": 0.00039138793945312503,
+                        "last_updated": 3374309617
                     },
                     "Logger1": {
                         "count_lock": 1,
@@ -995,19 +995,19 @@
                         "last_updated": 3519447703
                     },
                     "mhttpd": {
-                        "count_lock": 14692621,
+                        "count_lock": 853937,
                         "count_sent": 0,
                         "bytes_sent": 0,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
-                        "count_read": 46,
-                        "bytes_read": 413175628,
+                        "count_read": 26,
+                        "bytes_read": 291356288,
                         "get_all_flag": false,
-                        "read_pointer": 735807544,
-                        "bytes_used": 2096315136,
-                        "pct_used": 99.96009521484375,
-                        "last_updated": 314152650
+                        "read_pointer": 230576872,
+                        "bytes_used": 2091250608,
+                        "pct_used": 99.71859970092774,
+                        "last_updated": 3372723180
                     },
                     "notebook": {
                         "count_lock": 848704,
@@ -1025,19 +1025,19 @@
                         "last_updated": 2994062216
                     },
                     "rconsole": {
-                        "count_lock": 3304207,
+                        "count_lock": 57373,
                         "count_sent": 0,
                         "bytes_sent": 0,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
-                        "count_read": 1530039,
-                        "bytes_read": 17727144844032.0,
+                        "count_read": 5941,
+                        "bytes_read": 46138472856.0,
                         "get_all_flag": false,
-                        "read_pointer": 16648984,
-                        "bytes_used": 2051115480,
-                        "pct_used": 97.80480766296387,
-                        "last_updated": 1457300024
+                        "read_pointer": 464547072,
+                        "bytes_used": 0,
+                        "pct_used": 0,
+                        "last_updated": 1786304824
                     },
                     "rconsole1": {
                         "count_lock": 193,
@@ -1055,30 +1055,45 @@
                         "last_updated": 3945737404
                     },
                     "python_fe": {
-                        "count_lock": 1671576,
-                        "count_sent": 89085,
-                        "bytes_sent": 5701440,
+                        "count_lock": 5391637,
+                        "count_sent": 273612,
+                        "bytes_sent": 17511168,
                         "count_write_wait": 0,
                         "time_write_wait": 0,
                         "max_bytes_write_wait": 0,
                         "count_read": 0,
                         "bytes_read": 0,
                         "get_all_flag": false,
-                        "read_pointer": 2074176776,
-                        "bytes_used": 2090739688,
-                        "pct_used": 99.69423713684083,
-                        "last_updated": 1457300409
+                        "read_pointer": 470608400,
+                        "bytes_used": 2091090672,
+                        "pct_used": 99.71097335815429,
+                        "last_updated": 1786305105
+                    },
+                    "pytest": {
+                        "count_lock": 556,
+                        "count_sent": 0,
+                        "bytes_sent": 0,
+                        "count_write_wait": 0,
+                        "time_write_wait": 0,
+                        "max_bytes_write_wait": 0,
+                        "count_read": 0,
+                        "bytes_read": 0,
+                        "get_all_flag": false,
+                        "read_pointer": 881902376,
+                        "bytes_used": 0,
+                        "pct_used": 0,
+                        "last_updated": 4069829645
                     }
                 },
-                "Last updated": 1457300975
+                "Last updated": 1786305557
             }
         },
         "Prompt": "[%h:%e:%s]%p>",
         "Transition": {
             "transition": 1,
-            "run_number": 33394,
-            "start_time": 1457294858,
-            "end_time": 1457298406,
+            "run_number": 42901,
+            "start_time": 1786148496,
+            "end_time": 1786152043,
             "status": 1,
             "error": "Success",
             "deferred": "",
@@ -1087,73 +1102,73 @@
                     "sequence_number": 200,
                     "client_name": "Logger",
                     "host_name": "localhost",
-                    "port": 45723,
-                    "init_time": 1457294859,
+                    "port": 45453,
+                    "init_time": 1786148496,
                     "waiting_for_client": "",
                     "connect_timeout": 10000,
-                    "connect_start_time": 1457294859,
-                    "connect_end_time": 1457294860,
+                    "connect_start_time": 1786148497,
+                    "connect_end_time": 1786148498,
                     "rpc_timeout": 120000,
-                    "rpc_start_time": 1457294860,
-                    "rpc_end_time": 1457294891,
-                    "end_time": 1457294892,
+                    "rpc_start_time": 1786148498,
+                    "rpc_end_time": 1786148524,
+                    "end_time": 1786148524,
                     "status": 1,
                     "error": "",
-                    "last_updated": 1457294892
+                    "last_updated": 1786148524
                 },
                 "python_fe_500": {
                     "sequence_number": 500,
                     "client_name": "python_fe",
                     "host_name": "localhost",
-                    "port": 44093,
-                    "init_time": 1457294859,
+                    "port": 40055,
+                    "init_time": 1786148496,
                     "waiting_for_client": "",
                     "connect_timeout": 10000,
-                    "connect_start_time": 1457294960,
-                    "connect_end_time": 1457294960,
+                    "connect_start_time": 1786148598,
+                    "connect_end_time": 1786148598,
                     "rpc_timeout": 120000,
-                    "rpc_start_time": 1457294960,
-                    "rpc_end_time": 1457298405,
-                    "end_time": 1457298405,
+                    "rpc_start_time": 1786148598,
+                    "rpc_end_time": 1786152042,
+                    "end_time": 1786152042,
                     "status": 1,
                     "error": "",
-                    "last_updated": 1457298406
-                },
-                "cygnus_daq_500": {
-                    "sequence_number": 500,
-                    "client_name": "cygnus_daq",
-                    "host_name": "localhost",
-                    "port": 40599,
-                    "init_time": 1457294859,
-                    "waiting_for_client": "",
-                    "connect_timeout": 10000,
-                    "connect_start_time": 1457294960,
-                    "connect_end_time": 1457294960,
-                    "rpc_timeout": 120000,
-                    "rpc_start_time": 1457294960,
-                    "rpc_end_time": 1457295109,
-                    "end_time": 1457295109,
-                    "status": 1,
-                    "error": "",
-                    "last_updated": 1457295109
+                    "last_updated": 1786152042
                 },
                 "SC Frontend_500": {
                     "sequence_number": 500,
                     "client_name": "SC Frontend",
                     "host_name": "localhost",
-                    "port": 43735,
-                    "init_time": 1457294859,
+                    "port": 43931,
+                    "init_time": 1786148496,
                     "waiting_for_client": "",
                     "connect_timeout": 10000,
-                    "connect_start_time": 1457294960,
-                    "connect_end_time": 1457294961,
+                    "connect_start_time": 1786148598,
+                    "connect_end_time": 1786148598,
                     "rpc_timeout": 120000,
-                    "rpc_start_time": 1457294961,
-                    "rpc_end_time": 1457294973,
-                    "end_time": 1457294973,
+                    "rpc_start_time": 1786148598,
+                    "rpc_end_time": 1786148618,
+                    "end_time": 1786148618,
                     "status": 1,
                     "error": "",
-                    "last_updated": 1457294973
+                    "last_updated": 1786148618
+                },
+                "cygnus_daq_500": {
+                    "sequence_number": 500,
+                    "client_name": "cygnus_daq",
+                    "host_name": "localhost",
+                    "port": 46691,
+                    "init_time": 1786148496,
+                    "waiting_for_client": "",
+                    "connect_timeout": 10000,
+                    "connect_start_time": 1786148598,
+                    "connect_end_time": 1786148598,
+                    "rpc_timeout": 120000,
+                    "rpc_start_time": 1786148598,
+                    "rpc_end_time": 1786148751,
+                    "end_time": 1786148751,
+                    "status": 1,
+                    "error": "",
+                    "last_updated": 1786148751
                 }
             }
         }
@@ -1168,7 +1183,7 @@
             "Auto stop": false,
             "Auto restart": false,
             "Alarm class": "",
-            "First failed": 1697123702
+            "First failed": 1702364506
         },
         "SC Frontend": {
             "Required": true,
@@ -1248,7 +1263,7 @@
             "Auto stop": false,
             "Auto restart": false,
             "Alarm class": "",
-            "First failed": 1696931396
+            "First failed": 1700647000
         },
         "pytest": {
             "Required": false,
@@ -1259,7 +1274,7 @@
             "Auto stop": false,
             "Auto restart": false,
             "Alarm class": "",
-            "First failed": 1655229252
+            "First failed": 1700581913
         },
         "mhist": {
             "Required": false,
@@ -1302,14 +1317,14 @@
             "Auto start": false,
             "Auto stop": false,
             "Auto restart": false,
-            "Alarm class": "Software Alarm",
+            "Alarm class": "\tSoftware Alarm",
             "First failed": 0
         },
         "midas2cloud": {
             "Required": true,
             "Watchdog timeout": 1000000,
             "Check interval": 180000,
-            "Start command": "/home/standard/daq/middleware/dev/midas2cloud.py >>  /home/standard/daq/online/log/m2c_`date +\"%Y%m\"`.log  2>&1",
+            "Start command": "/home/standard/daq/middleware/dev/midas2cloud_v0.1.py >>  /home/standard/daq/online/log/m2c_`date +\"%Y%m\"`.log  2>&1",
             "Auto start": false,
             "Auto stop": false,
             "Auto restart": false,
@@ -1441,7 +1456,7 @@
                     "Subrun Byte limit": 0,
                     "Tape capacity": 0,
                     "Subdir format": "",
-                    "Current filename": "run33394.mid",
+                    "Current filename": "run42901.mid",
                     "Data checksum": "CRC32C (one of: NONE CRC32C SHA256 SHA512 ZLIB)",
                     "Options Data checksum": [
                         "NONE",
@@ -1481,13 +1496,13 @@
                     "Pbzip2 options": ""
                 },
                 "Statistics": {
-                    "Events written": 17,
-                    "Bytes written": 129415256,
-                    "Bytes written uncompressed": 129415256,
-                    "Bytes written total": 97887736997600.0,
-                    "Bytes written subrun": 129415256,
-                    "Files written": 27671,
-                    "Disk level": 0.5846588833711333
+                    "Events written": 138,
+                    "Bytes written": 1013429832,
+                    "Bytes written uncompressed": 1013429832,
+                    "Bytes written total": 137505466207776.0,
+                    "Bytes written subrun": 1013429832,
+                    "Files written": 37142,
+                    "Disk level": 0.49194554515255506
                 }
             }
         },
@@ -1521,9 +1536,9 @@
                     "drs4_correction_active": "/Configurations/DRS4Correction",
                     "shielding_configuration": "/Configurations/shielding_configuration",
                     "pmt_acquisition": "/Configurations/pmt_acquisition",
-                    "GEM3_V": 440,
-                    "GEM2_V": 440,
-                    "GEM1_V": 440,
+                    "GEM3_V": 400,
+                    "GEM2_V": 400,
+                    "GEM1_V": 400,
                     "T2_V": 500,
                     "T1_V": 500,
                     "DRIFT_V": 960,
@@ -1619,13 +1634,13 @@
     "Runinfo": {
         "State": 3,
         "Online Mode": 1,
-        "Run number": 33394,
+        "Run number": 42901,
         "Transition in progress": 0,
         "Start abort": 0,
         "Requested transition": 0,
-        "Start time": "Sun Oct 22 12:09:36 2023",
-        "Start time binary": 1697969376,
-        "Stop time": "Sun Oct 22 12:09:33 2023",
+        "Start time": "Thu Dec 14 23:33:17 2023",
+        "Start time binary": 1702593197,
+        "Stop time": "Thu Dec 14 23:33:14 2023",
         "Stop time binary": 0
     },
     "Equipment": {
@@ -1655,11 +1670,11 @@
                 "Recovery": 1,
                 "Demand": [
                     10,
-                    440,
+                    400,
                     500,
-                    440,
+                    400,
                     500,
-                    440,
+                    400,
                     960,
                     0,
                     0,
@@ -1682,31 +1697,31 @@
                     0
                 ],
                 "Measured": [
-                    10.42,
-                    440.20001,
-                    500.28,
-                    440.17999,
-                    500.38,
-                    440.12,
-                    960.67999,
+                    9.8199997,
+                    400.17999,
+                    500.32001,
+                    400.20001,
+                    500.39999,
+                    400.06,
+                    960.70001,
                     0,
-                    0.12,
+                    0.079999998,
                     0,
                     0,
-                    0.059999999,
-                    0.2,
+                    0.039999999,
+                    0.18000001,
                     0,
-                    772.25,
+                    772.5,
                     773.25,
                     1,
                     0,
-                    767.5,
-                    106,
-                    800.75,
+                    767.75,
+                    71,
+                    800.5,
                     1,
                     0,
                     0.25,
-                    0,
+                    0.25,
                     0.25
                 ],
                 "Current": [
@@ -1714,16 +1729,16 @@
                     0,
                     0,
                     0,
-                    0.0054000001,
-                    -0.0054000001,
                     0,
-                    -0.0137,
-                    0.0037,
-                    0.0037,
-                    0.0029,
-                    -0.0022,
-                    -0.0073000002,
-                    0.0060999999,
+                    0,
+                    0,
+                    -0.0113,
+                    0.0098000001,
+                    0.0011,
+                    -0.0020000001,
+                    9.9999997e-05,
+                    -0.0065000001,
+                    0.0031999999,
                     180.2,
                     180.8,
                     0.2,
@@ -1795,7 +1810,7 @@
                 ]
             },
             "Statistics": {
-                "Events sent": 1,
+                "Events sent": 3,
                 "Events per sec.": 0,
                 "kBytes per sec.": 0
             },
@@ -2131,14 +2146,14 @@
                 "Write cache size": 0
             },
             "Variables": {
-                "Demand": 41370,
-                "Measured": -41410,
-                "Current": -9.3900003,
+                "Demand": 41250,
+                "Measured": -41291,
+                "Current": -9.6999998,
                 "ChState": 1,
                 "ChStatus": 0
             },
             "Statistics": {
-                "Events sent": 1,
+                "Events sent": 3,
                 "Events per sec.": 0,
                 "kBytes per sec.": 0
             },
@@ -2192,34 +2207,34 @@
             },
             "Variables": {
                 "Input": [
-                    9.6622782,
-                    0.0012807781,
-                    4.5997958,
-                    12.974668,
-                    0.0012268545,
-                    13.038281,
-                    0.0012517907,
-                    0.0011221506,
-                    2.0863881,
-                    2.676194,
-                    1.1674997,
-                    0.62052286,
-                    1.2559332,
-                    0.92541927,
-                    0.3761282,
-                    0.40588057,
-                    10.398762,
-                    10.502898,
-                    4.5868263,
-                    4.5776281,
-                    0.00021659071,
-                    11.018281,
-                    6.2340617,
-                    6.3620191
+                    9.700902,
+                    0.0012255274,
+                    4.5086441,
+                    12.980146,
+                    0.0012583914,
+                    13.042763,
+                    0.0013721059,
+                    0.0011202879,
+                    1.9677782,
+                    2.6809347,
+                    1.1632733,
+                    0.56210542,
+                    1.2623887,
+                    0.87999064,
+                    0.34375516,
+                    0.41948321,
+                    8.7039766,
+                    8.703186,
+                    10.318619,
+                    10.609814,
+                    0.00033921096,
+                    10.996096,
+                    6.2433143,
+                    6.3741465
                 ]
             },
             "Statistics": {
-                "Events sent": 1,
+                "Events sent": 3,
                 "Events per sec.": 0,
                 "kBytes per sec.": 0
             },
@@ -2458,9 +2473,9 @@
                     2,
                     0,
                     1,
-                    64.296158,
-                    1.2087736,
-                    0.9079656,
+                    64.277809,
+                    1.1304033,
+                    0.90809089,
                     30,
                     0,
                     0,
@@ -2697,43 +2712,43 @@
                     30,
                     0,
                     0,
-                    1723.0902,
+                    1277.4885,
                     0,
-                    0.54253477,
-                    19.97522,
-                    5.0205803,
+                    0.3978588,
+                    19.966084,
+                    5.0228949,
                     0,
-                    3.0127316,
+                    3.0133102,
                     0,
-                    2.00774,
+                    2.006655,
                     0,
                     0.00010850695,
                     0,
-                    26.099537,
+                    26.079643,
                     0,
-                    140.42635,
+                    60.447678,
                     0,
-                    2.5827336,
+                    2.9288709,
                     0,
-                    50.112392,
+                    13.040995,
                     0,
-                    3.7495451,
-                    0,
-                    1.013,
+                    3.8349037,
                     0,
                     1.013,
                     0,
-                    0.91044194,
+                    1.013,
                     0,
-                    0.90691549,
+                    0.91053599,
                     0,
-                    0.90635121,
+                    0.90700954,
                     0,
-                    0.70317924,
+                    0.90639824,
                     0,
-                    2.9021058,
+                    0.70228583,
                     0,
-                    9.161871,
+                    2.4691632,
+                    0,
+                    22.513651,
                     1,
                     1,
                     1,
@@ -2773,7 +2788,7 @@
                     0,
                     0,
                     0,
-                    1,
+                    0,
                     0,
                     0
                 ],
@@ -2790,9 +2805,9 @@
                     2,
                     0,
                     1,
-                    64.296158,
-                    1.2087736,
-                    0.9079656,
+                    64.803879,
+                    1.1038778,
+                    0.90799695,
                     30,
                     0,
                     0,
@@ -3029,27 +3044,27 @@
                     30,
                     0,
                     0,
-                    1723.0902,
+                    1277.4885,
                     0,
-                    0.3978588,
-                    19.917366,
-                    5.0219908,
+                    0.36168981,
+                    19.966084,
+                    5.0182657,
                     0,
                     3.0127316,
                     0,
-                    2.009187,
+                    2.0048466,
                     0,
-                    7.2337964e-05,
+                    3.6168982e-05,
                     0,
-                    26.023945,
+                    26.087601,
                     0,
-                    140.42635,
+                    60.429596,
                     0,
-                    2.5827336,
+                    2.9288709,
                     0,
-                    50.101543,
+                    12.992167,
                     0,
-                    3.7484601,
+                    3.8352656,
                     0,
                     1.013,
                     0,
@@ -3057,15 +3072,15 @@
                     0,
                     0.91063005,
                     0,
-                    0.90691549,
+                    0.90700954,
                     0,
-                    0.90653932,
+                    0.90668035,
                     0,
-                    0.70026398,
+                    0.69927663,
                     0,
-                    2.8988507,
+                    2.4697058,
                     0,
-                    9.1781483,
+                    22.513651,
                     1,
                     1,
                     1,
@@ -3105,13 +3120,13 @@
                     0,
                     0,
                     0,
-                    1,
+                    0,
                     0,
                     0
                 ]
             },
             "Statistics": {
-                "Events sent": 1,
+                "Events sent": 3,
                 "Events per sec.": 0,
                 "kBytes per sec.": 0
             },
@@ -3790,7 +3805,8 @@
                     1,
                     1,
                     1
-                ]
+                ],
+                "seconds_from_last_GC_save": 34.687961
             }
         },
         "Trigger": {
@@ -3817,9 +3833,9 @@
             },
             "Variables": {},
             "Statistics": {
-                "Events sent": 10,
-                "Events per sec.": 1.95,
-                "kBytes per sec.": 25371.356
+                "Events sent": 94,
+                "Events per sec.": 0.32,
+                "kBytes per sec.": 3389.042
             }
         },
         "CameraStatus": {
@@ -3846,12 +3862,12 @@
             },
             "Variables": {
                 "Sensor Temperature": -18,
-                "TCAM": -21
+                "TCAM": -19
             },
             "Statistics": {
-                "Events sent": 1,
-                "Events per sec.": 0,
-                "kBytes per sec.": 0
+                "Events sent": 15,
+                "Events per sec.": 0.32,
+                "kBytes per sec.": 0.013
             }
         },
         "TriggerModule": {
@@ -3877,24 +3893,24 @@
                 "Write cache size": 100000
             },
             "Statistics": {
-                "Events sent": 1,
-                "Events per sec.": 0.29024703215153447,
-                "kBytes per sec.": 0.012471552162761248
+                "Events sent": 16,
+                "Events per sec.": 0,
+                "kBytes per sec.": 0
             },
             "Variables": {
                 "TMOD": [
-                    78.699997,
+                    0.89999998,
                     0,
                     0,
                     0,
-                    22.700001
+                    4.5
                 ],
                 "TriggerModuleRate": [
-                    78.699997,
+                    0.89999998,
                     0,
                     0,
                     0,
-                    22.700001
+                    4.5
                 ]
             },
             "Settings": {
@@ -3907,6 +3923,154 @@
                     1,
                     2,
                     1
+                ]
+            }
+        },
+        "SourceMotor": {
+            "Common": {
+                "Event ID": 9,
+                "Trigger mask": 0,
+                "Buffer": "SYSTEM",
+                "Type": 16,
+                "Source": 0,
+                "Format": "MIDAS",
+                "Enabled": false,
+                "Read on": 255,
+                "Period": 60000,
+                "Event limit": 0,
+                "Num subevents": 0,
+                "Log history": 1,
+                "Frontend host": "localhost",
+                "Frontend name": "SC Frontend",
+                "Frontend file name": "/home/standard/daq/online/scfe.cxx",
+                "Status": "Disabled",
+                "Status color": "yellowLight",
+                "Hidden": false,
+                "Write cache size": 0
+            },
+            "Variables": {
+                "Input": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    "NaN"
+                ],
+                "Output": [
+                    -1,
+                    -1
+                ]
+            },
+            "Statistics": {
+                "Events sent": 0,
+                "Events per sec.": 0,
+                "kBytes per sec.": 0
+            },
+            "Settings": {
+                "Devices": {
+                    "Input": {
+                        "Enabled": true,
+                        "DD": {
+                            "Port": "/dev/ttyACM0",
+                            "Baud": 9600
+                        }
+                    },
+                    "Output": {
+                        "Enabled": true,
+                        "DD": {
+                            "Port": "/dev/ttyACM0",
+                            "Baud": 9600
+                        }
+                    }
+                },
+                "Update Threshold": [
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1,
+                    0.1
+                ],
+                "Input Factor": [
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1,
+                    1
+                ],
+                "Input Offset": [
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
+                    0
+                ],
+                "Names Input": [
+                    "Current position",
+                    "Reference position 0",
+                    "Reference position 1",
+                    "Reference position 2",
+                    "Reference position 3",
+                    "Reference position 4",
+                    "Reference position 5",
+                    "Reference position 6",
+                    "Reference position 7",
+                    "Reference position 8",
+                    "Reference position 9",
+                    "Reference position 10"
+                ],
+                "Output Factor": [
+                    1,
+                    1
+                ],
+                "Output Offset": [
+                    0,
+                    0
+                ],
+                "Names Output": [
+                    "Target position",
+                    "Command"
+                ],
+                "Input Formula": [
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
                 ]
             }
         }
@@ -3927,7 +4091,8 @@
             "3": "HV",
             "5": "Environment",
             "1": "Trigger",
-            "8": "TriggerModule"
+            "8": "TriggerModule",
+            "7": "SourceMotor"
         },
         "DisableTags": false,
         "Tags": {
@@ -4783,6 +4948,33 @@
                 "TriggerModule",
                 "9[5] TMOD",
                 "9[5] TriggerModuleRate"
+            ],
+            "7": [
+                "SourceMotor",
+                "9[1] Current position",
+                "9[1] Target position",
+                "9[1] Command",
+                "9[1] Reference 0",
+                "9[1] Reference 1",
+                "9[1] Reference 2",
+                "9[1] Reference 3",
+                "9[1] Reference 4",
+                "9[1] Reference 5",
+                "9[1] Reference 6",
+                "9[1] Reference 7",
+                "9[1] Reference 8",
+                "9[1] Reference 9",
+                "9[1] Reference position 0",
+                "9[1] Reference position 1",
+                "9[1] Reference position 2",
+                "9[1] Reference position 3",
+                "9[1] Reference position 4",
+                "9[1] Reference position 5",
+                "9[1] Reference position 6",
+                "9[1] Reference position 7",
+                "9[1] Reference position 8",
+                "9[1] Reference position 9",
+                "9[1] Reference position 10"
             ]
         },
         "Images": {
@@ -5785,7 +5977,8 @@
                         "7d"
                     ]
                 }
-            }
+            },
+            "Camera": {}
         },
         "MaxDisplayEvents": 20,
         "MaxDisplayTags": 200,
@@ -5839,7 +6032,7 @@
                 "Triggered": 0,
                 "Type": 3,
                 "Check interval": 60,
-                "Checked last": 1697969323,
+                "Checked last": 1702593317,
                 "Time triggered first": "",
                 "Time triggered last": "",
                 "Condition": "/Equipment/GasSystem/Variables/Measured[300] > 0",
@@ -5851,7 +6044,7 @@
                 "Triggered": 0,
                 "Type": 3,
                 "Check interval": 60,
-                "Checked last": 1697969323,
+                "Checked last": 1702593317,
                 "Time triggered first": "",
                 "Time triggered last": "",
                 "Condition": "/Equipment/GasSystem/Variables/Measured[299] > 0",
@@ -5863,7 +6056,7 @@
                 "Triggered": 0,
                 "Type": 3,
                 "Check interval": 60,
-                "Checked last": 1697969323,
+                "Checked last": 1702593317,
                 "Time triggered first": "",
                 "Time triggered last": "",
                 "Condition": "/Equipment/GasSystem/Variables/Measured[301] > 0",
@@ -5875,7 +6068,7 @@
                 "Triggered": 0,
                 "Type": 3,
                 "Check interval": 60,
-                "Checked last": 1697969323,
+                "Checked last": 1702593317,
                 "Time triggered first": "",
                 "Time triggered last": "",
                 "Condition": "/Equipment/GasSystem/Variables/Measured[302] > 0",
@@ -5887,7 +6080,7 @@
                 "Triggered": 0,
                 "Type": 3,
                 "Check interval": 60,
-                "Checked last": 1697969323,
+                "Checked last": 1702593317,
                 "Time triggered first": "",
                 "Time triggered last": "",
                 "Condition": "/Equipment/GasSystem/Variables/Measured[303] > 0",
@@ -5899,7 +6092,7 @@
                 "Triggered": 0,
                 "Type": 3,
                 "Check interval": 60,
-                "Checked last": 1697969323,
+                "Checked last": 1702593317,
                 "Time triggered first": "",
                 "Time triggered last": "",
                 "Condition": "/Equipment/GasSystem/Variables/Measured[304] > 0",
@@ -5911,7 +6104,7 @@
                 "Triggered": 0,
                 "Type": 3,
                 "Check interval": 60,
-                "Checked last": 1697969323,
+                "Checked last": 1702593317,
                 "Time triggered first": "",
                 "Time triggered last": "",
                 "Condition": "/Equipment/GasSystem/Variables/Measured[305] > 0",
@@ -5979,7 +6172,7 @@
                 "Alarm Message": "Program rconsole is not running"
             },
             "middleware": {
-                "Active": true,
+                "Active": false,
                 "Triggered": 0,
                 "Type": 2,
                 "Check interval": 60,
@@ -5991,7 +6184,7 @@
                 "Alarm Message": "Program middleware is not running"
             },
             "SC Frontend": {
-                "Active": true,
+                "Active": false,
                 "Triggered": 0,
                 "Type": 2,
                 "Check interval": 60,
@@ -6025,64 +6218,54 @@
                 "Condition": "Program not running",
                 "Alarm Class": "Software Alarm",
                 "Alarm Message": "Program cygnus_daq is not running"
+            },
+            "GasController Alarm": {
+                "Active": true,
+                "Triggered": 0,
+                "Type": 3,
+                "Check interval": 60,
+                "Checked last": 1702593317,
+                "Time triggered first": "",
+                "Time triggered last": "",
+                "Condition": "/Equipment/GasSystem/Settings/seconds_from_last_GC_save > 3600",
+                "Alarm Class": "Gas Alarm",
+                "Alarm Message": "GasController Alarm: %s"
             }
         },
         "Classes": {
+            "Write system message": true,
+            "Write Elog message": false,
+            "System message interval": 60,
+            "System message last": 0,
+            "Execute command": "",
+            "Execute interval": 0,
+            "Execute last": 0,
+            "Stop run": false,
+            "Display BGColor": "red",
+            "Display FGColor": "black",
             "Alarm": {
-                "Write system message": true,
-                "Write Elog message": false,
-                "System message interval": 60,
-                "System message last": 0,
-                "Execute command": "/home/standard/daq/online/mail_allarm.sh ",
-                "Execute interval": 60,
-                "Execute last": 0,
-                "Stop run": false,
                 "Display BGColor": "red",
                 "Display FGColor": "black"
             },
             "Warning": {
-                "Write system message": true,
-                "Write Elog message": false,
-                "System message interval": 60,
-                "System message last": 0,
-                "Execute command": "",
-                "Execute interval": 0,
-                "Execute last": 0,
-                "Stop run": false,
                 "Display BGColor": "red",
                 "Display FGColor": "black"
             },
             "Gas Alarm": {
-                "Write system message": true,
-                "Write Elog message": false,
-                "System message interval": 600000,
-                "System message last": 0,
-                "Execute command": "/home/standard/daq/online/mail_allarm.sh GAS",
-                "Execute interval": 360000,
-                "Execute last": 0,
-                "Stop run": false,
                 "Display BGColor": "red",
                 "Display FGColor": "black"
             },
             "DAQ Alarm": {
-                "Write system message": true,
-                "Write Elog message": false,
-                "System message interval": 60,
-                "System message last": 0,
-                "Execute command": "/home/standard/daq/online/mail_allarm.sh DAQ",
-                "Execute interval": 600,
-                "Execute last": 0,
-                "Stop run": false,
                 "Display BGColor": "red",
                 "Display FGColor": "black"
             },
             "Software Alarm": {
                 "Write system message": true,
                 "Write Elog message": false,
-                "System message interval": 600,
+                "System message interval": 60,
                 "System message last": 0,
-                "Execute command": "/home/standard/daq/online/mail_allarm.sh Software",
-                "Execute interval": 3600,
+                "Execute command": "",
+                "Execute interval": 0,
                 "Execute last": 0,
                 "Stop run": false,
                 "Display BGColor": "red",
@@ -6095,7 +6278,7 @@
         "TriggerMode": 0,
         "MaxEvents": -1,
         "Pedestal": false,
-        "Exposure": 0.1,
+        "Exposure": 0.3,
         "Number of Digitizers": 2,
         "Digitizer Base Address": [
             839909376,
@@ -6170,11 +6353,11 @@
             "trigger_logic": 0
         },
         "SourceState": {
-            "source_position": 24.5,
-            "source_type": 5
+            "source_position": 0,
+            "source_type": 0
         },
-        "run_type": 1,
-        "shielding_configuration": 2,
+        "run_type": 0,
+        "shielding_configuration": 3,
         "pmt_acquisition": true,
         "DigitizerSN": [
             16362,
@@ -6299,7 +6482,7 @@
         "State": {
             "New File": false,
             "Path": "/home/standard/daq/online/",
-            "Filename": "S012_Run_3_Standard_Sequence.msl",
+            "Filename": "S019_Run_4_LowGain_Standard_Sequence.msl",
             "Error": "",
             "Error line": 0,
             "SError line": 0,
@@ -6362,8 +6545,8 @@
                 0
             ],
             "Loop counter": [
-                70,
                 6,
+                3,
                 0,
                 0,
                 0,
@@ -6375,7 +6558,7 @@
             ],
             "Loop n": [
                 -1,
-                14,
+                6,
                 0,
                 0,
                 0,
@@ -6456,36 +6639,36 @@
                 "",
                 ""
             ],
-            "Wait value": 10,
-            "Wait limit": 300,
+            "Wait value": 94,
+            "Wait limit": 400,
             "Start time": 0,
             "Wait type": "Events",
             "Wait ODB": "",
-            "Last msg": "12:09:40"
+            "Last msg": "23:33:21"
         },
         "Command": {
             "Start script": false,
             "Stop immediately": false,
             "Load new file": false,
-            "Load filename": "S012_Run_3_Standard_Sequence.msl"
+            "Load filename": "S019_Run_4_LowGain_Standard_Sequence.msl"
         },
         "Script": {
-            "XML": "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<RunSequence xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"\">\n<Comment l=\"1\">TEST v0.1</Comment>\n<ODBSet l=\"3\" path=\"/Configurations/Exposure\">0.1</ODBSet>\n<ODBSet l=\"4\" path=\"/Logger/Write data\">1</ODBSet>\n<ODBSet l=\"7\" path=\"/Configurations/SourceState/source_type\">5</ODBSet>\n<ODBSet l=\"8\" path=\"/Configurations/SourceState/source_position\">24.5</ODBSet>\n<ODBSet l=\"11\" path=\"/Configurations/run_type\">1</ODBSet>\n<RunDescription l=\"14\">Eu Campaign</RunDescription>\n<Loop l=\"16\" le=\"74\" n=\"infinite\">\n<ODBSet l=\"20\" path=\"/Configurations/FreeRunning\">0</ODBSet>\n<ODBSet l=\"21\" path=\"/Configurations/pmt_acquisition\">1</ODBSet>\n<ODBSet l=\"22\" path=\"/Configurations/Pedestal\">1</ODBSet>\n<ODBSet l=\"25\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[0]\">15</ODBSet>\n<ODBSet l=\"26\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[1]\">1</ODBSet>\n<ODBSet l=\"27\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[2]\">1</ODBSet>\n<ODBSet l=\"28\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[3]\">2</ODBSet>\n<ODBSet l=\"29\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[4]\">3</ODBSet>\n<ODBSet l=\"30\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[5]\">1</ODBSet>\n<ODBSet l=\"31\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[6]\">2</ODBSet>\n<ODBSet l=\"32\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[7]\">1</ODBSet>\n<ODBSet l=\"34\" path=\"/Equipment/HV/Variables/ChState[0-6]\">0</ODBSet>\n<Wait l=\"35\" for=\"seconds\">50</Wait>\n<Wait l=\"36\" for=\"ODBvalue\" path=\"/Equipment/HV/Variables/ChStatus[6]\" op=\"==\">0</Wait>\n<Transition l=\"38\">START</Transition>\n<Wait l=\"39\" for=\"events\">100</Wait>\n<Transition l=\"40\">STOP</Transition>\n<ODBSet l=\"43\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[0]\">240</ODBSet>\n<ODBSet l=\"44\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[1]\">240</ODBSet>\n<ODBSet l=\"45\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[2]\">240</ODBSet>\n<ODBSet l=\"46\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[3]\">2</ODBSet>\n<ODBSet l=\"47\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[4]\">2</ODBSet>\n<ODBSet l=\"48\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[5]\">1</ODBSet>\n<ODBSet l=\"49\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[6]\">2</ODBSet>\n<ODBSet l=\"50\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[7]\">1</ODBSet>\n<ODBSet l=\"52\" path=\"/Equipment/HV/Variables/ChState[0-6]\">1</ODBSet>\n<Wait l=\"53\" for=\"seconds\">50</Wait>\n<Wait l=\"54\" for=\"ODBvalue\" path=\"/Equipment/HV/Variables/ChStatus[6]\" op=\"==\">1</Wait>\n<ODBSet l=\"58\" path=\"/Configurations/FreeRunning\">0</ODBSet>\n<ODBSet l=\"59\" path=\"/Configurations/pmt_acquisition\">1</ODBSet>\n<ODBSet l=\"60\" path=\"/Configurations/Pedestal\">0</ODBSet>\n<Loop l=\"62\" le=\"72\" n=\"14\">\n<Transition l=\"64\">START</Transition>\n<Wait l=\"65\" for=\"events\">300</Wait>\n<Transition l=\"66\">STOP</Transition>\n</Loop>\n</Loop>\n</RunSequence>\n",
+            "XML": "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<RunSequence xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"\">\n<Comment l=\"1\">TEST v0.1</Comment>\n<ODBSet l=\"3\" path=\"/Configurations/Exposure\">0.3</ODBSet>\n<ODBSet l=\"4\" path=\"/Logger/Write data\">1</ODBSet>\n<ODBSet l=\"7\" path=\"/Configurations/SourceState/source_type\">0</ODBSet>\n<ODBSet l=\"8\" path=\"/Configurations/SourceState/source_position\">0</ODBSet>\n<ODBSet l=\"11\" path=\"/Configurations/run_type\">0</ODBSet>\n<RunDescription l=\"14\">Standard - LOW Gain</RunDescription>\n<Loop l=\"16\" le=\"74\" n=\"infinite\">\n<ODBSet l=\"20\" path=\"/Configurations/FreeRunning\">0</ODBSet>\n<ODBSet l=\"21\" path=\"/Configurations/pmt_acquisition\">1</ODBSet>\n<ODBSet l=\"22\" path=\"/Configurations/Pedestal\">1</ODBSet>\n<ODBSet l=\"25\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[0]\">15</ODBSet>\n<ODBSet l=\"26\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[1]\">1</ODBSet>\n<ODBSet l=\"27\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[2]\">1</ODBSet>\n<ODBSet l=\"28\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[3]\">2</ODBSet>\n<ODBSet l=\"29\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[4]\">3</ODBSet>\n<ODBSet l=\"30\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[5]\">1</ODBSet>\n<ODBSet l=\"31\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[6]\">2</ODBSet>\n<ODBSet l=\"32\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[7]\">1</ODBSet>\n<ODBSet l=\"34\" path=\"/Equipment/HV/Variables/ChState[0-6]\">0</ODBSet>\n<Wait l=\"35\" for=\"seconds\">50</Wait>\n<Wait l=\"36\" for=\"ODBvalue\" path=\"/Equipment/HV/Variables/ChStatus[6]\" op=\"==\">0</Wait>\n<Transition l=\"38\">START</Transition>\n<Wait l=\"39\" for=\"events\">100</Wait>\n<Transition l=\"40\">STOP</Transition>\n<ODBSet l=\"43\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[0]\">240</ODBSet>\n<ODBSet l=\"44\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[1]\">240</ODBSet>\n<ODBSet l=\"45\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[2]\">240</ODBSet>\n<ODBSet l=\"46\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[3]\">2</ODBSet>\n<ODBSet l=\"47\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[4]\">2</ODBSet>\n<ODBSet l=\"48\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[5]\">1</ODBSet>\n<ODBSet l=\"49\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[6]\">2</ODBSet>\n<ODBSet l=\"50\" path=\"/Equipment/TriggerModule/Settings/TriggerModuleConfigReg[7]\">1</ODBSet>\n<ODBSet l=\"52\" path=\"/Equipment/HV/Variables/ChState[0-6]\">1</ODBSet>\n<Wait l=\"53\" for=\"seconds\">50</Wait>\n<Wait l=\"54\" for=\"ODBvalue\" path=\"/Equipment/HV/Variables/ChStatus[6]\" op=\"==\">1</Wait>\n<ODBSet l=\"58\" path=\"/Configurations/FreeRunning\">0</ODBSet>\n<ODBSet l=\"59\" path=\"/Configurations/pmt_acquisition\">1</ODBSet>\n<ODBSet l=\"60\" path=\"/Configurations/Pedestal\">0</ODBSet>\n<Loop l=\"62\" le=\"72\" n=\"6\">\n<Transition l=\"64\">START</Transition>\n<Wait l=\"65\" for=\"events\">400</Wait>\n<Transition l=\"66\">STOP</Transition>\n</Loop>\n</Loop>\n</RunSequence>\n",
             "Lines": [
                 "COMMENT \"TEST v0.1\"",
                 "",
-                "ODBSET \"/Configurations/Exposure\", \"0.1\"",
+                "ODBSET \"/Configurations/Exposure\", \"0.3\"",
                 "ODBSET \"/Logger/Write data\", \"1\"",
                 "",
-                "# FE: NO Eu: Yes",
-                "ODBSET \"/Configurations/SourceState/source_type\", \"5\"",
-                "ODBSET \"/Configurations/SourceState/source_position\", \"24.5\"",
+                "# FE: No Am: No",
+                "ODBSET \"/Configurations/SourceState/source_type\", \"0\"",
+                "ODBSET \"/Configurations/SourceState/source_position\", \"0\"",
                 "",
-                "# calibration RUN",
-                "ODBSET \"/Configurations/run_type\", \"1\" ",
+                "# standard RUN",
+                "ODBSET \"/Configurations/run_type\", \"0\" ",
                 "",
                 "# Run description",
-                "RUNDESCRIPTION \"Eu Campaign\"",
+                "RUNDESCRIPTION \"Standard - LOW Gain\"",
                 "",
                 "LOOP infinite",
                 "    ",
@@ -6533,10 +6716,10 @@
                 "    ODBSET \"/Configurations/pmt_acquisition\", \"1\"",
                 "    ODBSET \"/Configurations/Pedestal\", \"0\"",
                 "",
-                "    LOOP 14",
+                "    LOOP 6",
                 "",
                 "        TRANSITION START",
-                "        WAIT events, 300",
+                "        WAIT events, 400",
                 "        TRANSITION STOP",
                 "               ",
                 "",
@@ -6594,7 +6777,8 @@
         "GEM HV&": "hv_gem.html",
         "Online Monitor&": "monitor.html",
         "Camera Status&": "camera_status.html",
-        "Trigger Module&": "trgmod.html"
+        "Trigger Module&": "trgmod.html",
+        "Source Motor&": "source_motor.html"
     },
     "MSCB": {
         "Submaster": {}
@@ -6604,6 +6788,10 @@
         "save_ped": false,
         "image_update_time": 10,
         "reconstruction_sample_gap": 10
+    },
+    "Alias": {
+        "Grafana": "https://grafana.cygno.cloud.infn.it/",
+        "LIME Instructions": "https://docs.google.com/presentation/d/1QnIPXbN3lE8CSkwTv9asPB7hGwgnsgvMC1CWIcbEF0w/edit?usp=sharing"
     },
     "middleware_alive": 1
 }

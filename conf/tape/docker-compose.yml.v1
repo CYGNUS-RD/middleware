@@ -1,0 +1,62 @@
+version: "3"
+
+services:
+  app:
+    image: gmazzitelli/cygno-tape:v1.0.5-cygno
+    container_name: tape
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
+    environment:
+      MYSQL_IP: ${MYSQL_IP}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_PORT: ${MYSQL_PORT}
+    volumes:
+      - ./script/:/root/script
+  notebook:
+    image: jupyter/scipy-notebook
+    container_name: editor
+    ports:
+      - 10000:8888
+    volumes:
+      - ./:/home/jovyan/work/
+  online:
+    image: gmazzitelli/cygno-st:v1.0.4-cygno
+    container_name: analisys
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
+    environment:
+      OIDC_AGENT: ${OIDC_AGENT}
+      REFRESH_TOKEN: ${REFRESH_TOKEN}
+      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+      IAM_SERVER: ${IAM_SERVER}
+      IAM_SCOPES: "'openid profile email offline_access wlcg wlcg.groups'"
+      MYSQL_IP: ${MYSQL_IP}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_PORT: ${MYSQL_PORT}
+    volumes:
+      - ${PWD}/script/:/root/script
+#  online2:
+#    image: gmazzitelli/cygno-st:v1.0.4-cygno
+#    container_name: analisys2
+#    stdin_open: true # docker run -i
+#    tty: true        # docker run -t
+#    environment:
+#      OIDC_AGENT: ${OIDC_AGENT}
+#      REFRESH_TOKEN: ${REFRESH_TOKEN}
+#      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+#      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+#      IAM_SERVER: ${IAM_SERVER}
+#      IAM_SCOPES: "'openid profile email offline_access wlcg wlcg.groups'"
+#      MYSQL_IP: ${MYSQL_IP}
+#      MYSQL_USER: ${MYSQL_USER}
+#      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+#      MYSQL_DATABASE: ${MYSQL_DATABASE}
+#      MYSQL_PORT: ${MYSQL_PORT}
+#    volumes:
+#      - ${PWD}/script/:/root/script
+
