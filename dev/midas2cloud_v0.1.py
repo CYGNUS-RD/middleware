@@ -185,7 +185,7 @@ def main():
                         
                         dtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                         
-                        print('{:s} Udatentig matadata for filer file: {:s}'.format(dtime, filename))
+                        print('{:s} Udatentig matadata for filer file: {:s}'.format(dtime, filename), flush = True)
                         
                         filesize = os.path.getsize(INAPATH+filename)               
                         md5sum = cy.cmd.file_md5sum(INAPATH+filename)
@@ -200,7 +200,7 @@ def main():
                                                               filesize, verbose=verbose)
 
                         dtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                        print('{:s} Transferring file: {:s}'.format(dtime, filename))
+                        print('{:s} Transferring file: {:s}'.format(dtime, filename), flush = True)
                         if compressing_files > 0:
                             compressing_files -= 1
                         current_try = 0
@@ -209,7 +209,7 @@ def main():
                             if verbose: print(INAPATH+filename,tag, backet, session, verbose, filesize)
                             if filesize < 5400000000: # ~ 5 GB
                                 dtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                                print('{:s} Uploading file: {:s}'.format(dtime, filename))
+                                print('{:s} Uploading file: {:s}'.format(dtime, filename), flush = True)
                                 try:
                                     s3.upload_file(INAPATH+filename, Bucket=bucket, Key=key+filename)
                                     response=s3.head_object(Bucket=bucket,Key=key+filename)
@@ -222,7 +222,7 @@ def main():
                                     cy.daq_update_runlog_replica_tag(connection, runN, 
                                                                          TAG=tag, verbose=verbose)
 
-                                    print('{:s} Upload done: {:s}'.format(dtime, filename))
+                                    print('{:s} Upload done: {:s}'.format(dtime, filename), flush = True)
                                     status = True
                                     
                                 except:
