@@ -2,12 +2,30 @@
 i=0
 d=`date +%Y-%M-%d\ %H:%M:%S`
 
-mkdir /root/submitJobs
+if [ -d /root/submitJobs ]; then
+  echo "submitJobs found"
+else
+  mkdir /root/submitJobs
+fi
 
-echo "$d executing init"
+cd /root/dev/
 
-/root/dev/fullRecoSentinel_v1.02.py ${STARTRUN} -o ${DFPANDAS} -v
 
+if [ -f /root/dev/${DFPANDAS}.csv ]; then
+   echo "copying df"
+   cp /root/dev/${DFPANDAS}.csv /root/submitJobs/
+else
+   echo "df will be create"
+fi
+
+echo "$d running full reco..."
+
+
+#CMD ["python", "-u", "main.py"]
+
+sleep ${WAITTIME}
+
+python3 -u /root/dev/fullRecoSentinel_v1.02.py ${STARTRUN} -e ${ENDRUN} -j ${NCORE} -t ${TAG} -o ${DFPANDAS} -v >> /root/dev/log/reco${DFPANDAS}.log  2>&1
 
 #WAIT=3600
 #while :
