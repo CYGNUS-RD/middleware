@@ -1,7 +1,7 @@
 version: '2'
 services:
   sentinel1:
-    image: gmazzitelli/cygno-st:v2.0.1-cygno
+    image: gmazzitelli/cygno-st:v2.0.4-cygno
     container_name: sentinel1
     environment:
       PYTHONUNBUFFERED: 1
@@ -23,6 +23,7 @@ services:
       DFPANDAS: df_condor_coda1
       TAG: RECO/Run4
       WAITTIME: 0
+      MAXIDLE: 30
 
     volumes:
       - ${PWD}/dev/init.sh:/root/init.sh
@@ -31,7 +32,7 @@ services:
       - /tmp/:/tmp/
 
   sentinel2:
-    image: gmazzitelli/cygno-st:v2.0.1-cygno
+    image: gmazzitelli/cygno-st:v2.0.4-cygno
     container_name: sentinel2
     environment:
       PYTHONUNBUFFERED: 1
@@ -53,6 +54,7 @@ services:
       DFPANDAS: df_condor_coda2
       TAG: RECO/Winter23-ReReco-Run3
       WAITTIME: 17
+      MAXIDLE: 30
 
     volumes:
       - ${PWD}/dev/init.sh:/root/init.sh
@@ -61,7 +63,7 @@ services:
       - /tmp/:/tmp/
       
   sentinel3:
-    image: gmazzitelli/cygno-st:v2.0.3-cygno
+    image: gmazzitelli/cygno-st:v2.0.4-cygno
     container_name: sentinel3
     environment:
       PYTHONUNBUFFERED: 1
@@ -77,12 +79,13 @@ services:
       MYSQL_PORT: ${MYSQL_PORT}
 
       HTC_IP: 131.154.98.218
-      STARTRUN: 37952
-      ENDRUN: 39638
+      STARTRUN: 37836
+      ENDRUN: 37937
       NCORE: 4
       DFPANDAS: df_condor_coda3
       TAG: RECO/Winter23-ReReco-Run3
       WAITTIME: 37
+      MAXIDLE: 30
 
     volumes:
       - ${PWD}/dev/init.sh:/root/init.sh

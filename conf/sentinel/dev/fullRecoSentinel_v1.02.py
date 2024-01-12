@@ -576,7 +576,7 @@ def savetables(df_condor, outname):
     create_json_with_date_time(outname)
     
     
-def main(run_number_start, run_number_end, nproc, TAG, outname='df_condor', just_status=False, verbose=False):
+def main(run_number_start, run_number_end, nproc, maxidle, TAG, outname='df_condor', just_status=False, verbose=False):
     #Set environment variables
     connection = refreshSQL(verbose)
     outname    = options.outname
@@ -618,7 +618,7 @@ def main(run_number_start, run_number_end, nproc, TAG, outname='df_condor', just
     aux_rm        = 0
     aux_held      = 0
     idlejobs      = 0
-    maxidle       = 30
+    #maxidle       = 30
     
 
     while True:
@@ -750,6 +750,7 @@ if __name__ == "__main__":
     parser = OptionParser(usage='usage: %prog\t [-ubsv] run_number_start')
     parser.add_option('-e', '--run-end', dest='run_number_end', default=99999, type=int, help='last run number to be analyzed')
     parser.add_option('-j', '--nproc', dest='nproc', default=3, type=int, help='number of cores to use')
+    parser.add_option('-i', '--maxidle', dest='maxidle', default=30, type=int, help='max number of jobs in idle')
     parser.add_option('-t', '--tag', dest='TAG', default=None, type='string', help='TAG where to save the output reco')
     parser.add_option('-o', '--outname', dest='outname', default='df_condor', type='string', help='prefix for the output file name')
     parser.add_option('-s','--just-status', dest='just_status', action="store_true", default=False, help='just update status, do not send jobs;')
@@ -762,7 +763,7 @@ if __name__ == "__main__":
         parser.error("incorrect number of arguments")
 
     else:
-        main(int(args[0]), options.run_number_end, options.nproc, options.TAG, options.outname, options.just_status, options.verbose)
+        main(int(args[0]), options.run_number_end, options.nproc, options.maxidle, options.TAG, options.outname, options.just_status, options.verbose)
 
         ## Example:
         # ./fullRecoSentinel_v1.02.py 17182 -o df_condor_coda1 -s -v
