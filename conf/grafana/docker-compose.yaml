@@ -20,7 +20,6 @@ services:
 
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD}
-      GF_SECURITY_ALLOW_EMBEDDING: 1 
       GF_USERS_ALLOW_SIGN_UP: 0
       GF_AUTH_ANONYMOUS_ENABLED: 0
       GF_AUTH_BASIC_ENABLED: 0
@@ -44,7 +43,7 @@ services:
       GF_AUTH_GENERIC_OAUTH_TOKEN_URL: https://iam.cloud.infn.it/token
       GF_AUTH_GENERIC_OAUTH_API_URL: https://iam.cloud.infn.it/userinfo
       GF_AUTH_GENERIC_OAUTH_COOKIE_SECURE: 'True'
-      GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_PATH: "contains(groups, 'cygno')  && 'Admin' || contains(groups, 'cygno-users') && 'Viewer'"
+      GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_PATH: "contains(groups, 'cygno')  && 'Admin' || contains(groups, 'cygno-users') && 'Viewer' || contains(groups, 'users/cygno') && 'Viewer'"
       GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_STRICT: 'True'
       GF_PANELS_DISABLE_SANITIZE_HTML: 'True' # https://stackoverflow.com/questions/65847384/embedding-a-website-in-a-grafana-dashboard
 
@@ -56,5 +55,62 @@ services:
 #     volumes:
 #       - ${PWD}/dev:/usr/share/nginx/html
 
+  tunnel:
+    restart: always
+    image: gmazzitelli/sshtunnel
+    container_name: tunnel_sentinel
+#    ports:
+#      - 80:80
+    environment: 
+       REMOTE_PORT: 80
+       REMOTE_APP_NAME: localhost
+       LOCAL_PORT: 80
+       USER: mazzitel
+       REMOTE_IP: 90.147.174.164
+    volumes:
+       - /root/.ssh/daq_id:/root/.ssh/id_rsa 
+
+  tunnel2:
+    restart: always
+    image: gmazzitelli/sshtunnel
+    container_name: tunnel_kafka
+#    ports:
+#      - 80:80
+    environment:
+       REMOTE_PORT: 80
+       REMOTE_APP_NAME: localhost
+       LOCAL_PORT: 80
+       USER: mazzitel
+       REMOTE_IP: 131.154.98.101
+    volumes:
+       - /root/.ssh/daq_id:/root/.ssh/id_rsa
+
+  backupper:
+    restart: always
+    image: gmazzitelli/backupper:v0.1
+    container_name: backupper
+    environment:
+       BCK_START_NAME: 'grafana'
+       IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+       IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+    volumes:
+       - /var/lib/docker/volumes/grafana_dbdata/_data/:/root/data/
+       - /tmp/:/tmp/
+
+  tokener:
+    image: gmazzitelli/tokener:v0.2
+    container_name: tokener
+    environment:
+      REFRESH_TOKEN: ${REFRESH_TOKEN}
+      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+      IAM_TOKEN_ENDPOINT: ${IAM_TOKEN_ENDPOINT}
+      SCOPES: ${SCOPES}
+
+    volumes:
+      - /tmp/:/tmp/
+
+    
 volumes:
    dbdata:
+

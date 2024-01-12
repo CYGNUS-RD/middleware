@@ -1,8 +1,13 @@
 FROM dodasts/mini-htc:v0
 
+RUN yum-config-manager --save --setopt=htcondor-development.skip_if_unavailable=true
+
 RUN yum -y clean metadata \
     && yum -y install \
               git \
+              gcc \
+              python36-devel \
+              numpy \
     && yum -y clean all 
 
 #
@@ -17,6 +22,9 @@ RUN pip3 install --no-cache-dir -U \
     boto3 \
     uproot \
     pymongo \
+    Cython \
+    seaborn \
+    scipy \
     git+https://github.com/DODAS-TS/boto3sts \
     git+https://github.com/CYGNUS-RD/cygno.git@v1.0.14 \
     'https://github.com/CYGNUS-RD/middleware/blob/master/midas/midaslib.tar.gz?raw=true'
