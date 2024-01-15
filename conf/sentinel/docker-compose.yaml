@@ -21,6 +21,7 @@ services:
       ENDRUN: 99999
       NCORE: 8
       DFPANDAS: df_condor_coda1
+      RECOPATH: reconstruction
       TAG: RECO/Run4
       WAITTIME: 0
       MAXIDLE: 30
@@ -48,10 +49,11 @@ services:
       MYSQL_PORT: ${MYSQL_PORT}
 
       HTC_IP: 131.154.99.82
-      STARTRUN: 17362
+      STARTRUN: 27844
       ENDRUN: 27845
-      NCORE: 4
+      NCORE: 3
       DFPANDAS: df_condor_coda2
+      RECOPATH: reconstruction
       TAG: RECO/Winter23-ReReco-Run3
       WAITTIME: 17
       MAXIDLE: 30
@@ -79,10 +81,11 @@ services:
       MYSQL_PORT: ${MYSQL_PORT}
 
       HTC_IP: 131.154.98.218
-      STARTRUN: 37836
-      ENDRUN: 37937
-      NCORE: 4
+      STARTRUN: 27844
+      ENDRUN: 27845
+      NCORE: 3
       DFPANDAS: df_condor_coda3
+      RECOPATH: reconstruction
       TAG: RECO/Winter23-ReReco-Run3
       WAITTIME: 37
       MAXIDLE: 30
@@ -92,6 +95,39 @@ services:
       - ${PWD}/dev/.bashrc:/root/.bashrc
       - ${PWD}/dev/:/root/dev/
       - /tmp/:/tmp/
+
+  sentinel4:
+    image: gmazzitelli/cygno-st:v2.0.4-cygno
+    container_name: sentinel4
+    environment:
+      PYTHONUNBUFFERED: 1
+      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+      ENDPOINT_URL: ${ENDPOINT_URL}
+
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_IP: ${MYSQL_IP}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_PORT: ${MYSQL_PORT}
+
+      HTC_IP: 131.154.98.46
+      STARTRUN: 17780
+      ENDRUN: 27845
+      NCORE: 4
+      DFPANDAS: df_condor_coda4
+      RECOPATH: reconstruction
+      TAG: RECO/Winter23-ReReco-Run3
+      WAITTIME: 23
+      MAXIDLE: 0
+
+    volumes:
+      - ${PWD}/dev/init.sh:/root/init.sh
+      - ${PWD}/dev/.bashrc:/root/.bashrc
+      - ${PWD}/dev/:/root/dev/
+      - /tmp/:/tmp/
+
 
   tokener:
     image: gmazzitelli/tokener:v0.1

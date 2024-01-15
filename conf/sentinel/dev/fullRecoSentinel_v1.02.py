@@ -34,17 +34,17 @@ import midas.file_reader
 DEFAULT_PATH_ONLINE = 'pedestals/' #DAQ_ROOT+'/online/'
 URL                 = 'https://minio.cloud.infn.it/'
 
-def writeSubmitFile(submit_path, submit_run, nproc, maxentries):
+def writeSubmitFile(recopath, submit_path, submit_run, nproc, maxentries):
     
-    files   = getReconstructionList()
-    githash = get_git_revision_hash()
+    files   = getReconstructionList(recopath)
+    githash = get_git_revision_hash(recopath)
     print("-----------------------")
     print(githash)
     print("-----------------------")
     
     with open(submit_path + "submit_" + submit_run, "w") as f:
         f.write("universe   = vanilla\n")
-        f.write("executable = /root/dev/reconstruction/exec_reco.sh\n")
+        f.write("executable = /root/dev/"+ recopath +"/exec_reco.sh\n")
         f.write("\n")
         f.write("log    = reconstruction_"+submit_run+".log\n")
         f.write("output = reconstruction_"+submit_run+".out\n")
@@ -61,9 +61,9 @@ def writeSubmitFile(submit_path, submit_run, nproc, maxentries):
         f.write("+OWNER = \"condor\"\n")
         f.write("queue\n")
 
-def get_git_revision_hash():
+def get_git_revision_hash(recopath):
     cwd = os.getcwd()
-    folder_path = "/root/dev/reconstruction"
+    folder_path = "/root/dev/" + recopath
     if cwd != folder_path:
         os.chdir(folder_path)
     githash = subprocess.check_output(['git', 'rev-parse', 'HEAD'])
@@ -118,9 +118,9 @@ def checkNewRuns(run_number_start, run_number_end):
             
     return list_runs_to_analyze
 
-def getReconstructionList():
+def getReconstructionList(recopath):
 
-    folder_path = "/root/dev/reconstruction/"
+    folder_path = "/root/dev/"+ recopath +"/"
     folder_to_exclude = ".git"
 
     # Get list of all files and folders in folder
@@ -433,10 +433,10 @@ def forOverPandasUnknown(df, connection):# Define the two filters
                 print("Retry")
     return df
 
-def createPedLog():
+def createPedLog(recopath):
     #get the most updated table and create the runlog table
     df = cy.read_cygno_logbook(verbose=False)
-    df.to_csv('/root/dev/reconstruction/pedestals/runlog_LNGS_auto.csv',index=False)
+    df.to_csv('/root/dev/'+ recopath +'/pedestals/runlog_LNGS_auto.csv',index=False)
 
 def s3_session(tfile='/tmp/token', verbose=False):
     import os
@@ -576,7 +576,7 @@ def savetables(df_condor, outname):
     create_json_with_date_time(outname)
     
     
-def main(run_number_start, run_number_end, nproc, maxidle, TAG, outname='df_condor', just_status=False, verbose=False):
+def main(run_number_start, run_number_end, nproc, maxidle, TAG, recopath = 'reconstruction', outname = 'df_condor', just_status = False, verbose = False):
     #Set environment variables
     connection = refreshSQL(verbose)
     outname    = options.outname
@@ -646,14 +646,14 @@ def main(run_number_start, run_number_end, nproc, maxidle, TAG, outname='df_cond
             
         if just_status == False:
         #for i in range(1):
-            while (len(list_runs_to_analyze) > 0) and (idlejobs < maxidle): ## keep send jobs to condor if we have new runs to analyze
+            while (len(list_runs_to_analyze) > 0) and (idlejobs <= maxidle): ## keep send jobs to condor if we have new runs to analyze
                 submit_run = list_runs_to_analyze[0] # Get the first run to go to the queue
                 status = sql_update_reco_status(submit_run,-2,connection) #"idle"
 
                 if verbose:
                     print("Sending the Run "+ str(submit_run) + " to the Queue", end='\r')
-                createPedLog()
-                writeSubmitFile(submit_path, str(submit_run), str(nproc), str(maxentries))
+                createPedLog(recopath)
+                writeSubmitFile(recopath, submit_path, str(submit_run), str(nproc), str(maxentries))
                 submitfile = createCondorSubmit(submit_path, str(submit_run))
 
                 cluster_id = sendjob(submit_path,submitfile)
@@ -752,6 +752,7 @@ if __name__ == "__main__":
     parser.add_option('-j', '--nproc', dest='nproc', default=3, type=int, help='number of cores to use')
     parser.add_option('-i', '--maxidle', dest='maxidle', default=30, type=int, help='max number of jobs in idle')
     parser.add_option('-t', '--tag', dest='TAG', default=None, type='string', help='TAG where to save the output reco')
+    parser.add_option('-f', '--recopath', dest='recopath', default='reconstruction', type='string', help='Name of the reconstruction folder')
     parser.add_option('-o', '--outname', dest='outname', default='df_condor', type='string', help='prefix for the output file name')
     parser.add_option('-s','--just-status', dest='just_status', action="store_true", default=False, help='just update status, do not send jobs;')
     parser.add_option('-v','--verbose', dest='verbose', action="store_true", default=False, help='verbose output;');
@@ -763,7 +764,7 @@ if __name__ == "__main__":
         parser.error("incorrect number of arguments")
 
     else:
-        main(int(args[0]), options.run_number_end, options.nproc, options.maxidle, options.TAG, options.outname, options.just_status, options.verbose)
+        main(int(args[0]), options.run_number_end, options.nproc, options.maxidle, options.TAG, options.recopath, options.outname, options.just_status, options.verbose)
 
         ## Example:
         # ./fullRecoSentinel_v1.02.py 17182 -o df_condor_coda1 -s -v

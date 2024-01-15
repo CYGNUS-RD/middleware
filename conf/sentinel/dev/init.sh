@@ -25,7 +25,7 @@ echo "$d running full reco..."
 
 sleep ${WAITTIME}
 
-python3 -u /root/dev/fullRecoSentinel_v1.02.py ${STARTRUN} -e ${ENDRUN} -j ${NCORE} -i ${MAXIDLE} -t ${TAG} -o ${DFPANDAS} -v >> /root/dev/log/reco${DFPANDAS}.log  2>&1
+python3 -u /root/dev/fullRecoSentinel_v1.02.py ${STARTRUN} -e ${ENDRUN} -j ${NCORE} -i ${MAXIDLE} -t ${TAG} -f ${RECOPATH}-o ${DFPANDAS} -v >> /root/dev/log/reco${DFPANDAS}.log  2>&1
 
 #WAIT=3600
 #while :
