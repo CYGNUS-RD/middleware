@@ -640,57 +640,57 @@ def main(run_number_start, run_number_end, nproc, maxidle, TAG, recopath = 'reco
             print("Number of Jobs in Idle: " + str(idlejobs) + "\n", end='\r')
         
         if idlejobs > maxidle:
-            just_status = True
+            idle_status = True
         else:
-            just_status = False
+            idle_status = False
             
         if just_status == False:
-        #for i in range(1):
-            while (len(list_runs_to_analyze) > 0) and (idlejobs <= maxidle): ## keep send jobs to condor if we have new runs to analyze
-                submit_run = list_runs_to_analyze[0] # Get the first run to go to the queue
-                status = sql_update_reco_status(submit_run,-2,connection) #"idle"
-
-                if verbose:
-                    print("Sending the Run "+ str(submit_run) + " to the Queue", end='\r')
-                createPedLog(recopath)
-                writeSubmitFile(recopath, submit_path, str(submit_run), str(nproc), str(maxentries))
-                submitfile = createCondorSubmit(submit_path, str(submit_run))
-
-                cluster_id = sendjob(submit_path,submitfile)
-                if cluster_id:
-                    status = sql_update_reco_status(submit_run,0,connection) #Update the online_reco variable to 0, which means "reconstructing"
+            if idle_status == False:
+                while (len(list_runs_to_analyze) > 0) and (idlejobs <= maxidle): ## keep send jobs to condor if we have new runs to analyze
+                    submit_run = list_runs_to_analyze[0] # Get the first run to go to the queue
+                    status = sql_update_reco_status(submit_run,-2,connection) #"idle"
+    
                     if verbose:
-                        print("Update Table: %d" %status, end='\r')
-                    if status == -2:
-                        connection = refreshSQL(verbose)
+                        print("Sending the Run "+ str(submit_run) + " to the Queue", end='\r')
+                    createPedLog(recopath)
+                    writeSubmitFile(recopath, submit_path, str(submit_run), str(nproc), str(maxentries))
+                    submitfile = createCondorSubmit(submit_path, str(submit_run))
+    
+                    cluster_id = sendjob(submit_path,submitfile)
+                    if cluster_id:
                         status = sql_update_reco_status(submit_run,0,connection) #Update the online_reco variable to 0, which means "reconstructing"
-
-                    if verbose:
-                        print("Run " + str(submit_run)+ "submitted with Cluster_ID: " + str(cluster_id), end='\r')
-
-                    status     = getJobStatus(cluster_id)
-                    df_condor  = update_job_status(df_condor, cluster_id, status)
-                    # Insert run_number information to the dataframe
-                    df_condor.loc[df_condor['Cluster_ID'] == cluster_id, 'Run_number'] = submit_run           
-
-                    if verbose:
-                        print("Saving Condor DataFrame Control Monitor", end='\r')
-                        print(df_condor, end='\r')
-                    #df_condor.to_csv('../submitJobs/'+ outname +'.csv', index=False)
-                    #df_condor.to_json('../dev/'+ outname +'.json', orient="table")
-                    savetables(df_condor, outname)
-                    
-                    ### Routine to not let the over sent jobs
-                    idlejobs = idleJobsCount(idlejobs)
-                    if verbose:
-                        print("Number of Jobs in Idle: " + str(idlejobs) + "\n", end='\r')
-
-                #Checking again the list to see if there is more Run to be analyzed
-                df_condor = forOverPandasStatus(df_condor)
-                df_condor = forOverPandasTransfer(df_condor, connection)
-                df_condor = forOverPandasCloud(df_condor, TAG)
-                df_condor = forOverPandasCloud_rm(df_condor)
-                list_runs_to_analyze = checkNewRuns(run_number_start,run_number_end)
+                        if verbose:
+                            print("Update Table: %d" %status, end='\r')
+                        if status == -2:
+                            connection = refreshSQL(verbose)
+                            status = sql_update_reco_status(submit_run,0,connection) #Update the online_reco variable to 0, which means "reconstructing"
+    
+                        if verbose:
+                            print("Run " + str(submit_run)+ "submitted with Cluster_ID: " + str(cluster_id), end='\r')
+    
+                        status     = getJobStatus(cluster_id)
+                        df_condor  = update_job_status(df_condor, cluster_id, status)
+                        # Insert run_number information to the dataframe
+                        df_condor.loc[df_condor['Cluster_ID'] == cluster_id, 'Run_number'] = submit_run           
+    
+                        if verbose:
+                            print("Saving Condor DataFrame Control Monitor", end='\r')
+                            print(df_condor, end='\r')
+                        #df_condor.to_csv('../submitJobs/'+ outname +'.csv', index=False)
+                        #df_condor.to_json('../dev/'+ outname +'.json', orient="table")
+                        savetables(df_condor, outname)
+                        
+                        ### Routine to not let the over sent jobs
+                        idlejobs = idleJobsCount(idlejobs)
+                        if verbose:
+                            print("Number of Jobs in Idle: " + str(idlejobs) + "\n", end='\r')
+    
+                    #Checking again the list to see if there is more Run to be analyzed
+                    df_condor = forOverPandasStatus(df_condor)
+                    df_condor = forOverPandasTransfer(df_condor, connection)
+                    df_condor = forOverPandasCloud(df_condor, TAG)
+                    df_condor = forOverPandasCloud_rm(df_condor)
+                    list_runs_to_analyze = checkNewRuns(run_number_start,run_number_end)
 
         
         
