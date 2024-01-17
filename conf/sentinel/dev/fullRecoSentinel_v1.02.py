@@ -691,6 +691,10 @@ def main(run_number_start, run_number_end, nproc, maxidle, TAG, recopath = 'reco
                     df_condor = forOverPandasCloud(df_condor, TAG)
                     df_condor = forOverPandasCloud_rm(df_condor)
                     list_runs_to_analyze = checkNewRuns(run_number_start,run_number_end)
+        else:
+            if verbose:
+                print("Sentinel in Drain, just checking status", end='\r')
+                
 
         
         

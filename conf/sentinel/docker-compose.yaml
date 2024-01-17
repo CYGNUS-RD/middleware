@@ -25,7 +25,7 @@ services:
       TAG: RECO/Run4
       WAITTIME: 0
       MAXIDLE: 30
-      DRAIN: False
+      DRAIN: "False"
 
     volumes:
       - ${PWD}/dev/init.sh:/root/init.sh
@@ -58,7 +58,7 @@ services:
       TAG: RECO/Winter23-ReReco-Run3
       WAITTIME: 17
       MAXIDLE: 30
-      DRAIN: True
+      DRAIN: "True"
 
     volumes:
       - ${PWD}/dev/init.sh:/root/init.sh
@@ -91,7 +91,7 @@ services:
       TAG: RECO/Winter23-ReReco-Run3
       WAITTIME: 37
       MAXIDLE: 30
-      DRAIN: True
+      DRAIN: "True"
 
     volumes:
       - ${PWD}/dev/init.sh:/root/init.sh
@@ -124,7 +124,7 @@ services:
       TAG: RECO/Winter23-ReReco-Run3
       WAITTIME: 23
       MAXIDLE: 0
-      DRAIN: True
+      DRAIN: "True"
 
     volumes:
       - ${PWD}/dev/init.sh:/root/init.sh
