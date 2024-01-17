@@ -587,10 +587,10 @@ def main(run_number_start, run_number_end, nproc, maxidle, TAG, recopath = 'reco
     if os.path.isfile(file_path):
         df_condor = pd.read_csv(file_path)
         if verbose:
-            print("File loaded successfully!", end='\r')
+            print("File loaded successfully!\n", end='\r')
     else:
         if verbose:
-            print("Creating new DataFrame.", end='\r')
+            print("Creating new DataFrame \n", end='\r')
         # create an empty DataFrame with the desired columns
         columns_condor = ['Cluster_ID', 'Run_number', 'Status', 'Data_transfered', 'Cloud_storage', 'JobInQueue']
         df_condor = pd.DataFrame(columns=columns_condor)
@@ -640,8 +640,12 @@ def main(run_number_start, run_number_end, nproc, maxidle, TAG, recopath = 'reco
             print("Number of Jobs in Idle: " + str(idlejobs) + "\n", end='\r')
         
         if idlejobs > maxidle:
+            if verbose:
+                print("Idle Jobs limit reached \n", end='\r')
             idle_status = True
         else:
+            if verbose:
+                print("Sentinel can still accept more jobs \n", end='\r')
             idle_status = False
             
         if just_status == False:
@@ -651,7 +655,7 @@ def main(run_number_start, run_number_end, nproc, maxidle, TAG, recopath = 'reco
                     status = sql_update_reco_status(submit_run,-2,connection) #"idle"
     
                     if verbose:
-                        print("Sending the Run "+ str(submit_run) + " to the Queue", end='\r')
+                        print("Sending the Run "+ str(submit_run) + " to the Queue \n", end='\r')
                     createPedLog(recopath)
                     writeSubmitFile(recopath, submit_path, str(submit_run), str(nproc), str(maxentries))
                     submitfile = createCondorSubmit(submit_path, str(submit_run))
@@ -666,7 +670,7 @@ def main(run_number_start, run_number_end, nproc, maxidle, TAG, recopath = 'reco
                             status = sql_update_reco_status(submit_run,0,connection) #Update the online_reco variable to 0, which means "reconstructing"
     
                         if verbose:
-                            print("Run " + str(submit_run)+ "submitted with Cluster_ID: " + str(cluster_id), end='\r')
+                            print("Run " + str(submit_run)+ "submitted with Cluster_ID: " + str(cluster_id) + "\n", end='\r')
     
                         status     = getJobStatus(cluster_id)
                         df_condor  = update_job_status(df_condor, cluster_id, status)
@@ -693,7 +697,7 @@ def main(run_number_start, run_number_end, nproc, maxidle, TAG, recopath = 'reco
                     list_runs_to_analyze = checkNewRuns(run_number_start,run_number_end)
         else:
             if verbose:
-                print("Sentinel in Drain, just checking status", end='\r')
+                print("Sentinel in Drain, just checking status\n", end='\r')
                 
 
         
@@ -709,7 +713,7 @@ def main(run_number_start, run_number_end, nproc, maxidle, TAG, recopath = 'reco
         nheld = 10
         if aux_held >= nheld:
             if verbose:
-                print("Checking completed Jobs on Queue", end='\r')
+                print("Checking completed Jobs on Queue\n", end='\r')
             connection = refreshSQL(verbose)
             # reset the start time
             df_condor = forOverPandasCloud_rm(df_condor)
@@ -718,32 +722,32 @@ def main(run_number_start, run_number_end, nproc, maxidle, TAG, recopath = 'reco
             aux_held = 0
         else:
             if verbose:
-                print("Next check of Queue in %d loops" %(nheld-aux_held), end='\r')
+                print("Next check of Queue in %d loops\n" %(nheld-aux_held), end='\r')
         
         
         #elapsed_time_rm = time.time() - start_time_rm
         nfresh = 1000
         if aux_rm >= nfresh:
             if verbose:
-                print("Killing agent and refreshing token", end='\r')
+                print("Killing agent and refreshing token\n", end='\r')
             time.sleep(40)
             connection = refreshSQL(verbose)
             # reset the start time
             aux_rm = 0
         else:
             if verbose:
-                print("Next cleaning in %d loops" %(nfresh-aux_rm), end='\r')
+                print("Next cleaning in %d loops\n" %(nfresh-aux_rm), end='\r')
         #df_condor = forOverPandasUnknown(df_condor, connection)
         
         if verbose:
             print(df_condor, end='\r')
-            print("Saving Condor DataFrame Control Monitor", end='\r')
+            print("Saving Condor DataFrame Control Monitor\n", end='\r')
         # save the dataframe to a CSV file
         savetables(df_condor, outname)
         #df_condor.to_csv('../submitJobs/'+ outname +'.csv', index=False)
         #df_condor.to_json('../dev/'+ outname +'.json', orient="table")
         if verbose:
-            print("Waiting 60 seconds to check Job status", end='\r')
+            print("Waiting 60 seconds to check Job status\n", end='\r')
         aux_rm = aux_rm + 1
         aux_held = aux_held + 1
         time.sleep(47)
@@ -758,10 +762,15 @@ if __name__ == "__main__":
     parser.add_option('-t', '--tag', dest='TAG', default=None, type='string', help='TAG where to save the output reco')
     parser.add_option('-f', '--recopath', dest='recopath', default='reconstruction', type='string', help='Name of the reconstruction folder')
     parser.add_option('-o', '--outname', dest='outname', default='df_condor', type='string', help='prefix for the output file name')
-    parser.add_option('-s','--just-status', dest='just_status', action="store_true", default=False, help='just update status, do not send jobs;')
+    parser.add_option('-s','--just-status', dest='just_status', default=0, type=int, help='just update status, do not send jobs;')
     parser.add_option('-v','--verbose', dest='verbose', action="store_true", default=False, help='verbose output;');
     (options, args) = parser.parse_args()
     #main(verbose=options.verbose)
+
+    if options.just_status == 1:
+        options.just_status = True
+    else:
+        options.just_status = False
     
     if len(args) < 1:
         print(args, len(args))
@@ -771,4 +780,4 @@ if __name__ == "__main__":
         main(int(args[0]), options.run_number_end, options.nproc, options.maxidle, options.TAG, options.recopath, options.outname, options.just_status, options.verbose)
 
         ## Example:
-        # ./fullRecoSentinel_v1.02.py 17182 -o df_condor_coda1 -s -v
+        # ./fullRecoSentinel_v1.02.py 17182 -o df_condor_coda1 -s 0 -v

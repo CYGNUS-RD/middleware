@@ -18,14 +18,14 @@ services:
 
       HTC_IP: 131.154.98.46
       STARTRUN: 43516
-      ENDRUN: 99999
+      ENDRUN: 99998
       NCORE: 8
       DFPANDAS: df_condor_coda1
       RECOPATH: reconstruction
       TAG: RECO/Run4
       WAITTIME: 0
       MAXIDLE: 30
-      DRAIN: "False"
+      DRAIN: 0
 
     volumes:
       - ${PWD}/dev/init.sh:/root/init.sh
@@ -50,7 +50,7 @@ services:
       MYSQL_PORT: ${MYSQL_PORT}
 
       HTC_IP: 131.154.99.82
-      STARTRUN: 27883
+      STARTRUN: 27884
       ENDRUN: 31377
       NCORE: 4
       DFPANDAS: df_condor_coda2
@@ -58,7 +58,7 @@ services:
       TAG: RECO/Winter23-ReReco-Run3
       WAITTIME: 17
       MAXIDLE: 30
-      DRAIN: "True"
+      DRAIN: 0
 
     volumes:
       - ${PWD}/dev/init.sh:/root/init.sh
@@ -83,7 +83,7 @@ services:
       MYSQL_PORT: ${MYSQL_PORT}
 
       HTC_IP: 131.154.98.218
-      STARTRUN: 31378
+      STARTRUN: 31379
       ENDRUN: 34871
       NCORE: 4
       DFPANDAS: df_condor_coda3
@@ -91,7 +91,7 @@ services:
       TAG: RECO/Winter23-ReReco-Run3
       WAITTIME: 37
       MAXIDLE: 30
-      DRAIN: "True"
+      DRAIN: 1
 
     volumes:
       - ${PWD}/dev/init.sh:/root/init.sh
@@ -116,7 +116,7 @@ services:
       MYSQL_PORT: ${MYSQL_PORT}
 
       HTC_IP: 131.154.98.46
-      STARTRUN: 17780
+      STARTRUN: 17781
       ENDRUN: 27845
       NCORE: 4
       DFPANDAS: df_condor_coda4
@@ -124,7 +124,7 @@ services:
       TAG: RECO/Winter23-ReReco-Run3
       WAITTIME: 23
       MAXIDLE: 0
-      DRAIN: "True"
+      DRAIN: 1
 
     volumes:
       - ${PWD}/dev/init.sh:/root/init.sh
