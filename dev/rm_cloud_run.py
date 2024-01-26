@@ -20,19 +20,20 @@ def main(tag, fforce, start, end, session, verbose):
     if not connection:
         print ("ERROR: Sql connetion")
         sys.exit(1)
+    if verbose: print ("fatching db...")
     df = cy.read_cygno_logbook()
     run_numbers=df.run_number.values
     print ("Cheching file localy and remote: ", datetime.datetime.now().time())
-    print ("File in dir %d" % np.size(file_in_dir), start, end)
+    print ("File in dir %d" % np.size(run_numbers), start, end)
     for i, run_number in enumerate(run_numbers):
-            if run_number >=start and run_number <=end:
+            if run_number >=int(start) and run_number <=int(end):
                 if cy.daq_read_runlog_replica_status(connection, run_number, storage="cloud", verbose=verbose)==1 and \
                 cy.daq_read_runlog_replica_status(connection, run_number, storage="tape", verbose=verbose)==1:
                     filename = 'run{:05d}.mid.gz'.format(run_number)
                     print ("removing run from cloud: ",run_number, filename)
                     if fforce:
                         delete = True
-                    elif input("are you sure to delete", filename).lower() in ('y','yes', 'Y', 'YES'): 
+                    elif input("are you sure to delete {:} [y/n] ".format(filename)).lower() in ('y','yes', 'Y', 'YES'): 
                         delete = True
                     else:
                         delete = False
@@ -45,9 +46,7 @@ def main(tag, fforce, start, end, session, verbose):
                         else:
                             print ("Update replica ok", filename)
                 else:
-                    print ("ERROR: no file in sql DB", filename)
-                    sys.exit(1)
-                
+                    print ("ERROR: no run {:} in cloud/tape sql DB, jump to next".format(run_number))
     sys.exit(0)
 if __name__ == "__main__":
     from optparse import OptionParser
@@ -64,12 +63,12 @@ if __name__ == "__main__":
     LOGFILE     = '/home/standard/daq/online/log/rm_cloud_{:d}{:d}{:d}.log'.format(now.year, now.month, now.day)
     max_tries   = 5
 
-    parser = OptionParser(usage='usage: %prog [-t [{:s}] -i [{:s}]  -n [{:d}] rv]\n'.format(TAG,INAPATH, max_tries))
+    parser = OptionParser(usage='usage: %prog -tsefnv')
     parser.add_option('-t','--tag', dest='tag', type='string', default=TAG, help='tag [{:}]'.format(TAG))
     parser.add_option('-s','--start', dest='start', type='string', default=START, help='start file number [ex 512]')
     parser.add_option('-e','--end', dest='end', type='string', default=END, help='end file number [ex 1512]')
     parser.add_option('-f','--force', dest='force', action="store_true", default=False, help='force')
-    parser.add_option('-s','--session', dest='session', type='string', default=SESSION, help='session [{:}]'.format(SESSION))
+    parser.add_option('-n','--session', dest='session', type='string', default=SESSION, help='session [{:}]'.format(SESSION))
     parser.add_option('-v','--verbose', dest='verbose', action="store_true", default=False, help='verbose output')
     (options, args) = parser.parse_args()
     if options.verbose: 

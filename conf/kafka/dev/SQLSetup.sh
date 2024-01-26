@@ -1,0 +1,7 @@
+# MYSQL
+export MYSQL_ROOT_PASSWORD='9754f510c12f8f1005cdb16dc51834c4'
+export MYSQL_PASSWORD='e3b46beda9650197978b7b7e80464f73'
+export MYSQL_IP='131.154.96.221'
+export MYSQL_USER='cygno_producer'
+export MYSQL_DATABASE='cygno_db'
+export MYSQL_PORT='6033'
