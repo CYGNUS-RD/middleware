@@ -63,7 +63,7 @@ def main(bucket, tag, fcopy, fsql, fforce, verbose):
     import mysql.connector
     script_path = os.path.dirname(os.path.realpath(__file__))
     start = end = time.time()
-    tmpout = '/tmp/tmp_data2save.dat'
+    tmpout = '/tmp/tmp_data2save_'+tag+'.dat'
     tape_path = 'davs://xfer-archive.cr.cnaf.infn.it:8443/cygno/'
     if fsql or not fforce:
         connection = cy.daq_sql_cennection(verbose)
