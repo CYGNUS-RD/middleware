@@ -31,6 +31,12 @@
 
 WARNING: directory data/ and file cygno_conf.py (contaning password) are not ignored
 
+### general tips ###
+```
+docker run -it -p 8888:8888 --name editor --user root -w /home/jovyan/work -v $(pwd):/home/jovyan/work jupyter/minimal-notebook
+```
+poi Ctrl P /CTRL Q per uscire dalla parte intereattiva 
+
 ### istallation history and tips:
 
 jupyter configuration (at LNF where root as been istalled as root)
