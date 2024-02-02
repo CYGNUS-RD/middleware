@@ -7,6 +7,7 @@ services:
     stdin_open: true # docker run -i
     tty: true        # docker run -t
     environment:
+      BUCKET_TAG: 'LNGS'
       IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
       IAM_CLIENT_ID: ${IAM_CLIENT_ID}
       ENDPOINT_URL: ${ENDPOINT_URL}
@@ -21,6 +22,41 @@ services:
     volumes:
       - $PWD/dev/:/root/dev
       - /tmp/:/tmp/
+
+  tape_mango:
+    image: gmazzitelli/cygno-tape:v1.0.6-cygno
+    container_name: tape_mango
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
+    environment:
+      BUCKET_TAG: 'MAN'
+      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+      ENDPOINT_URL: ${ENDPOINT_URL}
+      TAPE_TOKEN_FILE: '/tmp/tape_token'
+      S3_TOKEN_FILE: '/tmp/token'
+
+      MYSQL_IP: 'tunnel_grafana'
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: 'mango_db'
+      MYSQL_PORT: 6034
+    volumes:
+      - ${PWD}/dev/:/root/dev
+      - /tmp/:/tmp/
+
+  tunnel:
+    restart: always
+    image: gmazzitelli/sshtunnel
+    container_name: tunnel_grafana
+    environment:
+       REMOTE_PORT: 6034
+       REMOTE_APP_NAME: localhost
+       LOCAL_PORT: 6034
+       USER: mazzitel
+       REMOTE_IP: grafana.cygno.cloud.infn.it
+    volumes:
+       - /root/.ssh/daq_id:/root/.ssh/id_rsa
 
   tokener_s3:
     image: gmazzitelli/tokener:v0.2
