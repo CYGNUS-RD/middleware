@@ -63,7 +63,7 @@ def main(bucket, tag, fcopy, fsql, fforce, verbose):
     import mysql.connector
     script_path = os.path.dirname(os.path.realpath(__file__))
     start = end = time.time()
-    tmpout = '/tmp/tmp_data2save_'+tag+'.dat'
+    #tmpout = '/tmp/tmp_data2save_'+tag+'.dat'
     tape_path = 'davs://xfer-archive.cr.cnaf.infn.it:8443/cygno/'
     if fsql or not fforce:
         connection = cy.daq_sql_cennection(verbose)
@@ -77,7 +77,7 @@ def main(bucket, tag, fcopy, fsql, fforce, verbose):
     s3_token_file  = os.environ['S3_TOKEN_FILE']
     
     runs = cy.daq_not_on_tape_runs(connection, verbose=verbose) 
-    print("missing runs", runs)    
+    print("missing runs:", len(runs), runs)    
     
     key = tag+'/'
     
@@ -86,6 +86,7 @@ def main(bucket, tag, fcopy, fsql, fforce, verbose):
         if (verbose): 
             print("-------------------------")
         run_number = run
+        tmpout = '/tmp/tag_'+file_in
 	
         if not fforce and cy.daq_read_runlog_replica_status(connection, run_number, storage="tape", verbose=verbose)==1:
                 print ("File ", file_in, " ok, nothing done")
@@ -111,8 +112,10 @@ def main(bucket, tag, fcopy, fsql, fforce, verbose):
                 print("Cloud name", file_in)
                 print("run_number", run_number) 
                 print("Cloud size", filesize, kb2valueformat(filesize))
-                print("SQL actual status", 
-                      cy.daq_read_runlog_replica_status(connection, run_number, storage="tape", verbose=verbose))
+                print("SQL actual status", cy.daq_read_runlog_replica_status(connection, 
+                                                                             run_number, 
+                                                                             storage="tape", 
+                                                                             verbose=verbose))
  
             try:
                 tape_data_file = subprocess.check_output("gfal-ls -l "+tape_path\
@@ -133,18 +136,14 @@ def main(bucket, tag, fcopy, fsql, fforce, verbose):
 
 
             if (filesize != remotesize) and (filesize>0) or fforce:
-                print ("WARNING: file size mismatch", file_in, filesize, remotesize)
+                if not fforce: print ("WARNING: file size mismatch", file_in, filesize, remotesize)
                 if (fcopy):
                     print (">>> coping file: "+file_in)
                     try:
-                        #cy.s3.obj_get(file_in, tmpout, tag, bucket=bucket, session=session, verbose=verbose)
                         s3.download_file(bucket, key+file_in, tmpout)
-                        # url = "https://s3.cloud.infn.it/v1/AUTH_2ebf769785574195bde2ff418deac08a/"+bucket+"/"+key+file_in
-                        # url2 = "https://s3.cloud.infn.it/v1/AUTH_2ebf769785574195bde2ff418deac08a/cygno-data/LNGS/run39143.mid.gz"
-                        # print (url)
-                        # print (url2)
-                        # download2file(url, tmpout)
-                        # print (url, tmpout)
+                    except Exception as e:
+                        print("ERROR: Donwnload faliure", e)
+                    try:
                         if (remotesize):
                             tape_data_copy = subprocess.check_output("gfal-rm "+tape_path\
                                              +tag+"/"+file_in, shell=True)
@@ -154,16 +153,24 @@ def main(bucket, tag, fcopy, fsql, fforce, verbose):
                         cy.cmd.rm_file(tmpout)
 
                         if (fsql):
-                            cy.daq_update_runlog_replica_status(connection, run_number, 
-                                                                storage="tape", status=1, verbose=verbose)
-                            cy.daq_update_runlog_replica_tag(connection, run_number, tag, verbose=verbose)
+                            s1 = cy.daq_update_runlog_replica_status(connection, run_number, 
+                                                    storage="tape", status=1, verbose=verbose)
+                            
+                            s2 = cy.daq_update_runlog_replica_tag(connection, run_number, 
+                                                                  tag, verbose=verbose)
+                            if s2<0 or s1<0:
+                                print("ERROR: SQL faliure", s1, s2)
+                                sys.exit(1)
                     except Exception as e:
                         print("ERROR: Copy on TAPE faliure", e)
             else:
                 print ("File ", file_in, " ok")
                 if (fsql):
-                    cy.daq_update_runlog_replica_status(connection, run_number, 
+                    s3 = cy.daq_update_runlog_replica_status(connection, run_number, 
                                                         storage="tape", status=1, verbose=verbose)
+                    if s3<0:
+                        print("ERROR: SQL faliure", s1, s2)
+                        sys.exit(1)
 
 
     sys.exit(0)

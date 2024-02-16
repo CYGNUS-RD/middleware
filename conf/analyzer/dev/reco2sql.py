@@ -10,6 +10,8 @@ import pandas as pd
 import mysql.connector
 import os
 import cygno as cy
+import time
+import datetime
 
 def push_panda_table_sql(connection, table_name, df):
     try:
@@ -32,8 +34,9 @@ def push_panda_table_sql(connection, table_name, df):
 
         mycursor.close()
         return 0 
-    except:
-        return -1
+    except Exception as e:
+        print('ERROR >>> SQL insert {}'.format(e))
+        return 1
 
     
 def GetLY(tf):
@@ -164,6 +167,7 @@ def update_sql_value(connection, table_name, column_element, value, verbose=Fals
         return 0
     except Exception as e:
         print('ERROR >>> SQL update {}'.format(e))
+        return 1
 
 def alpha_rate(cut,length, xmax=40):
 #    cut = dfall.sc_integral/dfall.sc_nhits
@@ -172,6 +176,40 @@ def alpha_rate(cut,length, xmax=40):
 #        nalpha +=len(cut[i][(cut[i]>40) & (dfall.sc_length[i]>50)])
         nalpha +=len(cut[i][(cut[i]>40) & (length[i]>50)])
     return nalpha
+
+def push_update_panda_table_sql(connection, table_name, df):
+
+    try:
+        mycursor=connection.cursor()
+        mycursor.execute("SHOW TABLES LIKE '"+table_name+"'")
+        result = mycursor.fetchone()
+        if not result:
+            cols = "`,`".join([str(i) for i in df.columns.tolist()])
+            db_to_crete = "CREATE TABLE `"+table_name+"` ("+' '.join(["`"+x+"` REAL," for x in df.columns.tolist()])[:-1]+")"
+            print ("[Table {:s} created into SQL Server]".format(table_name))
+            mycursor = connection.cursor()
+            mycursor.execute(db_to_crete)
+
+        cols = "`,`".join([str(i) for i in df.columns.tolist()])
+
+        for i,row in df.iterrows():
+            sql = "INSERT INTO `"+table_name+"` (`" +cols + "`) VALUES (" + "%s,"*(len(row)-1) + "%s) " \
+            "ON DUPLICATE KEY UPDATE "+", ".join(["`"+s+"`="+str(df[s].values[0]) for s in df.columns])
+            mycursor.execute(sql, tuple(row.astype(str)))
+            connection.commit()
+
+        mycursor.close()
+        return 0 
+    except Exception as e:
+        print('SQL ERROR --> ', e)
+        return 1
+
+def sql2df(url="http://lnf.infn.it/~mazzitel/php/cygno_sql_query.php?site=lnf&db=gm_data"):
+    import requests
+    r = requests.get(url, verify=False)
+    df = pd.read_json(url)
+    return df
+
 
 def main(verbose=False):
     import os
@@ -211,8 +249,20 @@ def main(verbose=False):
         if verbose: print(run, force_rebuild==1, not (run in sql_Rec.run_mean.astype(int).tolist()), sql_Rec.run_mean.astype(int).tolist())
         if force_rebuild==1 or not (run in sql_Rec.run_mean.astype(int).tolist()):
 #        if not (run in sql_Rec.run_mean.astype(int).tolist()):
-            source = ((sql_Log[sql_Log.run_number==run].source_type.values[0]==1) & (sql_Log[sql_Log.run_number==run].source_position.values[0]==17.5))
-            print("analyzing run: ",run, str(sql_Log[sql_Log.run_number==run].run_description.values), source)
+            if (sql_Log[sql_Log.run_number==run].source_type.values[0]==1):
+                source1 = sql_Log[sql_Log.run_number==run].source_position.values[0]==3.5
+                source2 = sql_Log[sql_Log.run_number==run].source_position.values[0]==10.5
+                source3 = sql_Log[sql_Log.run_number==run].source_position.values[0]==17.5
+                source4 = sql_Log[sql_Log.run_number==run].source_position.values[0]==24.5
+                source5 = sql_Log[sql_Log.run_number==run].source_position.values[0]==32.5
+            else:
+                source1 = False
+                source2 = False
+                source3 = False
+                source4 = False
+                source5 = False
+
+            print("analyzing run: ",run, str(sql_Log[sql_Log.run_number==run].run_description.values), source1, source2, source3, source4, source5)
             try:
                 file_out_name="/tmp/"+"reco_run{0:05d}_3D.pkl.gz".format(run)
                 branch_data = {}
@@ -238,27 +288,102 @@ def main(verbose=False):
                 val_LY = GetLY(tf)
                 slow_data["LY_mean"]=val_LY[0]
                 slow_data["LY_std"]=val_LY[1]
-                if source and (reco_path0.split('/')[0]=='Run4'):
-                   img64,stat, popt, perr = plt_hist(np.hstack(np.array(branch_data["sc_integral"])), run, xmin=4000, xmax=16000, bins=60, verbose=verbose)
-                   update_sql_value(connection, "tmpTable", "image_fe", img64, verbose)
+
+                if source1:  
+                   img64,stat1, popt1, perr1 = plt_hist(np.hstack(np.array(branch_data["sc_integral"])), run, xmin=2000, xmax=14000, bins=60, verbose=verbose)
+                   update_sql_value(connection, "tmpTable", "image_fe_1", img64, verbose)
+                   update_sql_value(connection, "tmpTable", "peak_fe_1", popt1[1], verbose)
+                   update_sql_value(connection, "tmpTable", "epoch_fe_1", start2epoch(sql_Log, run), verbose)
+                   dv = sql2df(url="http://lnf.infn.it/~mazzitel/php/cygno_sql_query.php?db=tmpTable")
+                   if not (push_update_panda_table_sql(connection, 'tmpTableHist', dv.iloc[:, : 10])):
+                       print("history updated")
+                   else:
+                       print("ERROR in history updated")
+                if source2:  
+                   img64,stat2, popt2, perr2 = plt_hist(np.hstack(np.array(branch_data["sc_integral"])), run, xmin=4000, xmax=16000, bins=60, verbose=verbose)
+                   update_sql_value(connection, "tmpTable", "image_fe_2", img64, verbose)
+                   update_sql_value(connection, "tmpTable", "peak_fe_2", popt2[1], verbose)
+                   update_sql_value(connection, "tmpTable", "epoch_fe_2", start2epoch(sql_Log, run), verbose)
+                   dv = sql2df(url="http://lnf.infn.it/~mazzitel/php/cygno_sql_query.php?db=tmpTable")
+                   if not (push_update_panda_table_sql(connection, 'tmpTableHist', dv.iloc[:, : 10])):
+                       print("history updated")
+                   else:
+                       print("ERROR in history updated")
+                if source3:  #and (reco_path0.split('/')[0]=='Run4'):
+                   img64,stat3, popt3, perr3 = plt_hist(np.hstack(np.array(branch_data["sc_integral"])), run, xmin=4000, xmax=16000, bins=60, verbose=verbose)
+                   update_sql_value(connection, "tmpTable", "image_fe_3", img64, verbose)
+                   update_sql_value(connection, "tmpTable", "peak_fe_3", popt3[1], verbose)
+                   update_sql_value(connection, "tmpTable", "epoch_fe_3", start2epoch(sql_Log, run), verbose)
+                   dv = sql2df(url="http://lnf.infn.it/~mazzitel/php/cygno_sql_query.php?db=tmpTable")
+                   if not (push_update_panda_table_sql(connection, 'tmpTableHist', dv.iloc[:, : 10])):
+                       print("history updated")
+                   else:
+                       print("ERROR in history updated")
                 else:
-                   stat = (0.0,0.0)
-                   popt = (0.0,0.0,0.0)
-                slow_data["Fe_mean"]=stat[0]
-                slow_data["Fe_fit"]=popt[1]
+                   stat3 = (0.0,0.0)
+                   popt3 = (0.0,0.0,0.0)
+                if source4:  
+                   img64,stat4, popt4, perr4 = plt_hist(np.hstack(np.array(branch_data["sc_integral"])), run, xmin=4000, xmax=16000, bins=60, verbose=verbose)
+                   update_sql_value(connection, "tmpTable", "image_fe_4", img64, verbose)
+                   update_sql_value(connection, "tmpTable", "peak_fe_4", popt4[1], verbose)
+                   update_sql_value(connection, "tmpTable", "epoch_fe_4", start2epoch(sql_Log, run), verbose)
+                   dv = sql2df(url="http://lnf.infn.it/~mazzitel/php/cygno_sql_query.php?db=tmpTable")
+                   if not (push_update_panda_table_sql(connection, 'tmpTableHist', dv.iloc[:, : 10])):
+                       print("history updated")
+                   else:
+                       print("ERROR in history updated")
+                if source5:  
+                   img64,stat5, popt5, perr5 = plt_hist(np.hstack(np.array(branch_data["sc_integral"])), run, xmin=4000, xmax=16000, bins=60, verbose=verbose)
+                   update_sql_value(connection, "tmpTable", "image_fe_5", img64, verbose)
+                   update_sql_value(connection, "tmpTable", "peak_fe_5", popt5[1], verbose)
+                   update_sql_value(connection, "tmpTable", "epoch_fe_5", start2epoch(sql_Log, run), verbose)
+                   dv = sql2df(url="http://lnf.infn.it/~mazzitel/php/cygno_sql_query.php?db=tmpTable")
+                   if not (push_update_panda_table_sql(connection, 'tmpTableHist', dv.iloc[:, : 10])):
+                       print("history updated")
+                   else:
+                       print("ERROR in history updated")
+                slow_data["Fe_mean"]=stat3[0]
+                slow_data["Fe_fit"]=popt3[1]
+
                 spark = len(np.array(branch_data["cmos_integral"])[np.array(branch_data["cmos_integral"])>SPARK])
                 slow_data["spark"]=spark
                 slow_data["alpha"]=alpha_rate(np.array(branch_data["sc_integral"])/np.array(branch_data["sc_nhits"]),np.array(branch_data["sc_length"]), xmax=40)
                 slow_data["reco_tag"]=reco_path0.split('/')[0]
                 print(slow_data)
+
                 df = pd.DataFrame(slow_data, index=[0]) # qui index=0 perche sono scalari
                 df.replace(np.nan, -99, inplace=True)
+
                 table_name = "SlowReco"
                 push_panda_table_sql(connection,table_name, df)
                 df_all = pd.DataFrame(branch_data)
                 df_all.to_pickle(file_out_name, compression={'method': 'gzip', 'compresslevel': 1})
                 upload_file_2_S3(file_out_name, client_id, client_secret,  endpoint_url, bucket, tag, tfile, verbose=verbose)
                 cy.cmd.rm_file(file_out_name)
+# ############## Update Params
+                parma_data = {}
+                parma_data['run']=branch_data['run'][0]
+                parma_data['run_epoch']=start2epoch(sql_Log, run)
+                names = tf["Reco_params;1"].keys()
+                for i, name in enumerate(names):
+                    var = tf["Reco_params;1/"+name].array(library="np")
+                    parma_data[name]=var
+                parma_data['hash']=tf["gitHash;1"].member('fTitle')
+                dp = pd.DataFrame(parma_data)
+                push_panda_table_sql(connection,'SlowRecoParams', dp)
+# ############## Update History
+#                tn = datetime.datetime.fromtimestamp(time.time()).strftime('%H')
+#                if tn=='23':
+#                    dv = sql2df(url="http://lnf.infn.it/~mazzitel/php/cygno_sql_query.php?db=tmpTable")
+#                    dh = sql2df(url="http://lnf.infn.it/~mazzitel/php/cygno_sql_query.php?db=tmpTableHist")
+#                    tv = datetime.datetime.fromtimestamp(dv.epoch_fe_3).strftime('%Y-%m-%d')
+#                    th = datetime.datetime.fromtimestamp(dh.iloc[-1].epoch_fe_3).strftime('%Y-%m-%d')
+#                    if not tv==th:
+#                       if not (push_update_panda_table_sql(connection, 'tmpTableHist', dv.iloc[:, : 10])):
+#                           print("history updated")
+#                       else:
+#                           print("ERROR in history updated")
+
             except Exception as e:
                 print('ERROR >>> {}'.format(e))
                 continue

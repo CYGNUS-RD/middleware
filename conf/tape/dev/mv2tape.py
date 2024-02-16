@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 #
 # G. Mazzitelli 2022
-# versione DAQ LNGS/LNF per midas file2cloud 
+# versione DAQ LNGS/LNF per midas copy/check/or mouve files from cloud cloud to tape 
+# 
 #
 
 def kb2valueformat(val):
@@ -118,10 +119,9 @@ def main(bucket, key, remove, verbose):
     
     for i, filepath in enumerate(files):
         file_in = filepath.split('/')[-1]
-        tmpout = '/tmp/'+file_in
-        if (verbose): 
-            print("-------------------------")
-            print(file_in, filepath)
+        tmpout = '/tmp/'+file_in 
+        print("-------------------------")
+        print(file_in, filepath)
 	
         with open(s3_token_file) as file:
             s3_token = file.readline().strip('\n')
@@ -138,7 +138,7 @@ def main(bucket, key, remove, verbose):
             filesize = int(s3.head_object(Bucket=bucket,Key=filepath)['ContentLength'])
         except Exception as e: 
             print("ERROR in file size:", e)
-            sys.exit(2)
+            sys.exit(1)
             
         if (verbose): 
             print("Cloud name", file_in)
@@ -165,11 +165,11 @@ def main(bucket, key, remove, verbose):
             print ("WARNING: file size mismatch", file_in, filesize, remotesize)
             try:
                 s3.download_file(bucket, filepath, tmpout)
-                print("file doenload", filepath, tmpout)
+                print("file download", filepath, tmpout)
                 
             except Exception as e:
                 print("ERROR: Download faliure: ", e)
-                sys.exit(1)
+                sys.exit(2)
             try:
                 if (remotesize):
                     tape_data_copy = subprocess.check_output("gfal-rm "+tape_path+filepath, shell=True)
@@ -178,19 +178,21 @@ def main(bucket, key, remove, verbose):
                 cy.cmd.rm_file(tmpout)
             except Exception as e:
                 print("ERROR: Copy on TAPE faliure: ", e)
-                sys.exit(1)
-        try:
-            tape_data_file = subprocess.check_output("gfal-ls -l "+tape_path\
-                            +filepath+" | awk '{print $5\" \"$9}'", shell=True)
-
-            remotesize, tape_file = tape_data_file.decode("utf-8").split(" ")
-            remotesize = int(remotesize)         
-            if (filesize == remotesize) and remove:
-                response = s3.delete_object(Bucket=bucket,Key=filepath)
-                print ('removed file: '+filepath)
-        except Exception as e:
-            print("ERROR: Copy on TAPE faliure", e)
-            sys.exit(1)
+                sys.exit(3)
+            try:
+                tape_data_file = subprocess.check_output("gfal-ls -l "+tape_path\
+                                +filepath+" | awk '{print $5\" \"$9}'", shell=True)
+    
+                remotesize, tape_file = tape_data_file.decode("utf-8").split(" ")
+                remotesize = int(remotesize)         
+                if (filesize == remotesize) and remove:
+                    response = s3.delete_object(Bucket=bucket,Key=filepath)
+                    print ('removed file: '+filepath)
+            except Exception as e:
+                print("ERROR: Copy on TAPE faliure", e)
+                sys.exit(3)
+        else:
+            print("recheck ok")
 
     sys.exit(0)
     
@@ -203,14 +205,16 @@ if __name__ == "__main__":
     KEY         = 'RECO/Winter23/'
     BUCKET      = 'cygno-analysis'
 
-    parser = OptionParser(usage='usage: %prog [-b [{:s}] -t [{:s}] -csv]\n'.format(BUCKET,KEY))
+    parser = OptionParser(usage='usage: %prog [-b [{:s}] -r remove orginal files -v verbose]\n'.format(BUCKET))
     parser.add_option('-b','--bucket', dest='bucket', type='string', default=BUCKET, help='PATH to raw data')
-    parser.add_option('-k','--key', dest='key', type='string', default=KEY, help='key/dir path where dir for data')
     parser.add_option('-r','--remove', dest='remove', action='store_true', default=False, help='remove file')
     parser.add_option('-v','--verbose', dest='verbose', action="store_true", default=False, help='verbose output')
     (options, args) = parser.parse_args()
     if options.verbose: 
         print ("options", options)
         print ("args", args)
+    if len(args)<1:
+        parser.error("missing key/folder to beckup, example {:s}".format(KEY))
+        sys.exit(1)
      
-    main(options.bucket, options.key, options.remove, options.verbose)
+    main(options.bucket, args[0], options.remove, options.verbose)
