@@ -126,7 +126,7 @@ def plt_hist(data, run,  xmin=4000, xmax=16000, bins=60, verbose=False):
     y,x = np.histogram(data, range=(xmin,xmax), bins = bins)
     x=x[:-1]
     w = abs(x[1] - x[0])
-    xfmin=stat[0]-0.4*stat[1]
+    xfmin=stat[0]-0.6*stat[1]/(stat[0]/12000)
     xfmax=stat[0]+3*stat[1]
 
     popt, pcov = curve_fit(Gauss3,x[(x>xfmin) & (x<xfmax)], y[(x>xfmin) & (x<xfmax)], 
@@ -177,7 +177,7 @@ def alpha_rate(cut,length, xmax=40):
         nalpha +=len(cut[i][(cut[i]>40) & (length[i]>50)])
     return nalpha
 
-def push_update_panda_table_sql(connection, table_name, df):
+def push_update_panda_table_sql(connection, table_name, df, verbose=False):
 
     try:
         mycursor=connection.cursor()
@@ -194,7 +194,8 @@ def push_update_panda_table_sql(connection, table_name, df):
 
         for i,row in df.iterrows():
             sql = "INSERT INTO `"+table_name+"` (`" +cols + "`) VALUES (" + "%s,"*(len(row)-1) + "%s) " \
-            "ON DUPLICATE KEY UPDATE "+", ".join(["`"+s+"`="+str(df[s].values[0]) for s in df.columns])
+            "ON DUPLICATE KEY UPDATE "+", ".join(["`"+s+"`='"+str(df[s].values[0])+"'" for s in df.columns])
+            if verbose: print(sql)
             mycursor.execute(sql, tuple(row.astype(str)))
             connection.commit()
 
@@ -204,12 +205,69 @@ def push_update_panda_table_sql(connection, table_name, df):
         print('SQL ERROR --> ', e)
         return 1
 
-def sql2df(url="http://lnf.infn.it/~mazzitel/php/cygno_sql_query.php?site=lnf&db=gm_data"):
+def sql2df(url="http://lnf.infn.it/~mazzitel/php/cygno_sql_query.php?site=lnf&db=gm_data", verbose=False):
     import requests
     r = requests.get(url, verify=False)
     df = pd.read_json(url)
     return df
 
+def self_updete_history(connection, verbose=False):
+    dv = sql2df(url="http://lnf.infn.it/~mazzitel/php/cygno_sql_query.php?db=tmpTable")
+    img_base64, popt, perr = scan_plt(dv)
+    if img_base64:
+       update_sql_value(connection, "tmpTable", "image_scan_fe", img_base64, verbose)
+    dv = dv.iloc[:, : 10] 
+    dv['data']=datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d')
+    dv['par0']=popt[0]
+    dv['par1']=popt[1]
+    if not (push_update_panda_table_sql(connection, 'tmpTableHist', dv)):
+       print("history updated")
+    else:
+       print("ERROR in history updated")
+
+def scan_fit(x, a, b):
+    import numpy as np
+    return a * (1 - np.exp(-(x + 142.26) / (-0.02 * a + 19897.75) )) * np.exp(-x / b)
+
+def scan_plt(dv, verbose=False):
+    import matplotlib.pyplot as plt
+    import base64
+    from json import dump
+    import numpy as np
+    import seaborn as sns
+    from scipy.optimize import curve_fit
+    import datetime
+    
+    sns.set()
+    try:
+        fig,ax = plt.subplots(figsize=(10,5))
+        x = [50.0, 150.0, 250.0, 350.0, 465.0]
+        y = [dv.peak_fe_1.values[0], dv.peak_fe_2.values[0], dv.peak_fe_3.values[0], 
+             dv.peak_fe_4.values[0], dv.peak_fe_5.values[0]]
+        label = datetime.datetime.fromtimestamp(dv.epoch_fe_3).strftime('%Y-%m-%d')
+
+        ax.plot(x,y, 'b.-', label=label)
+        ax.legend()
+        x1 = np.linspace(0,500, 100)
+        popt, pcov = curve_fit(scan_fit,x,y, p0=[450000, 700])
+        perr = np.sqrt(np.diag(pcov))
+        y1 = scan_fit(x1, *popt)
+        ax.plot(x1,y1, 'r--', label='a={:.2e}, b={:.2e}'.format(popt[0], popt[1]))
+        ax.legend()
+
+        ax.set_xlim(0,500)
+        plt.savefig('/tmp/fe.png')
+        if verbose: plt.show()
+        with open('/tmp/fe.png', 'rb') as f:
+            img_bytes = f.read()
+        f.close()
+        img_base64 = base64.b64encode(img_bytes).decode('utf-8')
+        if verbose: print(img_base64)
+        del fig, ax
+        return img_base64, popt, perr
+    except Exception as e:
+        print('ERROR scan fit error {}'.format(e))
+        return False, [0,0], [0,0]
 
 def main(verbose=False):
     import os
@@ -290,35 +348,23 @@ def main(verbose=False):
                 slow_data["LY_std"]=val_LY[1]
 
                 if source1:  
-                   img64,stat1, popt1, perr1 = plt_hist(np.hstack(np.array(branch_data["sc_integral"])), run, xmin=2000, xmax=14000, bins=60, verbose=verbose)
+                   img64,stat1, popt1, perr1 = plt_hist(np.hstack(np.array(branch_data["sc_integral"])), run, xmin=4000, xmax=16000, bins=60, verbose=verbose)
                    update_sql_value(connection, "tmpTable", "image_fe_1", img64, verbose)
                    update_sql_value(connection, "tmpTable", "peak_fe_1", popt1[1], verbose)
                    update_sql_value(connection, "tmpTable", "epoch_fe_1", start2epoch(sql_Log, run), verbose)
-                   dv = sql2df(url="http://lnf.infn.it/~mazzitel/php/cygno_sql_query.php?db=tmpTable")
-                   if not (push_update_panda_table_sql(connection, 'tmpTableHist', dv.iloc[:, : 10])):
-                       print("history updated")
-                   else:
-                       print("ERROR in history updated")
+                   self_updete_history(connection)
                 if source2:  
                    img64,stat2, popt2, perr2 = plt_hist(np.hstack(np.array(branch_data["sc_integral"])), run, xmin=4000, xmax=16000, bins=60, verbose=verbose)
                    update_sql_value(connection, "tmpTable", "image_fe_2", img64, verbose)
                    update_sql_value(connection, "tmpTable", "peak_fe_2", popt2[1], verbose)
                    update_sql_value(connection, "tmpTable", "epoch_fe_2", start2epoch(sql_Log, run), verbose)
-                   dv = sql2df(url="http://lnf.infn.it/~mazzitel/php/cygno_sql_query.php?db=tmpTable")
-                   if not (push_update_panda_table_sql(connection, 'tmpTableHist', dv.iloc[:, : 10])):
-                       print("history updated")
-                   else:
-                       print("ERROR in history updated")
+                   self_updete_history(connection)
                 if source3:  #and (reco_path0.split('/')[0]=='Run4'):
                    img64,stat3, popt3, perr3 = plt_hist(np.hstack(np.array(branch_data["sc_integral"])), run, xmin=4000, xmax=16000, bins=60, verbose=verbose)
                    update_sql_value(connection, "tmpTable", "image_fe_3", img64, verbose)
                    update_sql_value(connection, "tmpTable", "peak_fe_3", popt3[1], verbose)
                    update_sql_value(connection, "tmpTable", "epoch_fe_3", start2epoch(sql_Log, run), verbose)
-                   dv = sql2df(url="http://lnf.infn.it/~mazzitel/php/cygno_sql_query.php?db=tmpTable")
-                   if not (push_update_panda_table_sql(connection, 'tmpTableHist', dv.iloc[:, : 10])):
-                       print("history updated")
-                   else:
-                       print("ERROR in history updated")
+                   self_updete_history(connection)
                 else:
                    stat3 = (0.0,0.0)
                    popt3 = (0.0,0.0,0.0)
@@ -327,21 +373,13 @@ def main(verbose=False):
                    update_sql_value(connection, "tmpTable", "image_fe_4", img64, verbose)
                    update_sql_value(connection, "tmpTable", "peak_fe_4", popt4[1], verbose)
                    update_sql_value(connection, "tmpTable", "epoch_fe_4", start2epoch(sql_Log, run), verbose)
-                   dv = sql2df(url="http://lnf.infn.it/~mazzitel/php/cygno_sql_query.php?db=tmpTable")
-                   if not (push_update_panda_table_sql(connection, 'tmpTableHist', dv.iloc[:, : 10])):
-                       print("history updated")
-                   else:
-                       print("ERROR in history updated")
+                   self_updete_history(connection)
                 if source5:  
                    img64,stat5, popt5, perr5 = plt_hist(np.hstack(np.array(branch_data["sc_integral"])), run, xmin=4000, xmax=16000, bins=60, verbose=verbose)
                    update_sql_value(connection, "tmpTable", "image_fe_5", img64, verbose)
                    update_sql_value(connection, "tmpTable", "peak_fe_5", popt5[1], verbose)
                    update_sql_value(connection, "tmpTable", "epoch_fe_5", start2epoch(sql_Log, run), verbose)
-                   dv = sql2df(url="http://lnf.infn.it/~mazzitel/php/cygno_sql_query.php?db=tmpTable")
-                   if not (push_update_panda_table_sql(connection, 'tmpTableHist', dv.iloc[:, : 10])):
-                       print("history updated")
-                   else:
-                       print("ERROR in history updated")
+                   self_updete_history(connection)
                 slow_data["Fe_mean"]=stat3[0]
                 slow_data["Fe_fit"]=popt3[1]
 
