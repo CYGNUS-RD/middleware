@@ -41,6 +41,7 @@ docker run -it -p 8888:8888 --name editor --user root -w /home/jovyan/work -v $(
 - ubuntu shell (source faile in conf/storage)
 ```
 docker run -d -v ${PWD}/dev/:/root/dev/ --name myubuntu --net="host" gmazzitelli/myubuntu sleep infinity
+docker exec -it myubuntu bash
 ```
 
 ### istallation history and tips:
