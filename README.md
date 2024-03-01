@@ -17,5 +17,5 @@ The generalization of the CYGNO computing model to small/medium astroparticle ex
 - [MIDAS CYGNO DAQ](https://github.com/CYGNUS-RD/daq)
 - [DAQ2Middle Ware API](https://github.com/CYGNUS-RD/cygno)
 - [DODAS CYGNO fork](https://github.com/gmazzitelli/dodas-docker-images)
-- [DADAS docker update](https://github.com/gmazzitelli/cloud_docker_dev)
+- [DODAS docker update](https://github.com/gmazzitelli/cloud_docker_dev)
 - [docker image repository](https://hub.docker.com/repositories/gmazzitelli)
