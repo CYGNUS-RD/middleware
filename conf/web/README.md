@@ -4,9 +4,10 @@
 - saml conf, etuth, ecc backuped in private git repo "info"
 
 # falure of certificate renewal
-''' 
-certbot -q renew; chmod -R a+r /etc/letsencrypt/archive/ 
+- connect to ssh backend.cygno.cloud.infn.it as superuser 
+``` 
+# certbot -q renew; chmod -R a+r /etc/letsencrypt/archive/ 
 cd middleware/conf/web/
 docker compose down
 docker compose up -d
-'''
+```
