@@ -19,6 +19,9 @@ elif [ "${VM_SERVICE}" = "BACKEND" ]; then
    docker compose up -d
    cd ./web
    docker compose up -d
+elif [ "${VM_SERVICE}" = "KAFKA" ]; then
+   cd ./kafka
+   docker compose up -d 
 else
   echo "No VM services to be start"
 fi
