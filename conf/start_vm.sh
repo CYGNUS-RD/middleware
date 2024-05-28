@@ -14,6 +14,11 @@ elif [ "${VM_SERVICE}" = "GRAFANA" ]; then
 elif [ "${VM_SERVICE}" = "SENTINEL" ]; then
    cd ./sentinel
    docker compose up -d 
+elif [ "${VM_SERVICE}" = "BACKEND" ]; then
+   cd ./backend
+   docker compose up -d
+   cd ./web
+   docker compose up -d
 else
   echo "No VM services to be start"
 fi
