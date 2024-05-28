@@ -17,8 +17,9 @@ if __name__ == '__main__':
         epoch = document['Alarms']['Alarms']['Gas Alarm 2']['Checked last']
         date = datetime.fromtimestamp(epoch).strftime('%Y-%m-%dT%H:%M:%S')
         data = document['Equipment']['GasSystem']['Variables']['Measured']
-        data = itemgetter(*data_struct)(data)
-        data = [str(x) for x in data]
-        data = ' '.join(data)
+#        data = document['Equipment']['CameraStatus']['Variables']['Sensor Temperature']
+        if isinstance(data, list):
+           data = itemgetter(*data_struct)(data)
+           data = [str(x) for x in data]
+           data = ' '.join(data)
         print(epoch, date, data)
-        
