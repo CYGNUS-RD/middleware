@@ -40,45 +40,59 @@ def pmt_jpg(header, waveform_f, waveform_s, producer, number_of_w_readed = 8, ve
     from matplotlib import pyplot as plt
     import numpy as np
     import base64
-    q1 = min(header[0][0], 5)
-    fig, ax = plt.subplots(q1, number_of_w_readed, figsize=(8, 8))
-    for t in range(0, q1):
-        offset = t*header[1][0]
-        for w in range(0, number_of_w_readed):
-            ax[t,w].plot(np.linspace(0, header[2][0], header[2][0]), waveform_f[offset], label="t: {:d} w{:d}".format(t,w))
+    import sys
+    try:
+        q1 = min(header[0][0], 5)
+        fig, ax = plt.subplots(q1, number_of_w_readed, figsize=(8, 8))
+        for t in range(0, q1):
+           offset = t*header[1][0]
+           for w in range(0, number_of_w_readed):
+
+#               print('fast:', t, w, q1, offset)
+               if q1==1:
+                   ax[w].plot(np.linspace(0, header[2][0], header[2][0]), waveform_f[offset], label="t: {:d} w{:d}".format(t,w))
+               else:
+                   ax[t,w].plot(np.linspace(0, header[2][0], header[2][0]), waveform_f[offset], label="t: {:d} w{:d}".format(t,w))
 #             ax[t,w].legend()
 #             ax[t,w].set_yscale("log")
 #             ax[t,w].set_ylim(top=4000)
-            offset+=1
+               offset+=1
 
-    plt.savefig(DEFAULT_PATH_ONLINE+'custom/pmt_f.png', bbox_inches='tight')
-    plt.close()
-    with open(DEFAULT_PATH_ONLINE+'custom/pmt_f.png', 'rb') as f:
-        img_bytes = f.read()
-    f.close()
-    img_base64 = base64.b64encode(img_bytes).decode('utf-8')
-    producer.send('midas-pmt-f'+TAG, value=img_base64)#.encode('utf-8'))
-    producer.flush()
+        plt.savefig(DEFAULT_PATH_ONLINE+'custom/pmt_f.png', bbox_inches='tight')
+        plt.close()
+        with open(DEFAULT_PATH_ONLINE+'custom/pmt_f.png', 'rb') as f:
+           img_bytes = f.read()
+        f.close()
+        img_base64 = base64.b64encode(img_bytes).decode('utf-8')
+        producer.send('midas-pmt-f'+TAG, value=img_base64)#.encode('utf-8'))
+        producer.flush()
 
-    q2 = min(header[0][1], 5)
-    fig, ax = plt.subplots(q2, number_of_w_readed, figsize=(8, 8))
-    for t in range(0, q2):
-        offset = t*header[1][1]
-        for w in range(0, number_of_w_readed):
-            ax[t,w].plot(np.linspace(0, header[2][1], header[2][1]), waveform_s[offset], label="t: {:d} w{:d}".format(t,w))
+        q2 = min(header[0][1], 5)
+        fig, ax = plt.subplots(q2, number_of_w_readed, figsize=(8, 8))
+        for t in range(0, q2):
+           offset = t*header[1][1]
+           for w in range(0, number_of_w_readed):
+#               print('slow:', t, w, q1, offset)
+               if q1==1:
+                  ax[w].plot(np.linspace(0, header[2][1], header[2][1]), waveform_s[offset], label="t: {:d} w{:d}".format(t,w))
+               else:
+                  ax[t,w].plot(np.linspace(0, header[2][1], header[2][1]), waveform_s[offset], label="t: {:d} w{:d}".format(t,w))
 #             ax[t,w].legend()
 #             ax[t,w].set_yscale("log")
 #             ax[t,w].ylim(top=3000)
-            offset+=1
+               offset+=1
     
-    plt.savefig(DEFAULT_PATH_ONLINE+'custom/pmt_s.png', bbox_inches='tight')
-    plt.close()
-    with open(DEFAULT_PATH_ONLINE+'custom/pmt_s.png', 'rb') as f:
-        img_bytes = f.read()
-    f.close()
-    img_base64 = base64.b64encode(img_bytes).decode('utf-8')
-    producer.send('midas-pmt-s'+TAG, value=img_base64)#.encode('utf-8'))
-    producer.flush()
+        plt.savefig(DEFAULT_PATH_ONLINE+'custom/pmt_s.png', bbox_inches='tight')
+        plt.close()
+        with open(DEFAULT_PATH_ONLINE+'custom/pmt_s.png', 'rb') as f:
+            img_bytes = f.read()
+        f.close()
+        img_base64 = base64.b64encode(img_bytes).decode('utf-8')
+        producer.send('midas-pmt-s'+TAG, value=img_base64)#.encode('utf-8'))
+        producer.flush()
+    except Exception as e:
+       exc_type, exc_obj, exc_tb = sys.exc_info()
+       print('ERROR >>> {} @ line: {}'.format(e, exc_tb.tb_lineno))
     if verbose:
         print("PMT Image produced")
 
@@ -137,7 +151,7 @@ def main(verbose=False):
             try:
                 # update ODB
                 odb = client.odb_get("/")
-                # print(odb)
+                #print(odb)
                 odb_json = json.dumps(odb)
                 producer.send('midas-odb-'+TAG, value=odb_json)
                 producer.flush()
@@ -148,7 +162,6 @@ def main(verbose=False):
             except Exception as e:
                 print('ERROR >>> Midas ODB: {}'.format(e))
                 continue
-
 
         # ######
             
@@ -177,23 +190,25 @@ def main(verbose=False):
                 try: 
                     image, _, _ = cy.daq_cam2array(event.banks['CAM0']) # matrice delle imagine
                     image_jpg(image, 95, 130, event_number, event_time, producer, verbose)
+                    del image
                 except Exception as e:
                     print('ERROR >>> generate IMAGE exception occurred: {}'.format(e))
                     continue
             if ('DGH0' in bank_names) and (int(time.time()+imege_pmt_offset)%image_update_time==0): # PMTs wavform 
                 try:
-#                     header = cy.daq_dgz_full2header(event.banks['DGH0'], verbose=verbose)
-#                     waveform_f, waveform_s = cy.daq_dgz_full2array(event.banks['DIG0'], header)
-                    full_header= cy.daq_dgz_full2header(event.banks['DGH0'], verbose=verbose)
-                    w_fast, w_slow = cy.daq_dgz_full2array(event.banks['DIG0'], full_header, verbose=verbose, 
+##                     header = cy.daq_dgz_full2header(event.banks['DGH0'], verbose=verbose)
+##                     waveform_f, waveform_s = cy.daq_dgz_full2array(event.banks['DIG0'], header)
+                     full_header= cy.daq_dgz_full2header(event.banks['DGH0'], verbose=verbose)
+                     w_fast, w_slow = cy.daq_dgz_full2array(event.banks['DIG0'], full_header, verbose=verbose, 
                                                    corrected=corrected, ch_offset=channels_offsets)
                     
                     
-                    pmt_jpg(full_header, w_fast, w_slow, producer, number_of_w_readed = 5, verbose=verbose)
+                     pmt_jpg(full_header, w_fast, w_slow, producer, number_of_w_readed = 5, verbose=verbose)
+                     del full_header, w_fast, w_slow
                 except Exception as e:
                     print('ERROR >>> generate PMTs exception occurred: {}'.format(e))
                     continue
-                
+            del bank_names, event_number, event_time, run_number, image_update_time, imege_pmt_offset
         client.communicate(10)
         time.sleep(0.1)
         
