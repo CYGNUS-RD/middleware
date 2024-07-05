@@ -1,9 +1,10 @@
 version: '2'
 services:
   sentinel1:
-    image: gmazzitelli/cygno-st:v2.0.1-cygno
+    image: gmazzitelli/cygno-st:v2.0.4-cygno
     container_name: sentinel1
     environment:
+      PYTHONUNBUFFERED: 1
       IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
       IAM_CLIENT_ID: ${IAM_CLIENT_ID}
       ENDPOINT_URL: ${ENDPOINT_URL}
@@ -15,10 +16,16 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_PORT: ${MYSQL_PORT}
 
-      #HTC_IP: 131.154.99.82
-      HTC_IP: 131.154.96.173
-      STARTRUN: 36000
+      HTC_IP: 131.154.98.50
+      STARTRUN: 43517
+      ENDRUN: 99999
+      NCORE: 8
       DFPANDAS: df_condor_coda1
+      RECOPATH: reconstruction
+      TAG: RECO/Run4
+      WAITTIME: 0
+      MAXIDLE: 10
+      DRAIN: 0
 
     volumes:
       - ${PWD}/dev/init.sh:/root/init.sh
@@ -26,55 +33,105 @@ services:
       - ${PWD}/dev/:/root/dev/
       - /tmp/:/tmp/
 
-  # sentinel2:
-  #   image: gmazzitelli/cygno-st:v2.0.0-cygno
-  #   container_name: sentinel2
-  #   environment:
-  #     IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
-  #     IAM_CLIENT_ID: ${IAM_CLIENT_ID}
-  #     ENDPOINT_URL: ${ENDPOINT_URL}
+  sentinel2:
+    image: gmazzitelli/cygno-st:v2.0.4-cygno
+    container_name: sentinel2
+    environment:
+      PYTHONUNBUFFERED: 1
+      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+      ENDPOINT_URL: ${ENDPOINT_URL}
 
-  #     MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-  #     MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-  #     MYSQL_IP: ${MYSQL_IP}
-  #     MYSQL_USER: ${MYSQL_USER}
-  #     MYSQL_DATABASE: ${MYSQL_DATABASE}
-  #     MYSQL_PORT: ${MYSQL_PORT}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_IP: ${MYSQL_IP}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_PORT: ${MYSQL_PORT}
 
-  #     HTC_IP: 131.154.98.218
-  #     STARTRUN: 36000
-  #     DFPANDAS: df_condor_coda2
+      HTC_IP: 131.154.99.82
+      STARTRUN: 34877
+      ENDRUN: 35169
+      NCORE: 4
+      DFPANDAS: df_condor_coda2
+      RECOPATH: reconstruction_set3/
+      TAG: RECO/Winter23-ReReco-Run3
+      WAITTIME: 17
+      MAXIDLE: 20
+      DRAIN: 0
 
-  #   volumes:
-  #     - ${PWD}/dev/init.sh:/root/init.sh
-  #     - ${PWD}/dev/.bashrc:/root/.bashrc
-  #     - ${PWD}/dev/:/root/dev/
-  #     - /tmp/:/tmp/
+    volumes:
+      - ${PWD}/dev/init.sh:/root/init.sh
+      - ${PWD}/dev/.bashrc:/root/.bashrc
+      - ${PWD}/dev/:/root/dev/
+      - /tmp/:/tmp/
+      
+  sentinel3:
+    image: gmazzitelli/cygno-st:v2.0.4-cygno
+    container_name: sentinel3
+    environment:
+      PYTHONUNBUFFERED: 1
+      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+      ENDPOINT_URL: ${ENDPOINT_URL}
 
-  # sentinel3:
-  #   image:  gmazzitelli/cygno-st:v2.0.0-cygno
-  #   container_name: sentinel3
-  #   environment:
-  #     IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
-  #     IAM_CLIENT_ID: ${IAM_CLIENT_ID}
-  #     ENDPOINT_URL: ${ENDPOINT_URL}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_IP: ${MYSQL_IP}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_PORT: ${MYSQL_PORT}
 
-  #     MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-  #     MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-  #     MYSQL_IP: ${MYSQL_IP}
-  #     MYSQL_USER: ${MYSQL_USER}
-  #     MYSQL_DATABASE: ${MYSQL_DATABASE}
-  #     MYSQL_PORT: ${MYSQL_PORT}
+      HTC_IP: 131.154.98.50
+      STARTRUN: 36658
+      ENDRUN: 36661
+      NCORE: 8
+      DFPANDAS: df_condor_coda3
+      RECOPATH: reconstruction_set3/
+      TAG: RECO/Winter23-ReReco-Run3
+      WAITTIME: 37
+      MAXIDLE: 0
+      DRAIN: 0
 
-  #     HTC_IP: 131.154.96.56
-  #     STARTRUN: 36000
-  #     DFPANDAS: df_condor_coda3
+    volumes:
+      - ${PWD}/dev/init.sh:/root/init.sh
+      - ${PWD}/dev/.bashrc:/root/.bashrc
+      - ${PWD}/dev/:/root/dev/
+      - /tmp/:/tmp/
 
-  #   volumes:
-  #     - ${PWD}/dev/init.sh:/root/init.sh
-  #     - ${PWD}/dev/.bashrc:/root/.bashrc
-  #     - ${PWD}/dev/:/root/dev/
-  #     - /tmp/:/tmp/
+  sentinel4:
+    image: gmazzitelli/cygno-st:v2.0.4-cygno
+    container_name: sentinel4
+    environment:
+      PYTHONUNBUFFERED: 1
+      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+      ENDPOINT_URL: ${ENDPOINT_URL}
+
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_IP: ${MYSQL_IP}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_PORT: ${MYSQL_PORT}
+
+      HTC_IP: 131.154.98.46
+      STARTRUN: 17781
+      ENDRUN: 27845
+      NCORE: 4
+      DFPANDAS: df_condor_coda4
+      RECOPATH: reconstruction
+      TAG: RECO/Winter23-ReReco-Run3
+      WAITTIME: 23
+      MAXIDLE: 0
+      DRAIN: 1
+
+    volumes:
+      - ${PWD}/dev/init.sh:/root/init.sh
+      - ${PWD}/dev/.bashrc:/root/.bashrc
+      - ${PWD}/dev/:/root/dev/
+      - /tmp/:/tmp/
+
 
   tokener:
     image: gmazzitelli/tokener:v0.1
@@ -106,15 +163,15 @@ services:
      volumes:
        - ${PWD}/dev:/usr/share/nginx/html
 
-  tunnel:
-    restart: always
-    image: gmazzitelli/sshtunnel
-    container_name: grafana_tunnel
-    environment: 
-       REMOTE_PORT: 8081
-       LOCAL_APP_NAME: web
-       LOCAL_PORT: 80 
-       USER: mazzitel
-       REMOTE_IP: grafana.cygno.cloud.infn.it
-    volumes:
-       - /root/.ssh/daq_id:/id_rsa 
+#  tunnel:
+#    restart: always
+#    image: gmazzitelli/sshtunnel
+#    container_name: grafana_tunnel
+#    environment: 
+#       REMOTE_PORT: 8081
+#       LOCAL_APP_NAME: web
+#       LOCAL_PORT: 80 
+#       USER: mazzitel
+#       REMOTE_IP: grafana.cygno.cloud.infn.it
+#    volumes:
+#       - /root/.ssh/daq_id:/id_rsa 

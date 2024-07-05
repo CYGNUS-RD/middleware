@@ -1,9 +1,37 @@
 version: "3"
 
 services:
-  analyzer:
-    image: gmazzitelli/cygno-st:v2.0.1-cygno
-    container_name: analyzer
+
+#  analyzer3:
+#    image: gmazzitelli/cygno-st:v2.0.5-cygno
+#    container_name: analyzer3
+#    environment:
+#      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+#      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+#      ENDPOINT_URL: ${ENDPOINT_URL}
+#
+#      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+#      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+#      MYSQL_IP: ${MYSQL_IP}
+#      MYSQL_USER: ${MYSQL_USER}
+#      MYSQL_DATABASE: ${MYSQL_DATABASE}
+#      MYSQL_PORT: ${MYSQL_PORT}
+# # generic queue for test
+#      HTC_IP: 131.154.99.182
+#      RECO_PATH: 'Winter23-ReReco-Run3/'
+#      SQL_LIMIT: 25000
+#      FORCE_REBUILD: 0
+
+
+#    volumes:
+#      - ${PWD}/dev/init.sh:/root/init.sh
+#      - ${PWD}/dev/.bashrc:/root/.bashrc
+#      - ${PWD}/dev/:/root/dev/
+#      - /tmp/:/tmp/
+
+  analyzer4:
+    image: gmazzitelli/cygno-st:v2.0.5-cygno
+    container_name: analyzer4
     environment:
       IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
       IAM_CLIENT_ID: ${IAM_CLIENT_ID}
@@ -17,15 +45,19 @@ services:
       MYSQL_PORT: ${MYSQL_PORT}
 # # generic queue for test
       HTC_IP: 131.154.99.182
+      RECO_PATH: 'Run4/'
+      SQL_LIMIT: 100
+      FORCE_REBUILD: 0
+
 
     volumes:
       - ${PWD}/dev/init.sh:/root/init.sh
       - ${PWD}/dev/.bashrc:/root/.bashrc
       - ${PWD}/dev/:/root/dev/
       - /tmp/:/tmp/
-      
+
   analyzer_ped:
-    image: gmazzitelli/cygno-st:v2.0.1-cygno
+    image: gmazzitelli/cygno-st:v2.0.5-cygno
     container_name: analyzer_ped
     environment:
       IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
@@ -40,6 +72,10 @@ services:
       MYSQL_PORT: ${MYSQL_PORT}
 # generic queue for test
       HTC_IP: 131.154.99.182
+      RECO_PATH: 'Run4/'
+      SQL_LIMIT: 100
+      FORCE_REBUILD: 0
+
 
     volumes:
       - ${PWD}/dev/init_ped.sh:/root/init.sh
