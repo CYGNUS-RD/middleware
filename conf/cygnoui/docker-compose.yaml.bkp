@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+
+  tunnel:
+    restart: always
+    image: gmazzitelli/sshtunnel
+    container_name: tunnel_notebook01
+    ports:
+      - 81:80
+    environment: 
+       REMOTE_PORT: 80
+       REMOTE_APP_NAME: localhost
+       LOCAL_PORT: 80
+       USER: mazzitel
+       REMOTE_IP: notebook01.cygno.cloud.infn.it
+    volumes:
+       - /root/.ssh/cygnoui:/root/.ssh/id_rsa 
+
+  tunnel2:
+    restart: always
+    image: gmazzitelli/sshtunnel
+    container_name: tunnel_notebook02
+    ports:
+      - 82:80
+    environment:
+       REMOTE_PORT: 80
+       REMOTE_APP_NAME: localhost
+       LOCAL_PORT: 80
+       USER: mazzitel
+       REMOTE_IP: notebook02.cygno.cloud.infn.it
+    volumes:
+       - /root/.ssh/cygnoui:/root/.ssh/id_rsa
+
+#  backupper:
+#    restart: always
+#    image: gmazzitelli/backupper:v0.1
+#    container_name: backupper
+#    environment:
+#       BCK_START_NAME: 'grafana'
+#       IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+#       IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+#    volumes:
+#       - /var/lib/docker/volumes/grafana_dbdata/_data/:/root/data/
+#       - /tmp/:/tmp/
+

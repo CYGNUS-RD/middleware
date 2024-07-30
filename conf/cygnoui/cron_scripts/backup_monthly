@@ -1,0 +1,1 @@
+00 12 * * 7 [ $(date +\%d) -le 07 ] && rsync -avz --delete /data/notebook00/daily /data/notebook00/monthly; rsync -avz --delete /data/notebook01/daily /data/notebook01/monthly; rsync -avz --delete /data/notebook02/daily /data/notebook02/monthly

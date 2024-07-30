@@ -1,0 +1,17 @@
+Host notebook00
+    HostName notebook00.cygno.cloud.infn.it
+    User mazzitel
+    IdentityFile /root/.ssh/cygnoui
+    StrictHostKeyChecking no
+
+Host notebook01
+    HostName notebook01.cygno.cloud.infn.it
+    User mazzitel
+    IdentityFile /root/.ssh/cygnoui
+    StrictHostKeyChecking no
+
+Host notebook02
+    HostName notebook02.cygno.cloud.infn.it
+    User mazzitel
+    IdentityFile /root/.ssh/cygnoui
+    StrictHostKeyChecking no

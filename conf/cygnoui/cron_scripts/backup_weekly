@@ -1,0 +1,1 @@
+0 23 * * 0 rsync -avz --delete /data/notebook00/daily /data/notebook00/weekly; rsync -avz --delete /data/notebook01/daily /data/notebook01/weekly; rsync -avz --delete /data/notebook02/daily /data/notebook02/weekly
