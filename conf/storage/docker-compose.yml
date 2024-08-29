@@ -1,0 +1,23 @@
+version: '2'
+services:
+  storage:
+    image: myubuntu
+    container_name: storage
+    environment:
+      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+      REFRESH_TOKEN: ${REFRESH_TOKEN}
+      IAM_SERVER: ${IAM_SERVER}
+      SCOPES: ${SCOPES}
+
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_IP: ${MYSQL_IP}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_PORT: ${MYSQL_PORT}
+
+    volumes:
+#      - ${PWD}/dev/.bashrc:/root/.bashrc
+      - ${PWD}/dev/:/root/dev/
+      - /tmp/:/tmp/
