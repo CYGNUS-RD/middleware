@@ -1,5 +1,7 @@
 FROM dodasts/mini-htc:v0
 
+COPY assets/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo
+
 RUN yum-config-manager --save --setopt=htcondor-development.skip_if_unavailable=true
 
 RUN yum -y clean metadata \
@@ -26,7 +28,7 @@ RUN pip3 install --no-cache-dir -U \
     seaborn \
     scipy \
     git+https://github.com/DODAS-TS/boto3sts \
-    git+https://github.com/CYGNUS-RD/cygno.git@v1.0.14 \
+    git+https://github.com/CYGNUS-RD/cygno.git@v1.0.17 \
     'https://github.com/CYGNUS-RD/middleware/blob/master/midas/midaslib.tar.gz?raw=true'
 #
 # configure startup script
