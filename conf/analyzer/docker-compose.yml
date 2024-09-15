@@ -1,4 +1,4 @@
-version: "3"
+# version: "3"
 
 services:
 
@@ -29,9 +29,9 @@ services:
 #      - ${PWD}/dev/:/root/dev/
 #      - /tmp/:/tmp/
 
-  analyzer4:
+  analyzer1:
     image: gmazzitelli/cygno-st:v2.0.5-cygno
-    container_name: analyzer4
+    container_name: analyzer
     environment:
       IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
       IAM_CLIENT_ID: ${IAM_CLIENT_ID}
@@ -45,8 +45,8 @@ services:
       MYSQL_PORT: ${MYSQL_PORT}
 # # generic queue for test
       HTC_IP: 131.154.99.182
-      RECO_PATH: 'Run4/'
-      SQL_LIMIT: 100
+      RECO_PATH: 'Run5/'
+      SQL_LIMIT: 2000
       FORCE_REBUILD: 0
 
 
@@ -72,8 +72,8 @@ services:
       MYSQL_PORT: ${MYSQL_PORT}
 # generic queue for test
       HTC_IP: 131.154.99.182
-      RECO_PATH: 'Run4/'
-      SQL_LIMIT: 100
+      RECO_PATH: 'Run5/'
+      SQL_LIMIT: 1000
       FORCE_REBUILD: 0
 
 

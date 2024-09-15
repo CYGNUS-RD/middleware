@@ -50,7 +50,7 @@ def get_s3_client(client_id, client_secret, endpoint_url, session_token):
     return s3
 
 
-def main(bucket, tag, fcopy, fsql, fforce, verbose):
+def main(bucket, tag, fcopy, fsql, fforce, days, verbose):
     #
 
     import os,sys
@@ -76,7 +76,7 @@ def main(bucket, tag, fcopy, fsql, fforce, verbose):
     tape_token_file  = os.environ['TAPE_TOKEN_FILE']
     s3_token_file  = os.environ['S3_TOKEN_FILE']
     
-    runs = cy.daq_not_on_tape_runs(connection, verbose=verbose) 
+    runs = cy.daq_not_on_tape_runs(connection, days=days, verbose=verbose) 
     print("missing runs:", len(runs), runs)    
     
     key = tag+'/'
@@ -184,6 +184,7 @@ if __name__ == "__main__":
     TAG         = 'LNGS'
     BUCKET      = 'cygno-data'
     SESSION     = 'infncloud-wlcg'
+    DAYS        = 30
 
 
     parser = OptionParser(usage='usage: %prog [-b [{:s}] -t [{:s}] -s[{:s}] -csv]\n'.format(BUCKET,TAG,SESSION))
@@ -192,10 +193,11 @@ if __name__ == "__main__":
     parser.add_option('-c','--copy', dest='copy', action="store_true", default=False, help='upload data to TAPE if not present')
     parser.add_option('-q','--sql', dest='sql', action="store_true", default=False, help='update sql')
     parser.add_option('-f','--force', dest='force', action="store_true", default=False, help='force full recheck of data')
+    parser.add_option('-d','--days', dest='days', type='int', default=DAYS, help='days of rechek db')
     parser.add_option('-v','--verbose', dest='verbose', action="store_true", default=False, help='verbose output')
     (options, args) = parser.parse_args()
     if options.verbose: 
         print ("options", options)
         print ("args", args)
      
-    main(options.bucket, options.tag, options.copy, options.sql, options.force, options.verbose)
+    main(options.bucket, options.tag, options.copy, options.sql, options.force, options.days, options.verbose)

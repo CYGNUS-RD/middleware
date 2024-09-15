@@ -10,6 +10,7 @@ import pandas as pd
 import mysql.connector
 import os
 import cygno as cy
+import sys
 
 def push_panda_table_sql(connection, table_name, df):
     try:
@@ -35,6 +36,33 @@ def push_panda_table_sql(connection, table_name, df):
     except:
         return -1
 
+def push_update_panda_table_sql(connection, table_name, df, verbose=False):
+
+    try:
+        mycursor=connection.cursor()
+        mycursor.execute("SHOW TABLES LIKE '"+table_name+"'")
+        result = mycursor.fetchone()
+        if not result:
+            cols = "`,`".join([str(i) for i in df.columns.tolist()])
+            db_to_crete = "CREATE TABLE `"+table_name+"` ("+' '.join(["`"+x+"` REAL," for x in df.columns.tolist()])[:-1]+")"
+            print ("[Table {:s} created into SQL Server]".format(table_name))
+            mycursor = connection.cursor()
+            mycursor.execute(db_to_crete)
+
+        cols = "`,`".join([str(i) for i in df.columns.tolist()])
+
+        for i,row in df.iterrows():
+            sql = "INSERT INTO `"+table_name+"` (`" +cols + "`) VALUES (" + "%s,"*(len(row)-1) + "%s) " \
+            "ON DUPLICATE KEY UPDATE "+", ".join(["`"+s+"`='"+str(df[s].values[0])+"'" for s in df.columns])
+            if verbose: print(sql)
+            mycursor.execute(sql, tuple(row.astype(str)))
+            connection.commit()
+
+        mycursor.close()
+        return 0 
+    except Exception as e:
+        print('SQL ERROR --> ', e)
+        return 1
     
 def GetLY(tf):
     df_A = tf['Events'].arrays(['sc_rms', 'sc_tgausssigma', 'sc_width', 'sc_length', 'sc_xmean', 'sc_ymean', 'sc_integral'], library = 'pd')
@@ -192,7 +220,7 @@ def main(verbose=False):
     BASE_URL = 'https://s3.cloud.infn.it/v1/AUTH_2ebf769785574195bde2ff418deac08a/'
     reco_path = BASE_URL+'cygno-analysis/RECO/'+reco_path0
     sqlLog = "SELECT * FROM `Runlog`  WHERE `online_reco_status` = 1 AND `pedestal_run` = 1 ORDER BY `run_number` DESC LIMIT "+str(sql_limit)+";"
-    sqlRec = "SELECT * FROM `SlowReco` ORDER BY `run_mean` DESC;"
+    sqlRec = "SELECT * FROM `SlowPed` ORDER BY `run_mean` DESC;"
     sql_Log = pd.read_sql(sqlLog, connection)
     try:
         sql_Rec = pd.read_sql(sqlRec, connection)
@@ -230,13 +258,18 @@ def main(verbose=False):
                 df = pd.DataFrame(slow_data, index=[0]) # qui index=0 perche sono scalari
                 df.replace(np.nan, -1, inplace=True)
                 table_name = "SlowPed"
-                push_panda_table_sql(connection,table_name, df)
+                if force_rebuild==1:
+                    status = push_update_panda_table_sql(connection, table_name, df, verbose)
+                else:
+                    status = push_panda_table_sql(connection,table_name, df)
+                if status == -1: print('ERROR >>> pushing db...')
                 df_all = pd.DataFrame(branch_data)
                 df_all.to_pickle(file_out_name, compression={'method': 'gzip', 'compresslevel': 1})
                 upload_file_2_S3(file_out_name, client_id, client_secret,  endpoint_url, bucket, tag, tfile, verbose=verbose)
                 cy.cmd.rm_file(file_out_name)
             except Exception as e:
-                print('ERROR >>> {}'.format(e))
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                print('ERROR >>> {} @ line: {}'.format(e, exc_tb.tb_lineno))
                 continue
     print("DONE")
 main()

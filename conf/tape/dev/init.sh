@@ -18,6 +18,7 @@ do
 	d=`date +%Y-%M-%d\ %H:%M:%S`
 	echo "$d loop $i"
 # insert your command
+       #export BEARER_TOKEN=$(cat /tmp/tape_token)
 	/root/dev/cloud2tape_v2.py -t $BUCKET_TAG -c -q -f 
 	i=$((i+1))
 	sleep $WAIT

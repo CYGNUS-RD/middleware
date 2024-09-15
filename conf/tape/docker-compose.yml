@@ -36,7 +36,7 @@ services:
       TAPE_TOKEN_FILE: '/tmp/tape_token'
       S3_TOKEN_FILE: '/tmp/token'
 
-      MYSQL_IP:  'tunnel_grafana'
+      MYSQL_IP:  'tunnel_grafana34'
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_DATABASE: 'mango_db'
@@ -58,7 +58,7 @@ services:
       TAPE_TOKEN_FILE: '/tmp/tape_token'
       S3_TOKEN_FILE: '/tmp/token'
 
-      MYSQL_IP: 'grafana.cygno.cloud.infn.it'
+      MYSQL_IP: 'tunnel_grafana33'
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_DATABASE: 'cygno_db'
@@ -68,11 +68,23 @@ services:
       - /tmp/:/tmp/
 
 
-
   tunnel:
     restart: always
     image: gmazzitelli/sshtunnel
-    container_name: tunnel_grafana
+    container_name: tunnel_grafana33
+    environment:
+       REMOTE_PORT: 6033
+       REMOTE_APP_NAME: localhost
+       LOCAL_PORT: 6033
+       USER: mazzitel
+       REMOTE_IP: grafana.cygno.cloud.infn.it
+    volumes:
+       - /root/.ssh/daq_id:/root/.ssh/id_rsa
+
+  tunnel2:
+    restart: always
+    image: gmazzitelli/sshtunnel
+    container_name: tunnel_grafana34
     environment:
        REMOTE_PORT: 6034
        REMOTE_APP_NAME: localhost
