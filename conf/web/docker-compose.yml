@@ -22,6 +22,7 @@ services:
       - ${PWD}/apache/html:/var/www/html
       - /etc/letsencrypt/:/var/www/letsencrypt/
       - ${PWD}/apache/000-default.conf:/etc/apache2/sites-available/000-default.conf
+      - ${PWD}/apache/php.ini:/usr/local/etc/php/php.ini
       - ${PWD}/ssl/ssl.conf:/etc/apache2/mods-available/ssl.conf
       - ${PWD}/saml/saml.crt:/var/simplesamlphp/cert/saml.crt
       - ${PWD}/saml/saml.key:/var/simplesamlphp/cert/saml.key

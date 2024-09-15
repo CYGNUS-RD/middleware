@@ -15,10 +15,21 @@ s3 = aws_session.client('s3', endpoint_url="https://swift.recas.ba.infn.it/",
 
 for bucket in s3r.buckets.all():
     print("-->",bucket.name)
+
+    IsTruncated = True
+    NextMarker  = ''
+
     try:
-        response = s3.list_objects(Bucket=bucket.name)['Contents']
-        #print(response)
-        for i, file in enumerate(response):
-            print(file['Key'], file['LastModified'], file['Size'])
-    except:
-        print('empty bucket or error')
+        while IsTruncated:
+            response = s3.list_objects(Bucket=bucket.name, Marker=NextMarker)
+            IsTruncated = response['IsTruncated']
+            contents = response['Contents']
+            for i, file in enumerate(contents):
+               print('{:s} {:} {:.3f} GB'.format(file['Key'], file['LastModified'], file['Size']/(1024)**3))
+            if IsTruncated:
+                Marker      = response['Marker']
+                NextMarker  = response['NextMarker']
+    except Exception as e:
+        print('empty bucket or error:', e)
+# for volume in s3r.volumes.all():
+#    print(volume.size, volume.state)

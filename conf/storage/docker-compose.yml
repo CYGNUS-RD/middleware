@@ -2,6 +2,10 @@ services:
   storage:
     image: myubuntu
     container_name: storage
+# option to attach the contaner
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
+#
     environment:
       IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
       IAM_CLIENT_ID: ${IAM_CLIENT_ID}
