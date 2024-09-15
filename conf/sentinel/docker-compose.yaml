@@ -1,7 +1,7 @@
 version: '2'
 services:
   sentinel1:
-    image: gmazzitelli/cygno-st:v2.0.4-cygno
+    image: gmazzitelli/cygno-st:v2.0.6-cygno
     container_name: sentinel1
     environment:
       PYTHONUNBUFFERED: 1
@@ -17,14 +17,14 @@ services:
       MYSQL_PORT: ${MYSQL_PORT}
 
       HTC_IP: 131.154.98.50
-      STARTRUN: 43517
+      STARTRUN: 75000
       ENDRUN: 99999
       NCORE: 8
       DFPANDAS: df_condor_coda1
       RECOPATH: reconstruction
-      TAG: RECO/Run4
+      TAG: RECO/Run5
       WAITTIME: 0
-      MAXIDLE: 10
+      MAXIDLE: 11
       DRAIN: 0
 
     volumes:
@@ -34,7 +34,7 @@ services:
       - /tmp/:/tmp/
 
   sentinel2:
-    image: gmazzitelli/cygno-st:v2.0.4-cygno
+    image: gmazzitelli/cygno-st:v2.0.6-cygno
     container_name: sentinel2
     environment:
       PYTHONUNBUFFERED: 1
@@ -49,15 +49,15 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_PORT: ${MYSQL_PORT}
 
-      HTC_IP: 131.154.99.82
-      STARTRUN: 34877
-      ENDRUN: 35169
+      HTC_IP: 131.154.98.168
+      STARTRUN: 48055
+      ENDRUN: 50892
       NCORE: 4
       DFPANDAS: df_condor_coda2
-      RECOPATH: reconstruction_set3/
-      TAG: RECO/Winter23-ReReco-Run3
-      WAITTIME: 17
-      MAXIDLE: 20
+      RECOPATH: reconstruction_Run4_PMT
+      TAG: RECO/ReRun4_PMT
+      WAITTIME: 10
+      MAXIDLE: 2
       DRAIN: 0
 
     volumes:
@@ -67,7 +67,7 @@ services:
       - /tmp/:/tmp/
       
   sentinel3:
-    image: gmazzitelli/cygno-st:v2.0.4-cygno
+    image: gmazzitelli/cygno-st:v2.0.6-cygno
     container_name: sentinel3
     environment:
       PYTHONUNBUFFERED: 1
@@ -82,16 +82,16 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_PORT: ${MYSQL_PORT}
 
-      HTC_IP: 131.154.98.50
-      STARTRUN: 36658
-      ENDRUN: 36661
-      NCORE: 8
+      HTC_IP: 131.154.99.82
+      STARTRUN: 40781
+      ENDRUN: 43515
+      NCORE: 4
       DFPANDAS: df_condor_coda3
-      RECOPATH: reconstruction_set3/
-      TAG: RECO/Winter23-ReReco-Run3
-      WAITTIME: 37
-      MAXIDLE: 0
-      DRAIN: 0
+      RECOPATH: reconstruction
+      TAG: RECO/Run4
+      WAITTIME: 17
+      MAXIDLE: 10
+      DRAIN: 1
 
     volumes:
       - ${PWD}/dev/init.sh:/root/init.sh
@@ -100,7 +100,7 @@ services:
       - /tmp/:/tmp/
 
   sentinel4:
-    image: gmazzitelli/cygno-st:v2.0.4-cygno
+    image: gmazzitelli/cygno-st:v2.0.6-cygno
     container_name: sentinel4
     environment:
       PYTHONUNBUFFERED: 1
@@ -110,20 +110,21 @@ services:
 
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_IP: ${MYSQL_IP}
+      MYSQL_IP: ${MYSQL_IP_LNF}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_PORT: ${MYSQL_PORT}
 
-      HTC_IP: 131.154.98.46
-      STARTRUN: 17781
-      ENDRUN: 27845
+      HTC_IP: 131.154.99.82
+      STARTRUN: 11302
+      ENDRUN: 11329
       NCORE: 4
-      DFPANDAS: df_condor_coda4
-      RECOPATH: reconstruction
-      TAG: RECO/Winter23-ReReco-Run3
+      DFPANDAS: df_condor_codaGIN
+      RECOPATH: reconstruction_GIN
+      CONFIGFILE: configFile_LNF.txt
+      TAG: Gin/
       WAITTIME: 23
-      MAXIDLE: 0
+      MAXIDLE: 10
       DRAIN: 1
 
     volumes:

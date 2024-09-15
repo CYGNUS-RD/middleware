@@ -41,23 +41,25 @@ def writeSubmitFile(recopath, submit_path, submit_run, nproc, maxentries):
     print("-----------------------")
     print(githash)
     print("-----------------------")
+    submit_run_str = submit_run.zfill(5)
     
     with open(submit_path + "submit_" + submit_run, "w") as f:
         f.write("universe   = vanilla\n")
         f.write("executable = /root/dev/"+ recopath +"/exec_reco.sh\n")
         f.write("\n")
-        f.write("log    = reconstruction_"+submit_run+".log\n")
-        f.write("output = reconstruction_"+submit_run+".out\n")
-        f.write("error  = reconstruction_"+submit_run+".error\n")
+        f.write("log    = reconstruction_"+submit_run_str+".log\n")
+        f.write("output = reconstruction_"+submit_run_str+".out\n")
+        f.write("error  = reconstruction_"+submit_run_str+".error\n")
         f.write("\n")
         f.write("should_transfer_files   = YES\n")
         f.write("when_to_transfer_output = ON_EXIT_OR_EVICT\n")
         f.write("\n")
         f.write("transfer_input_files  = "+ files +"\n\n")
-        f.write("transfer_output_files = reco_run"+submit_run+"_3D.root, reco_run"+submit_run+"_3D.txt\n")
+        f.write("transfer_output_files = reco_run"+submit_run_str+"_3D.root, reco_run"+submit_run_str+"_3D.txt\n")
         f.write("\n")
         f.write("arguments             = configFile_LNGS.txt "+submit_run+" "+ nproc +" "+ maxentries +" "+ githash +"\n")
         f.write("\n")
+        f.write("+CygnoUser = \"autoreco\"\n")
         f.write("+OWNER = \"condor\"\n")
         f.write("queue\n")
 
@@ -88,7 +90,7 @@ def getSQLrun(run,verbose=False):
         except:
             print("Error connecting to SQL, trying again in 30s", end='\r')
             df = []
-            time.sleep(40)
+            time.sleep(10)
 
     return df
 
@@ -98,21 +100,22 @@ def checkNewRuns(run_number_start, run_number_end):
     list_runs_to_analyze = []
     #while len(list_runs_to_analyze) == 0:
     try:
-        df = cy.read_cygno_logbook(verbose=False)
+        #df = cy.read_cygno_logbook(verbose=False)
+        df = cy.read_cygno_logbook(tag="LNGS",start_run=run_number_start,end_run=run_number_end+1)
         print("DB connected")
     except:
         print("Error connecting to SQL, trying again in 30s")
         df = pd.DataFrame()
         list_runs_to_analyze = []
-        time.sleep(50)
+        time.sleep(10)
     if not df.empty:
-        list_runs_to_analyze = df.run_number[(df["number_of_events"] > 1) & (df["storage_cloud_status"] == 1) & (df["online_reco_status"] == -1) & (df["run_number"] >= run_number_start) & (df["run_number"] <= run_number_end)].values.tolist()
+        list_runs_to_analyze = df.run_number[(df["number_of_events"] > 10) & (df["storage_cloud_status"] == 1) & (df["online_reco_status"] == -1) & (df["run_number"] >= run_number_start) & (df["run_number"] <= run_number_end)].values.tolist()
 
         if len(list_runs_to_analyze) == 0:
             print("Waiting 60 seconds to check new files again")
             time.sleep(60)
         else:
-            print("New files to be reconstruced found")
+            print("New files to be reconstructed found")
     else:
         list_runs_to_analyze = []
             
@@ -655,12 +658,12 @@ def main(run_number_start, run_number_end, nproc, maxidle, TAG, recopath = 'reco
         if just_status == False:
             if idle_status == False:
                 while (len(list_runs_to_analyze) > 0) and (idlejobs <= maxidle): ## keep send jobs to condor if we have new runs to analyze
-                    submit_run = list_runs_to_analyze[0] # Get the first run to go to the queue
+                    submit_run = list_runs_to_analyze[-1] # Get the first run to go to the queue
                     status = sql_update_reco_status(submit_run,-2,connection) #"idle"
     
                     if verbose:
                         print("Sending the Run "+ str(submit_run) + " to the Queue \n", end='\r')
-                    createPedLog(recopath)
+                    #createPedLog(recopath)
                     writeSubmitFile(recopath, submit_path, str(submit_run), str(nproc), str(maxentries))
                     submitfile = createCondorSubmit(submit_path, str(submit_run))
     
@@ -714,7 +717,7 @@ def main(run_number_start, run_number_end, nproc, maxidle, TAG, recopath = 'reco
         savetables(df_condor, outname)
         
         
-        nheld = 10
+        nheld = 20
         if aux_held >= nheld:
             if verbose:
                 print("Checking completed Jobs on Queue\n", end='\r')
@@ -730,7 +733,7 @@ def main(run_number_start, run_number_end, nproc, maxidle, TAG, recopath = 'reco
         
         
         #elapsed_time_rm = time.time() - start_time_rm
-        nfresh = 1000
+        nfresh = 20
         if aux_rm >= nfresh:
             if verbose:
                 print("Killing agent and refreshing token\n", end='\r')
@@ -754,7 +757,7 @@ def main(run_number_start, run_number_end, nproc, maxidle, TAG, recopath = 'reco
             print("Waiting 60 seconds to check Job status\n", end='\r')
         aux_rm = aux_rm + 1
         aux_held = aux_held + 1
-        time.sleep(47)
+        time.sleep(5)
 
 
 if __name__ == "__main__":
