@@ -169,26 +169,21 @@ Based on the conversation, here’s a step-by-step guide for managing and troubl
 
 #### **4. Final Steps for Reconstruction Setup**
 
-13. Navigate back to the `/dev` directory:
-   ```bash
-   cd /dev
-   ```
-
-14. Copy the `exec_reco.sh` script from the old directory to the new one:
+13. Copy the `exec_reco.sh` script from the old directory to the new one:
    ```bash
    cp reconstruction_toberemoved/exec_reco.sh reconstruction/
    ```
 
-15. Ensure the parameters are correct by comparing them (e.g., using `diff`):
+14. Ensure the parameters are correct by comparing them (e.g., using `diff`):
    ```bash
    diff -r reconstruction_toberemoved/ reconstruction/
    ```
 
 #### **5. Completing the Process**
 
-16. After verifying the parameters, remove the drain from Sentinel 1 in the `docker-compose.yaml` file.
+15. After verifying the parameters, remove the drain from Sentinel 1 in the `docker-compose.yaml` file.
 
-17. Start the container again:
+16. Start the container again:
    ```bash
    docker compose up -d
    ```
