@@ -100,3 +100,97 @@ Based on the conversation, here’s a step-by-step guide for managing and troubl
      docker compose up -d
      ```
    - However, be aware that this will stop and restart **all** containers in the folder, not just Sentinel.
+    
+
+# How to update the reconstruction folder with new repository on the Sentinel:
+
+#### **1. Initial Setup for Sentinel**
+
+1. Switch to superuser:
+   ```bash
+   sudo su
+   ```
+
+2. Navigate to the Sentinel directory:
+   ```bash
+   cd /middleware/conf/sentinel/
+   ```
+
+3. Drain the Sentinel 1 in the `docker-compose.yaml` file as per instructions.
+
+4. Start the container:
+   ```bash
+   docker compose up -d
+   ```
+
+#### **2. Modifying the Reconstruction Directory**
+
+5. Navigate to the `/dev` directory:
+   ```bash
+   cd /dev
+   ```
+
+6. Rename the existing reconstruction directory:
+   ```bash
+   mv reconstruction reconstruction_toberemoved
+   ```
+
+7. Clone the reconstruction repository (specific repository URL not mentioned, but use this command with the repository link):
+   ```bash
+   git clone https://github.com/CYGNUS-RD/reconstruction.git
+   ```
+
+#### **3. Cythonize Setup within the Docker Container**
+
+8. Enter the Sentinel Docker container:
+   ```bash
+   docker exec -it sentinel1 bash
+   ```
+
+9. Navigate to the reconstruction directory:
+   ```bash
+   cd dev/reconstruction
+   ```
+
+10. Run the `cythonize.sh` script:
+   ```bash
+   source cythonize.sh
+   ```
+
+11. Exit the Docker bash shell:
+   ```bash
+   exit
+   ```
+
+12. Change the permissions for the reconstruction directory:
+   ```bash
+   chmod -R 777 reconstruction
+   ```
+
+#### **4. Final Steps for Reconstruction Setup**
+
+13. Navigate back to the `/dev` directory:
+   ```bash
+   cd /dev
+   ```
+
+14. Copy the `exec_reco.sh` script from the old directory to the new one:
+   ```bash
+   cp reconstruction_toberemoved/exec_reco.sh reconstruction/
+   ```
+
+15. Ensure the parameters are correct by comparing them (e.g., using `diff`):
+   ```bash
+   diff -r reconstruction_toberemoved/ reconstruction/
+   ```
+
+#### **5. Completing the Process**
+
+16. After verifying the parameters, remove the drain from Sentinel 1 in the `docker-compose.yaml` file.
+
+17. Start the container again:
+   ```bash
+   docker compose up -d
+   ```
+
+This guide walks through the full process, from setting up Sentinel, modifying reconstruction files, to handling Cythonization and executing the final steps.
