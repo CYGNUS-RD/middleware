@@ -83,7 +83,7 @@ WARNING: directory data/ and file cygno_conf.py (contaning password) are not ign
 ## general tips ###
 - editor/notebook
 ```
-docker run -d -it -p 8888:8888 --name editor --user root -w /home/jovyan/work -v $(pwd):/home/jovyan/work jupyter/minimal-notebook
+docker run -it -p 8888:8888 --name editor --user root -w /home/jovyan/work -v $(pwd):/home/jovyan/work jupyter/minimal-notebook
 docker exec -it editor jupyter server list 
 ```
 - poi Ctrl P /CTRL Q per uscire dalla parte intereattiva 
