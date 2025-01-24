@@ -170,17 +170,6 @@ host gas-system {hardware ethernet 00:03:27:11:c3:53; fixed-address 192.168.99.2
 
 #  How to add created WN (worker nodes) to another existent Condor Queue:
 
-# How to Access a Kubernetes Worker Node and Execute Commands in a Container
-
-This guide walks you through accessing a Kubernetes worker node and running commands inside a container. Follow these steps carefully.
-
-## Prerequisites
-- SSH key for authentication
-- Access credentials (username, master node IP, worker node IP)
-- Knowledge of container IDs and Kubernetes namespace
-
-## Steps
-
 1. Connect to the Master Node via SSH
 Use the following command to SSH into the master node:
 ```sh
