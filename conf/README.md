@@ -170,18 +170,80 @@ host gas-system {hardware ethernet 00:03:27:11:c3:53; fixed-address 192.168.99.2
 
 #  How to add created WN (worker nodes) to another existent Condor Queue:
 
-1. ssh the WN you want to move from one Queue to another;
+# How to Access a Kubernetes Worker Node and Execute Commands in a Container
 
-2. Then, create the config file:
+This guide walks you through accessing a Kubernetes worker node and running commands inside a container. Follow these steps carefully.
+
+## Prerequisites
+- SSH key for authentication
+- Access credentials (username, master node IP, worker node IP)
+- Knowledge of container IDs and Kubernetes namespace
+
+## Steps
+
+1. Connect to the Master Node via SSH
+Use the following command to SSH into the master node:
+```sh
+ssh -i .ssh/<sshkey> <username>@<master_node_ip>
+```
+Replace `<sshkey>`, `<username>`, and `<master_node_ip>` with your actual SSH key filename, username, and master node IP address, respectively.
+
+2. Navigate to the SSH Directory
+Once logged into the master node, navigate to the `.ssh` directory:
+```sh
+cd .ssh/
+```
+
+3. Open or Create an SSH Key File for the Worker Node
+Use `vi` to create or edit the SSH key file:
+```sh
+vi id_node
+```
+Paste the private key for accessing the worker node and save the file.
+
+4. Set the Correct Permissions
+Set the appropriate permissions for the SSH key file:
+```sh
+chmod 600 id_node
+```
+
+5. SSH into the Worker Node
+Use the following command to connect to the worker node:
+```sh
+ssh -i id_node <WN_IP>
+```
+Replace `<WN_IP>` with the actual worker node IP address.
+
+6. Switch to Root User
+After connecting to the worker node, switch to the root user:
+```sh
+sudo su
+```
+
+7. List Running Containers
+To find running containers associated with a specific name (e.g., `mazz`), use:
+```sh
+ctr -n k8s.io containers ls | grep mazz
+```
+This filters the output to display only containers related to `mazz`.
+
+8. Execute Commands in a Specific Container
+Find the container ID from the previous command and replace `ID_container` in the following command:
+```sh
+crictl exec -it ID_container /bin/bash
+```
+This opens an interactive shell inside the specified container.
+
+10. Then, create the config file:
   ```
   vi /etc/condor/condor_config.local
   ```
-3. Add the line:
+11. Add the line:
   ```
   CONDOR_HOST = <IP_Kubernetes>
   ```
 
-4. Then, run the command:
+12. Then, run the command:
 
   ```
   condor_reconfig
