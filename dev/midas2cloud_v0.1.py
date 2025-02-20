@@ -84,14 +84,14 @@ def main():
     import gzip
     import boto3
     from boto3sts import credentials as creds
+    from boto3.s3.transfer import TransferConfig
 
     
     #
     # deault parser value
     #
     version  ='s3v4'
-    endpoint ='https://minio.cloud.infn.it/'
-
+    BARI = 1
     session  ='infncloud-wlcg'
     bucket   = 'cygno-data'
     
@@ -102,16 +102,21 @@ def main():
     #to = 'giovanni.mazzitelli@lnf.infn.it, davide.pinci@roma1.infn.it, francesco.renga@roma1.infn.it'
     to = ''
 
-    parser = OptionParser(usage='usage: %prog [-t [{:s}] -i [{:s}]  -d [{:s}] -n [{:d}] rv]\n'.format(TAG, INAPATH,DAQPATH, max_tries))
+    parser = OptionParser(usage='usage: %prog [-t [{:s}] -i [{:s}]  -d [{:s}] -n [{:d}] -b [{:d}] rv]\n'.format(TAG, INAPATH,DAQPATH, max_tries,BARI))
     parser.add_option('-t','--tag', dest='tag', type='string', default=TAG, help='tag where dir for data')
     parser.add_option('-i','--inpath', dest='inpath', type='string', default=INAPATH, help='PATH to raw data')
     parser.add_option('-d','--daqpath', dest='daqpath', type='string', default=DAQPATH, help='DAQ to raw data')
     parser.add_option('-n','--tries', dest='tries', type=int, default=max_tries, help='# of retry upload temptative')
     parser.add_option('-v','--verbose', dest='verbose', action="store_true", default=False, help='verbose output')
     parser.add_option('-m','--mail', dest='mail', type='string', default=to, help='mail allert')
+    parser.add_option('-b','--bari', dest='Bari',default=1, type='int', help='If it is 1 then upload to bari')
     (options, args) = parser.parse_args()
 
-
+    if options.Bari==1:
+       endpoint = "https://swift.recas.ba.infn.it/"
+    else:
+       endpoint ='https://minio.cloud.infn.it/'
+    
     max_tries   = options.tries
     verbose     = options.verbose
     to          = options.mail
@@ -131,9 +136,18 @@ def main():
     
     key = tag+'/'
 
-    session = creds.assumed_session(session, endpoint=endpoint, verify=True)
-    s3 = session.client('s3', endpoint_url=endpoint, config=boto3.session.Config(signature_version='s3v4'),
+    if options.Bari==1:
+        aws_session = boto3.session.Session(aws_access_key_id=os.environ.get('BA_ACCESS_KEY_ID'),
+                                            aws_secret_access_key=os.environ.get('BA_SECRET_ACCESS_KEY'))
+        s3 = aws_session.client('s3', endpoint_url=endpoint,
+                                config=boto3.session.Config(signature_version=version),verify=True)
+    else:
+        session = creds.assumed_session(session, endpoint=endpoint, verify=True)
+        s3 = session.client('s3', endpoint_url=endpoint, config=boto3.session.Config(signature_version=version),
                                                     verify=True)
+    
+    GB = 1024 ** 3
+    config = TransferConfig(multipart_threshold=5*GB)
 
     
     connection = daq_sql_connection_local(verbose)#cy.daq_sql_cennection(verbose)
@@ -206,12 +220,12 @@ def main():
                         current_try = 0
                         status = False 
                         while(not status):   
-                            if verbose: print(INAPATH+filename,tag, backet, session, verbose, filesize)
+                            if verbose: print(INAPATH+filename,tag, bucket, session, verbose, filesize)
                             if filesize < 5400000000: # ~ 5 GB
                                 dtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                                 print('{:s} Uploading file: {:s}'.format(dtime, filename), flush = True)
                                 try:
-                                    s3.upload_file(INAPATH+filename, Bucket=bucket, Key=key+filename)
+                                    s3.upload_file(INAPATH+filename, Bucket=bucket, Key=key+filename, Config=config)
                                     response=s3.head_object(Bucket=bucket,Key=key+filename)
                                     remotesize = int(response['ContentLength'])
                                     newupoload.append(storeStatus(filename, filesize, status, 
@@ -225,9 +239,10 @@ def main():
                                     print('{:s} Upload done: {:s}'.format(dtime, filename), flush = True)
                                     status = True
                                     
-                                except:
+                                except Exception as e:
                                     current_try = current_try+1
                                     print('{:s} ERROR: Uploading file: {:s}'.format(dtime, filename))
+                                    print(e)
                                     if current_try==max_tries:
                                         print('ERROR: Max try number reached: '+str(current_try))
                                         status = True
