@@ -17,4 +17,7 @@ to do:
 (Igor, Giorgio and Giulia are already authenticated and do not need to do nothing)
 
 ### access to old HOME foleder troght the s3 rados gateway ###
-https://s3webui.cloud.infn.it/
+- https://s3webui.cloud.infn.it/
+### migration in progess ###
+- notebook gcluster storage (come $HOME, high perfomaces)
+- daq tocken
