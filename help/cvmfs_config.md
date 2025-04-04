@@ -1,4 +1,4 @@
-### install sofware on CVMMFS form running image 
+### install sofware on CVMFS form running image 
 - connenct to cvmfs VM ```ssh mazzitel@212.189.145.224```
 - change user as root ```sudo su```
 - open trascription ```cvmfs_server transaction sft-cygno.infn.it```
