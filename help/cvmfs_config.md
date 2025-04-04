@@ -3,6 +3,7 @@
 - change user as root ```sudo su```
 - open trascription ```cvmfs_server transaction sft-cygno.infn.it```
 - execute the image you like: ```docker run -it -v /cvmfs:/cvmfs gmazzitelli/cygno-wn:v2.4 bash```
+- configure eventualy setup like: ```source /cvmfs/sft.cern.ch/lcg/views/LCG_105/x86_64-ubuntu2204-gcc11-opt/setup.sh```
 - install your software on cvmfs
 - exit form the docker image 
 - ```cvmfs_server publish sft-cygno.infn.it```
