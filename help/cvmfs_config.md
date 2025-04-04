@@ -14,3 +14,5 @@
 - ```cvmfs_server transaction sft-cygno.infn.it```
 - make your change 
 - ```cvmfs_server publish sft-cygno.infn.it```
+- ```docker run -it -d --rm --name wn -v /cvmfs:/cvmfs gmazzitelli/cygno-wn:v2.4 bash```
+- ```docker attach wn```
