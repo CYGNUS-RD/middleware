@@ -1,5 +1,5 @@
 ### install sofware on CVMFS for a specific image (2.4 in the following) 
-- connenct to cvmfs VM ```ssh mazzitel@212.189.145.224```
+- connenct to cvmfs VM ```ssh mazzitel@2notebook00.cygno.cloud.infn.it```
 - change user as root ```sudo su```
 - open trascription ```cvmfs_server transaction sft-cygno.infn.it```
 - execute the image you like (e.g.): ```docker run -it --rm -v /cvmfs:/cvmfs gmazzitelli/cygno-wn:v2.4 bash```
