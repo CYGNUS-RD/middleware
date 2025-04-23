@@ -1,5 +1,5 @@
-### install sofware on CVMFS for a specific image (2.4 in the following) 
-- connenct to cvmfs VM ```ssh mazzitel@2notebook00.cygno.cloud.infn.it```
+### publishing sofware on CVMFS for a specific image (2.4 in the following) 
+- connenct to cvmfs VM ```ssh mazzitel@212.189.145.224``` stadalone publisher or ```ssh mazzitel@2notebook00.cygno.cloud.infn.it```
 - change user as root ```sudo su```
 - open trascription ```cvmfs_server transaction sft-cygno.infn.it```
 - execute the image you like (e.g.): ```docker run -it --rm -v /cvmfs:/cvmfs gmazzitelli/cygno-wn:v2.4 bash```
@@ -9,6 +9,14 @@
 - ```cvmfs_server publish sft-cygno.infn.it```
 
 WARNING: Be careful not to have the /cvmfs resource in use by any process. This means you should either exit the /cvmfs directory if you have entered it, or ensure the Docker container is removed. Using the --rm option will automatically remove the container upon exit.
+
+### publishing python library for a specific os relese (ex export PYTHONPATH="/mnt/py/Ubuntu22.04_Py3.11.9")
+- connenct to ```ssh mazzitel@2notebook00.cygno.cloud.infn.it```
+- change user as root ```sudo su```
+- ```cd /home/mazzitel/jupyterhub/CYGNO/package```
+- ```cvmfs_server transaction sft-cygno.infn.it; docker-compose up -d; docker exec -it py_assets bash```
+- `pip install ... -t $PYTHONPATH/ or pip install --force-reinstall -v "MySQL_python==1.2.2" or batter pip install -r /tmp/requirements.txt --no-deps --target=/mnt/py/Ubuntu22.04_Py3.11.9/
+- ```docker-compose down ; cvmfs_server publish sft-cygno.infn.it```
 
 ### expert
 - WP6 test: ```cvmfs_server mkfs -w https://rgw.cloud.infn.it:443/cvmfs/sft-cygno.infn.it -u gw,/srv/cvmfs/sft-cygno.infn.it/data/txn,http://cvmfs.wp6.cloud.infn.it:4929/api/v1 -k /home/mazzitel/keys_w6_publisher/ -o `whoami` sft-cygno.infn.it```
