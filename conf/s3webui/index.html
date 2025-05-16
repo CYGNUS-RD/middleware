@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CYGNO storage Web app</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f4f8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    h1 {
+      margin-bottom: 40px;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 15px 30px;
+      margin: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      color: white;
+      background: linear-gradient(135deg, #4CAF50, #2E7D32);
+      border: none;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: background 0.3s, transform 0.2s;
+    }
+
+    .button:hover {
+      background: linear-gradient(135deg, #66BB6A, #388E3C);
+      transform: scale(1.05);
+    }
+
+    .horizontal-buttons {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>CYGNO Storage Area</h1>
+
+  <!-- Ultimi tre bottoni (orizzontali) -->
+  <div class="horizontal-buttons">
+    <a href="https://s3webui.cygno.cloud.infn.it/%5B2_CNAF:cygno:cygno-data%5D/" class="button">DATA S3@CNAF</a>
+    <a href="https://s3webui.cygno.cloud.infn.it/%5B2_CNAF:cygno:cygno-sim%5D/" class="button">SIM S3@CNAF</a>
+    <a href="https://s3webui.cygno.cloud.infn.it/%5B2_CNAF:cygno:cygno-analysis%5D/" class="button">ANALYSIS S3@CNAF</a>
+  </div>
+
+  <div class="horizontal-buttons">
+    <a href="https://s3webui.cygno.cloud.infn.it/%5B0_BARI:%5D/" class="button">S3@BARI</a>
+    <a href="https://s3webui.cygno.cloud.infn.it/%5B1_MINIO:%5D/" class="button">S3@MINIO</a>
+  </div>
+
+</body>
+</html>
