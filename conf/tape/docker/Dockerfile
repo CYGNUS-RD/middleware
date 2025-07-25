@@ -1,6 +1,9 @@
 FROM cern/cc7-base:20220601-1
 
+COPY yum.repos.d /etc/yum.repos.d
+
 ENV OIDC_AGENT=/usr/bin/oidc-agent
+#RUN yum install https://dl.fedoraproject.org/pub/archive/epel/7/x86_64/Packages/e/epel-release-7-14.noarch.rpm
 
 RUN yum -y update && yum -y install \
     wget \

@@ -134,6 +134,30 @@ def upload_file_2_S3(file_name, client_id, client_secret,  endpoint_url, bucket,
         print('ERROR S3 file update: {:s} --> '.format(file_name), e)
         return 1
 
+def upload_file_2_S3_BA(file_name, bucket, tag, verbose=False):
+    import boto3
+    from boto3.s3.transfer import TransferConfig
+
+    aws_session = boto3.session.Session(
+        aws_access_key_id=os.environ.get('BA_ACCESS_KEY_ID'),
+        aws_secret_access_key=os.environ.get('BA_SECRET_ACCESS_KEY')
+    )
+
+    s3 = aws_session.client('s3', endpoint_url="https://swift.recas.ba.infn.it/",
+                            config=boto3.session.Config(signature_version='s3v4'),verify=True)
+
+    GB = 1024 ** 3
+    config = TransferConfig(multipart_threshold=5*GB)
+    
+    filename = file_name.split('/')[-1]
+    try:
+        s3.upload_file(file_name, Bucket=bucket, Key=tag+'/'+filename, Config=config)
+        return 0
+    except Exception as e:
+        print('ERROR S3 file update: {:s} --> '.format(file_name), e)
+        return 1
+
+
 def Gauss3(x, a0, x0, s0):
     import numpy as np
     return a0 * np.exp(-(x - x0)**2 / (2 * s0**2))
@@ -370,7 +394,7 @@ def p_rate(df, nsigma, verbose):
         nalpha +=len(cut[i][(cut[i]>40) & (length[i]>50)])
     return nalpha
 
-def main(verbose=True):
+def main(verbose):
     import os
     import cygno as cy
     connection = mysql.connector.connect(
@@ -485,9 +509,9 @@ def main(verbose=True):
                 slow_data["LY_mean"]=val_LY[0]
                 slow_data["LY_std"]=val_LY[1]
                 
-                if parma_data['nsigma'] >= 0.4:
+                if parma_data['nsigma'] >= 0.3:
                     xmin=4000
-                    xmax=16000
+                    xmax=18000
                 else:
                     xmin=2000
                     xmax=12000
@@ -553,7 +577,8 @@ def main(verbose=True):
                 if status == -1 : print ("ERROR: pushing db")
                 df_all = pd.DataFrame(branch_data)
                 df_all.to_pickle(file_out_name, compression={'method': 'gzip', 'compresslevel': 1})
-                upload_file_2_S3(file_out_name, client_id, client_secret,  endpoint_url, bucket, tag, tfile, verbose=verbose)
+                # upload_file_2_S3(file_out_name, client_id, client_secret,  endpoint_url, bucket, tag, tfile, verbose=verbose)
+                upload_file_2_S3_BA(file_out_name, bucket, tag, verbose=verbose)
                 cy.cmd.rm_file(file_out_name)
 
                 ###
@@ -566,4 +591,14 @@ def main(verbose=True):
                 cy.cmd.rm_file(file_in_name)
                 continue
     print("DONE")
-main()
+if __name__ == "__main__":
+    from optparse import OptionParser
+
+    parser = OptionParser(usage='usage: %prog -v\n')
+    parser.add_option('-v','--verbose', dest='verbose', action="store_true", default=False, help='verbose output')
+    (options, args) = parser.parse_args()
+    if options.verbose: 
+        print ("options", options)
+        print ("args", args)
+    main(options.verbose)
+

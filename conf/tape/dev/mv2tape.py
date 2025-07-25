@@ -146,7 +146,7 @@ def main(bucket, key, remove, verbose):
 
         try:
             tape_data_file = subprocess.check_output("gfal-ls -l "+tape_path\
-                             +filepath+" | awk '{print $5\" \"$9}'", shell=True)
+                             +bucket+'/'+filepath+" | awk '{print $5\" \"$9}'", shell=True)
 
             remotesize, tape_file = tape_data_file.decode("utf-8").split(" ")
             remotesize = int(remotesize)
@@ -156,7 +156,7 @@ def main(bucket, key, remove, verbose):
             tape_file=file_in
             
         if (verbose): 
-            print("gfal-ls -l "+tape_path+filepath+" | awk '{print $5\" \"$9}'")
+            print("gfal-ls -l "+tape_path+bucket+'/'+filepath+" | awk '{print $5\" \"$9}'")
             print("Tape", tape_file) 
             print("Tape size", remotesize)
 
@@ -172,8 +172,8 @@ def main(bucket, key, remove, verbose):
                 sys.exit(2)
             try:
                 if (remotesize):
-                    tape_data_copy = subprocess.check_output("gfal-rm "+tape_path+filepath, shell=True)
-                tape_data_copy = subprocess.check_output("gfal-copy "+tmpout+" "+tape_path+filepath, shell=True)
+                    tape_data_copy = subprocess.check_output("gfal-rm "+tape_path+bucket+'/'+filepath, shell=True)
+                tape_data_copy = subprocess.check_output("gfal-copy "+tmpout+" "+tape_path+bucket+'/'+filepath, shell=True)
 
                 cy.cmd.rm_file(tmpout)
             except Exception as e:
@@ -181,7 +181,7 @@ def main(bucket, key, remove, verbose):
                 sys.exit(3)
             try:
                 tape_data_file = subprocess.check_output("gfal-ls -l "+tape_path\
-                                +filepath+" | awk '{print $5\" \"$9}'", shell=True)
+                                +bucket+'/'+filepath+" | awk '{print $5\" \"$9}'", shell=True)
     
                 remotesize, tape_file = tape_data_file.decode("utf-8").split(" ")
                 remotesize = int(remotesize)         

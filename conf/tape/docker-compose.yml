@@ -1,8 +1,7 @@
-version: "3"
 
 services:
   tape:
-    image: gmazzitelli/cygno-tape:v1.0.6-cygno
+    image: gmazzitelli/cygno-tape:v1.0.7-cygno
     container_name: tape
     stdin_open: true # docker run -i
     tty: true        # docker run -t
@@ -22,19 +21,21 @@ services:
     volumes:
       - $PWD/dev/:/root/dev
       - /tmp/:/tmp/
+    depends_on:
+      - tokener_s3
+      - tokener_tape
 
   tape_mango:
-    image: gmazzitelli/cygno-tape:v1.0.6-cygno
+    image: gmazzitelli/cygno-tape:v1.0.7-cygno
     container_name: tape_mango
     stdin_open: true # docker run -i
     tty: true        # docker run -t
     environment:
       BUCKET_TAG: 'MAN'
-      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
-      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
-      ENDPOINT_URL: ${ENDPOINT_URL}
+      BA_ACCESS_KEY_ID: ${BA_ACCESS_KEY_ID}
+      BA_SECRET_ACCESS_KEY: ${BA_SECRET_ACCESS_KEY}
+      ENDPOINT_URL: "https://swift.recas.ba.infn.it/"
       TAPE_TOKEN_FILE: '/tmp/tape_token'
-      S3_TOKEN_FILE: '/tmp/token'
 
       MYSQL_IP:  'tunnel_grafana34'
       MYSQL_USER: ${MYSQL_USER}
@@ -44,19 +45,22 @@ services:
     volumes:
       - ${PWD}/dev/:/root/dev
       - /tmp/:/tmp/
+      - ${PWD}/dev/init_userpass.sh:/root/dev/init.sh
+    depends_on:
+      - tokener_s3
+      - tokener_tape
 
   tape_lnf:
-    image: gmazzitelli/cygno-tape:v1.0.6-cygno
+    image: gmazzitelli/cygno-tape:v1.0.7-cygno
     container_name: tape_lnf
     stdin_open: true # docker run -i
     tty: true        # docker run -t
     environment:
       BUCKET_TAG: 'LNF'
-      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
-      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
-      ENDPOINT_URL: ${ENDPOINT_URL}
+      BA_ACCESS_KEY_ID: ${BA_ACCESS_KEY_ID}
+      BA_SECRET_ACCESS_KEY: ${BA_SECRET_ACCESS_KEY}
+      ENDPOINT_URL: "https://swift.recas.ba.infn.it/"
       TAPE_TOKEN_FILE: '/tmp/tape_token'
-      S3_TOKEN_FILE: '/tmp/token'
 
       MYSQL_IP: 'tunnel_grafana33'
       MYSQL_USER: ${MYSQL_USER}
@@ -66,7 +70,10 @@ services:
     volumes:
       - ${PWD}/dev/:/root/dev
       - /tmp/:/tmp/
-
+      - ${PWD}/dev/init_userpass.sh:/root/dev/init.sh
+    depends_on:
+      - tokener_s3
+      - tokener_tape
 
   tunnel:
     restart: always

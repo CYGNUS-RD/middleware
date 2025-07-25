@@ -131,6 +131,30 @@ def upload_file_2_S3(file_name, client_id, client_secret,  endpoint_url, bucket,
         print('ERROR S3 file update: {:s} --> '.format(file_name), e)
         return 1
 
+def upload_file_2_S3_BA(file_name, bucket, tag, verbose=False):
+    import boto3
+    from boto3.s3.transfer import TransferConfig
+
+    aws_session = boto3.session.Session(
+        aws_access_key_id=os.environ.get('BA_ACCESS_KEY_ID'),
+        aws_secret_access_key=os.environ.get('BA_SECRET_ACCESS_KEY')
+    )
+
+    s3 = aws_session.client('s3', endpoint_url="https://swift.recas.ba.infn.it/",
+                            config=boto3.session.Config(signature_version='s3v4'),verify=True)
+
+    GB = 1024 ** 3
+    config = TransferConfig(multipart_threshold=5*GB)
+    
+    filename = file_name.split('/')[-1]
+    try:
+        s3.upload_file(file_name, Bucket=bucket, Key=tag+'/'+filename, Config=config)
+        return 0
+    except Exception as e:
+        print('ERROR S3 file update: {:s} --> '.format(file_name), e)
+        return 1
+
+
 def Gauss3(x, a0, x0, s0):
     import numpy as np
     return a0 * np.exp(-(x - x0)**2 / (2 * s0**2))
@@ -265,7 +289,8 @@ def main(verbose=False):
                 if status == -1: print('ERROR >>> pushing db...')
                 df_all = pd.DataFrame(branch_data)
                 df_all.to_pickle(file_out_name, compression={'method': 'gzip', 'compresslevel': 1})
-                upload_file_2_S3(file_out_name, client_id, client_secret,  endpoint_url, bucket, tag, tfile, verbose=verbose)
+                #upload_file_2_S3(file_out_name, client_id, client_secret,  endpoint_url, bucket, tag, tfile, verbose=verbose)
+                upload_file_2_S3_BA(file_out_name, bucket, tag, verbose=verbose)
                 cy.cmd.rm_file(file_out_name)
             except Exception as e:
                 exc_type, exc_obj, exc_tb = sys.exc_info()
