@@ -142,3 +142,4 @@ conf/kafka/dev/LNGS_pmt_s.json
 conf/web/saml/config.php
 conf/web/saml/saml.crt  
 conf/web/saml/saml.key
+rclone.conf
