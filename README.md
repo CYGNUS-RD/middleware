@@ -1,129 +1,21 @@
 # Middle Ware
 
-* ODB INFO: [http://lmu.web.psi.ch/docu/manuals/bulk_manuals/software/midas195/html/ODB_Structure.html#ODB_System_Tree](http://lmu.web.psi.ch/docu/manuals/bulk_manuals/software/midas195/html/ODB_Structure.html#ODB_System_Tree)
-* LIB INFO: [https://bitbucket.org/tmidas/midas/src/develop/python/](https://bitbucket.org/tmidas/midas/src/develop/python/)
-* SSH LNGS: `ssh -p 9023 standard@172.18.9.72 `
-* SSH LNF: `ssh -p 9023 standard@spaip.lnf.infn.it` (`ssh -X cygno@spaip.lnf.infn.it -p 9022`)
-* CONF: ...
-* JUPYTER LNF:  http://spaip.lnf.infn.it:8888/ (not in autostart: `nohup jupyter notebook --no-browser&` )
-* JUPYTER LNGS: http://172.18.9.72:8888/ 
-* DAQ LNF: https://spaip.lnf.infn.it:8443/
-* DAQ LNGS: https://172.18.9.72:8443/
+<table>
+  <tr>
+    <th border-style: none;><img src="http://lnf.infn.it/~mazzitel/cygno.png" width="200"></th>
+    <th border-style: none;><img src="https://web.infn.it/csn2/images/Immagini_CSNII/CSNII.png" width="250"></th>
+    <th border-style: none;><img src="https://www.supercomputing-icsc.it/wp-content/uploads/2022/10/logoxweb.svg" width="450" ></th>
+  </tr>
+</table>
 
 
-* (sono aperte su entrambe le macchine anche le porte del DAQ e del RTD)
-* To access Grafana (Just one for both DBs):
-  * 1 - Go to the link: https://grafana.cygno.cloud.infn.it/
-  * 2 - Choose "Sign in with IAM"
-  * 3 - Use your INFN credentials
-  * 4 - Go to the desired Dashboard
-  
-* [LNF] To access the DB:
-  *   1 - Connect to the LNF VPN
-  *   2 - Use the following command at the terminal: `ssh -L 8081:131.154.96.196:8081 standard@spaip.lnf.infn.it -p 9023`
-  *   3 - DB Address: access the http://localhost:8081/ using the browser
-  
-* [LNGS] To access DB:
-  *   1 - Connect to the LNGS VPN
-  *   2 - Use the following command at the terminal: `ssh -L 8081:131.154.96.221:8081 standard@172.18.9.72 -p 9023`
-  *   3 - DB Address: access the http://localhost:8081/ using the browser
-  
+<div align="justify"> The Middle Ware project aim to realize a Computing Model (CM) for <a href="https://web.infn.it/cygnus/">CYGNO</a> and small/medium experiments in the astroparticle physics community: <a href="https://web.infn.it/cygnus/">CYGNO</a>, like many other astroparticle experiments, requires a computing model to acquire, store, simulate and analyze data. Indeed, astroparticle experiments are typically characterized by the fact to be less demanding from computing resources with respect to High Energy Physics (HEP) experiments one but have to deal with unique and unrepeatable data, sometimes collected in extreme conditions, with extensive use of templates and Montecarlo, and are often re-calibrated and reconstructed many times for a given data sets. Moreover, the varieties and the scale of computing models and requirements are extremely large. In this scenario, the Cloud infrastructure with standardized and optimized services offered to the scientific community could be a useful solution able to match the requirements of many small/medium size experiments. This repository contains, beyond then Data Acquisition System <a href=https://github.com/CYGNUS-RD/daq>DAQ</a> that is specialyzed for the exepreiment, the <a href="https://web.infn.it/cygnus/">CYGNO</a> computing model based on the <a href="https://web.infn.it/cygnus/">INFN cloud infrastructure</a> where the experiment software, easily extensible to similar experiments for similar applications and experiments, providings generic tools as a service.</div>
 
-WARNING: directory data/ and file cygno_conf.py (contaning password) are not ignored
+<div align="justify"> The generalization of the CYGNO computing model to small/medium astroparticle experiments is part of the <a href=https://www.supercomputing-icsc.it/>ICSC – Centro Nazionale di Ricerca in High Performance Computing, Big Data and Quantum Computing</a> project trought the Spoke2, <a href=https://www.supercomputing-icsc.it/en/spoke-2-fundamental-research-space-economy-en/>FUNDAMENTAL RESEARCH & SPACE ECONOMY</a> as part of the WP3 - Design and development of science-driven tools and innovative algorithms for Experimental Astroparticle Physics and Gravitational Waves - supported by the European Union – NextGenerationEU (UC/KPI-2.3.6 - Pipeline optimization for space and ground based experiments (PSGE))</div>
 
-### istallation history and tips:
-
-jupyter configuration (at LNF where root as been istalled as root)
-```
-sudo chmod 777 /home/software/root_build/etc/notebook/jupyter_notebook_config.py
-sudo chmod 777 /home/software/root_build/etc/notebook/
-```
-first config 
-```
-jupyter notebook --generate-config
-c.NotebookApp.allow_origin = '*'
-c.NotebookApp.ip = '0.0.0.0'
-c.NotebookApp.password = <password>
-```
-
-python setup:
-
-```
-pip install testresources
-pip install root_numpy
-pip install sklearn
-pip install Cython
-pip install notebook
-pip install mysql-connector
-pip install git+https://github.com/DODAS-TS/boto3sts
-pip install git+https://github.com/CYGNUS-RD/cygno.git
-export PYTHONPATH=$PYTHONPATH:$MIDASSYS/python (to set in bashrc/DAQsetup)
-sudo pip install -e $MIDASSYS/python --user
-```
-
-in middeleware setup for cygno cytron (in dev middelware folder)
-```
-sudo apt-get install python-numpy
-cython cython_cygno.pyx
-cythonize -a -i cython_cygno.pyx
-```
-
-cloud token https://github.com/CYGNUS-RD/cygno; http://repo.data.kit.edu/ (if repository unreachble eg ubunto 20.04)
-```
-sudo apt-key adv --keyserver hkp://pgp.surfnet.nl --recv-keys ACDFB08FDC962044D87FF00B512839863D487A87
-vi /etc/apt/sources.list
-```
-add
-```
-deb https://repo.data.kit.edu/ubuntu/20.04 ./
-sudo apt-get install oidc-agent
-```
-### gestione del router 
-https://wiki.ubuntu-it.org/Sicurezza/Nftables
-```
-IP LNGS: mazzitel@172.18.9.72
-```
-* Configurazione Virtual host e routing /etc/nftables.conf
-* Restart seervice: ```nft -f /etc/nftables.conf```
-* Configurazione fixed host: /etc/dhcp/fixed-addr.conf
-* Restart service: ```systemctl restart isc-dhcp-server.service```
-* ip volatili: /var/lib/dhcp/dhcpd.leases
-
-
-```
-#host lap-mazzitelli {hardware ethernet d0:c0:bf:2e:6b:4c; fixed-address 192.168.99.10; }
-host daq-server1 {hardware ethernet 3c:ec:ef:6c:df:ac; fixed-address 192.168.99.10; }
-host daq-server2 {hardware ethernet 3c:ec:ef:6c:e0:d8; fixed-address 192.168.99.11; }
-host pc-windows {hardware ethernet e4:54:e8:83:25:c1; fixed-address 192.168.99.12; }
-host hv-iseg {hardware ethernet 00:80:a3:e1:9c:01; fixed-address 192.168.99.13; }
-host hv-caen {hardware ethernet 00:90:fb:66:2f:2c; fixed-address 192.168.99.14; }
-#host slow-mscb399 {hardware ethernet 00:50:c2:46:d1:8f; fixed-address 192.168.99.15; } # scs rotto
-host slow-mscb399 {hardware ethernet 00:50:c2:46:d4:16; fixed-address 192.168.99.15; }
-host gas-system {hardware ethernet 00:03:27:11:c3:53; fixed-address 192.168.99.20; }
-
-```
-
-### HTCondor + Kubernetes
-
-#  How to add created WN (worker nodes) to another existent Condor Queue:
-
-1. ssh the WN you want to move from one Queue to another;
-
-2. Then, create the config file:
-  ```
-  vi /etc/condor/condor_config.local
-  ```
-3. Add the line:
-  ```
-  CONDOR_HOST = <IP_Kubernetes>
-  ```
-
-4. Then, run the command:
-
-  ```
-  condor_reconfig
-  ```
-
-
-### Database SQL (MariaDB)
- Installation and problem solve of the Database can be found here: [README.md](https://github.com/CYGNUS-RD/middleware/blob/master/conf/mariadb/README.md)
+### useful link
+- [MIDAS CYGNO DAQ](https://github.com/CYGNUS-RD/daq)
+- [DAQ2Middle Ware API](https://github.com/CYGNUS-RD/cygno)
+- [DODAS CYGNO fork](https://github.com/gmazzitelli/dodas-docker-images)
+- [DODAS docker update](https://github.com/gmazzitelli/cloud_docker_dev)
+- [docker image repository](https://hub.docker.com/repositories/gmazzitelli)

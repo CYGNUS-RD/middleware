@@ -1,0 +1,5 @@
+# Example sshd_config - Customize as needed
+Port 22
+PermitRootLogin no
+PasswordAuthentication no
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com

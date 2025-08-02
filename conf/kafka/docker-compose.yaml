@@ -11,16 +11,19 @@ services:
     container_name: kafka
     ports:
      - "9092:9092"
+     - "29092:29092"
+     - "39092:39092"
     expose:
      - "9093"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
-      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9093,OUTSIDE://localhost:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
-      KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092
+      # use localhost insted of kafka if access is needed from VM
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:9093,OUTSIDE://localhost:9092,OUTSIDETWO://kafka:29092,OUTSIDETRE://bastion:39092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT,OUTSIDETWO:PLAINTEXT,OUTSIDETRE:PLAINTEXT
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092,OUTSIDETWO://0.0.0.0:29092,OUTSIDETRE://0.0.0.0:39092
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_CREATE_TOPICS: "online:1:1"
-####      KAFKA_REPLICA_FETCH_MAX_BYTES: 31457280 / 15728640
       KAFKA_PRODUCER_MAX_REQUEST_SIZE: 31457280
       KAFKA_CONSUMER_MAX_PARTITION_FETCH_BYTES: 31457280
       KAFKA_MESSAGE_MAX_BYTES: 31457280
@@ -28,43 +31,64 @@ services:
       CONNECT_CONSUMER_MAX_PARTITION_FETCH_BYTES: 31457280
       KAFKA_LOG_RETENTION_HOURS: 1
       KAFKA_LOG_RETENTION_BYTES: 1073741824
-#      KAFKA_TOPIC_MAX_MESSAGE_BYTES: 31457280
-#      KAFKA_REPLICA_FETCH_MAX_BYTES: 31457280
-#      KAFKA_LOG_RETENTION_BYTES: 1048576
     volumes:
      - /var/run/docker.sock:/var/run/docker.sock
 
-  sentinel:
-    image: gmazzitelli/cygno-st:v1.0.4-cygno
-    container_name: sentinel
-    stdin_open: true # docker run -i
-    tty: true        # docker run -t
-    environment:
-      OIDC_AGENT: ${OIDC_AGENT}
-      REFRESH_TOKEN: ${REFRESH_TOKEN}
-      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
-      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
-      IAM_SERVER: ${IAM_SERVER}
-      IAM_SCOPES: "'openid profile email offline_access wlcg wlcg.groups'"
-    volumes:
-      - ${PWD}/dev/:/root/dev
-      - ${PWD}/start_script.sh:/root/start_script.sh
-      - /tmp/:/tmp/
-    command: /bin/sh -c "/root/start_script.sh && tail -f /dev/null"
-#    command: /bin/sh -c "echo \"source /root/start_script.sh\" >> /root/.bashrc && tail -f /dev/null"
 
-  editor:
-    image: jupyter/minimal-notebook
-    container_name: editor
-    user: root
+  rconsole:
+    image: gmazzitelli/cygno-st:v2.0.2-cygno
+    container_name: rconsole
+    environment:
+      OPTIONS: 'kafka:29092 -m'
     volumes:
-      - ${PWD}/dev:/home/jovyan/work/
-    ports:
-      - "8890:8888"
+      - ${PWD}/dev/consumer_odb_multi.sh:/root/init.sh
+#      - ${PWD}/dev/.bashrc:/root/.bashrc
+      - ${PWD}/dev/:/root/dev/
+      - /tmp/:/tmp/
 
   web:
      image: nginx:latest
+     container_name: web
      ports:
        - "80:80"
      volumes:
        - ${PWD}/dev:/usr/share/nginx/html
+
+  mongo:
+    image: mongo
+    container_name: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - "27017:27017"
+    volumes:
+      - mogodata:/data/db
+
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_BASICAUTH_USERNAME: 'root'
+      ME_CONFIG_BASICAUTH_PASSWORD: 'example'
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: example
+      ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
+
+#  bastion:
+#     image: gmazzitelli/bastion:v0.1
+#     container_name: bastion
+#     environment:
+#       BASTION_USER: daq
+#       BASTION_PASWD: daq
+#     ports:
+#       - "9022:22"
+#     volumes:
+#       - /home/mazzitel/.ssh/authorized_keys:/home/daq/.ssh/authorized_keys
+
+volumes:
+   mogodata:

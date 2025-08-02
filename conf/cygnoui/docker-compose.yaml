@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  rsync:
+    container_name: bkp_note00
+    build: .
+    volumes:
+      - /data/notebook00/daily:/data
+      - /root/.ssh/cygnoui:/root/.ssh/cygnoui:ro
+      - /root/middleware/conf/cygnoui/ssh_config:/root/.ssh/config:ro
+    environment:
+      - SERVER2=notebook00  # Hostname notebook
+      - SOURCE_DIR=/data/jupyter-mounts/
+      - DEST_DIR=/data  
+
+  rsync1:
+    container_name: bkp_note01
+    build: .
+    volumes:
+      - /data/notebook01/daily:/data
+      - /root/.ssh/cygnoui:/root/.ssh/cygnoui:ro
+      - /root/middleware/conf/cygnoui/ssh_config:/root/.ssh/config:ro
+    environment:
+      - SERVER2=notebook01  # Hostname notebook
+      - SOURCE_DIR=/data/jupyter-mounts/
+      - DEST_DIR=/data
+
+  rsync2:
+    container_name: bkp_note02
+    build: .
+    volumes:
+      - /data/notebook02/daily:/data
+      - /root/.ssh/cygnoui:/root/.ssh/cygnoui:ro
+      - /root/middleware/conf/cygnoui/ssh_config:/root/.ssh/config:ro
+    environment:
+      - SERVER2=notebook02  # Hostname notebook
+      - SOURCE_DIR=/data/jupyter-mounts/
+      - DEST_DIR=/data

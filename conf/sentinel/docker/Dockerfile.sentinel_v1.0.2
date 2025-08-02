@@ -1,0 +1,57 @@
+FROM cern/cc7-base:20220601-1
+
+COPY assets/base_packages /tmp/
+COPY assets/packages /tmp/
+
+# clean metadata: https://srvfail.com/yum-doesnt-work-in-clean-centos-7-install-exiting-on-user-cancel/
+RUN yum -y clean metadata \
+    && yum --exclude=\*oidc-agent\* -y update \
+    && yum --exclude=\*oidc-agent\* -y upgrade \
+    && xargs yum -y install < /tmp/base_packages \
+    && xargs yum -y install < /tmp/packages \
+    && yum -y clean all \
+    && rm -f /tmp/*packages
+
+WORKDIR /etc/yum.repos.d
+
+RUN  wget https://repo.data.kit.edu/data-kit-edu-centos7.repo
+
+RUN yum install -y \
+    oidc-agent \
+    condor \
+    && yum clean all
+
+RUN sed -i 's/\/bin\/bin\//\/bin\//g' /usr/bin/oidc-agent-service
+
+# Install boto
+RUN pip3 install --no-cache-dir -U git+https://github.com/DODAS-TS/boto3sts
+
+# Install ca
+RUN wget "https://crt.sh/?d=2475254782" --progress=bar -O /etc/pki/ca-trust/source/anchors/ca.crt \
+    && update-ca-trust \
+    && update-ca-trust force-enable
+
+# Install 
+RUN pip3 install --upgrade pip
+RUN pip3 install --no-cache-dir \
+#    mahotas==1.4.11 \
+#    scikit-image==0.17.2 \
+#    scikit-learn==0.24.2 \
+    scipy==1.5.4 \
+#    seaborn==0.11.2 \
+#    jedi-language-server==0.21.0 \
+#    metakernel==0.28.2 \
+#    tensorflow==2.6.2 \
+#    opencv-python==4.6.0.66 \
+    kafka-python==2.0.2 \
+    root_numpy==4.8.0 \
+#    pydot==1.4.2\
+#    graphviz==0.19.1 \
+    uproot==4.3.7 \
+    mysql-connector==2.2.9 \
+    && pip3 install --no-cache-dir -U git+https://github.com/CYGNUS-RD/cygno.git@v1.0.10 \
+    && pip3 install 'https://github.com/CYGNUS-RD/middleware/blob/master/midas/midaslib.tar.gz?raw=true'
+
+WORKDIR /root/dev
+COPY ./wn/startup.sh /root/startup.sh
+# ENTRYPOINT /root/startup.sh

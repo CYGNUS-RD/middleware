@@ -1,0 +1,30 @@
+services:
+  storage:
+    image: myubuntu
+    container_name: storage
+# option to attach the contaner
+    stdin_open: true # docker run -i
+    tty: true        # docker run -t
+#
+    environment:
+      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+      REFRESH_TOKEN: ${REFRESH_TOKEN}
+      IAM_SERVER: ${IAM_SERVER}
+      SCOPES: ${SCOPES}
+
+      BA_SECRET_ACCESS_KEY: ${BA_SECRET_ACCESS_KEY}
+      BA_ACCESS_KEY_ID: ${BA_ACCESS_KEY_ID}
+
+
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_IP: ${MYSQL_IP}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_PORT: ${MYSQL_PORT}
+
+    volumes:
+#      - ${PWD}/dev/.bashrc:/root/.bashrc
+      - ${PWD}/dev/:/root/dev/
+      - /tmp/:/tmp/

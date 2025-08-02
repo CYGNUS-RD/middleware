@@ -7,6 +7,8 @@ Useful links:
 - [Install and Secure Phpmyadmin Ubuntu](https://www.digitalocean.com/community/tutorials/how-to-install-and-secure-phpmyadmin-on-ubuntu-20-04)
 - [Install PhpMyAdmin with MariaDB](https://www.server-world.info/en/note?os=Ubuntu_22.04&p=mariadb&f=6)
 
+- [Relay Log Corrupted](https://dba.stackexchange.com/questions/53893/mysql-relay-log-corrupted-how-do-i-fix-it-tried-but-failed).
+
 ### Configure mysql_secure_installation
 
 > sudo mysql_secure_installation
