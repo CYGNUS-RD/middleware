@@ -1,9 +1,9 @@
 #!/bin/bash
 TOKEN=$(cat /tmp/token)
 env
-apk update
-apk add curl
-apk add grep
+# apk update
+# apk add curl
+# apk add grep
 
 
 

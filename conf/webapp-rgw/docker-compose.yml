@@ -1,22 +1,31 @@
 services:
 
-  rgw:
-    image: baltig.infn.it:4567/infn-cloud/webapp-rgw:1.1.0 # baltig.infn.it:4567/infn-cloud/webapp-rgw
-    container_name: rgw
+#<<<<<<< HEAD
+#  rgw:
+#    image: baltig.infn.it:4567/infn-cloud/webapp-rgw:1.1.0 # baltig.infn.it:4567/infn-cloud/webapp-rgw
+#    container_name: rgw
+#=======
+  webapp-rgw:
+#    image: baltig.infn.it:4567/infn-cloud/webapp-rgw
+    image: baltig.infn.it:4567/infn-cloud/webapp-rgw:pagination
+    container_name: webapp-rgw
+#>>>>>>> 56149fd4b3764deec3a230ccb702b0e4280ab1e2
     ports:
-      - "8080:80"
-    environment:
-      - AUTH_URL=${AUTH_URL}
-      - AUTH_SECRET=${AUTH_SECRET}
-      - IAM_AUTHORITY_URL=${IAM_AUTHORITY_URL}
-      - IAM_CLIENT_ID=${IAM_CLIENT_ID}
-      - IAM_CLIENT_SECRET=${IAM_CLIENT_SECRET}
-      - IAM_AUDIENCE=${IAM_AUDIENCE}
-      - IAM_SCOPE=${IAM_SCOPE}
-      - S3_ENDPOINT=${S3_ENDPOINT}
-      - S3_REGION=${S3_REGION}
-      - S3_ROLE_ARN=${S3_ROLE_ARN}
-      - S3_ROLE_DURATION_SECONDS=${S3_ROLE_DURATION_SECONDS}
+      - "9023:80"
+    env_file:
+      - .env
+
+#      - AUTH_URL=${AUTH_URL}
+#      - AUTH_SECRET=${AUTH_SECRET}
+#      - IAM_AUTHORITY_URL=${IAM_AUTHORITY_URL}
+#      - IAM_CLIENT_ID=${IAM_CLIENT_ID}
+#      - IAM_CLIENT_SECRET=${IAM_CLIENT_SECRET}
+#      - IAM_AUDIENCE=${IAM_AUDIENCE}
+#      - IAM_SCOPE=${IAM_SCOPE}
+#      - S3_ENDPOINT=${S3_ENDPOINT}
+#      - S3_REGION=${S3_REGION}
+#      - S3_ROLE_ARN=${S3_ROLE_ARN}
+#      - S3_ROLE_DURATION_SECONDS=${S3_ROLE_DURATION_SECONDS}
 
   nginx:
     image: nginx:alpine
@@ -27,4 +36,4 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt:ro
       - ./conf.d:/etc/nginx/conf.d:ro
     depends_on:
-      - rgw
+      - webapp-rgw

@@ -3,10 +3,12 @@
 # G. Mazzitelli 2022
 # versione DAQ LNGS/LNF per midas file2cloud
 #
+# RUCIO upload
+#
 
-def storeStatus(filen, size, status, remotesize, outfile):
+def storeStatus(filen, size, status, result, outfile):
     from cygno import cmd
-    stchar = ' '.join([filen, str(size), str(status), str(remotesize)])
+    stchar = ' '.join([filen, str(size), str(status), str(result)])
     cmd.append2file(stchar, outfile)
     return stchar
 
@@ -81,14 +83,12 @@ def main():
     import time
     import midas
     import midas.client
-    import gzip
-    import boto3
-    from boto3sts import credentials as creds
-    from boto3.s3.transfer import TransferConfig
+    import subprocess
     #
     # deault parser value
     #
     version  ='s3v4'
+
     BARI = 1
     session  ='infncloud-wlcg'
     bucket   = 'cygno-data'
@@ -107,14 +107,8 @@ def main():
     parser.add_option('-n','--tries', dest='tries', type=int, default=max_tries, help='# of retry upload temptative')
     parser.add_option('-v','--verbose', dest='verbose', action="store_true", default=False, help='verbose output')
     parser.add_option('-m','--mail', dest='mail', type='string', default=to, help='mail allert')
-    parser.add_option('-b','--bari', dest='Bari',default=1, type='int', help='If it is 1 then upload to bari')
     (options, args) = parser.parse_args()
 
-    if options.Bari==1:
-       endpoint = "https://swift.recas.ba.infn.it/"
-    else:
-       endpoint ='https://minio.cloud.infn.it/'
-    
     max_tries   = options.tries
     verbose     = options.verbose
     to          = options.mail
@@ -134,15 +128,6 @@ def main():
     
     key = tag+'/'
 
-    if options.Bari==1:
-        aws_session = boto3.session.Session(aws_access_key_id=os.environ.get('BA_ACCESS_KEY_ID'),
-                                            aws_secret_access_key=os.environ.get('BA_SECRET_ACCESS_KEY'))
-        s3 = aws_session.client('s3', endpoint_url=endpoint,
-                                config=boto3.session.Config(signature_version=version),verify=True)
-    else:
-        session = creds.assumed_session(session, endpoint=endpoint, verify=True)
-        s3 = session.client('s3', endpoint_url=endpoint, config=boto3.session.Config(signature_version=version),
-                                                    verify=True)
     
     GB = 1024 ** 3
     config = TransferConfig(multipart_threshold=5*GB)
@@ -164,21 +149,6 @@ def main():
                 if verbose : print ("File in dir %d" % np.size(file_in_dir))
 
                 ipload = 1 # index of file uploaded
-                # if verbose : print(file_in_dir)
-
-                #for i in range(0, np.size(file_in_dir)):
-                #    if ('run' in str(file_in_dir[i]))   and \
-                #    ('.mid' in str(file_in_dir[i]))  and \
-                #    (not ('.gz' in str(file_in_dir[i]))) and \
-                #    (not('.crc32c' in str(file_in_dir[i]))) and\
-                #    ((str(file_in_dir[i]).split('.mid')[0] + '.crc32c') in file_in_dir) and \
-                #    (not ( (str(file_in_dir[i]) + '.gz') in file_in_dir)) and \
-                #    (not file_in_dir[i].startswith('.')):
-                #        if compressing_files < 5:
-                #            dtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                #            print('{:s} Compressing file: {:s}'.format(dtime, file_in_dir[i]))
-                #            os.system('gzip ' + INAPATH + file_in_dir[i] +' &')
-                #            compressing_files += 1
             except:
                 print('{:s} ERROR: Compressing files'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
                 
@@ -197,7 +167,7 @@ def main():
                         
                         dtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                         
-                        print('{:s} Udatentig matadata for filer file: {:s}'.format(dtime, filename), flush = True)
+                        print('{:s} Udatentig matadata for filer file: {:s}'.format(dtime, filename))
                         
                         filesize = os.path.getsize(INAPATH+filename)               
                         md5sum = cy.cmd.file_md5sum(INAPATH+filename)
@@ -212,7 +182,7 @@ def main():
                                                               filesize, verbose=verbose)
 
                         dtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                        print('{:s} Transferring file: {:s}'.format(dtime, filename), flush = True)
+                        print('{:s} Transferring file: {:s}'.format(dtime, filename))
                         if compressing_files > 0:
                             compressing_files -= 1
                         current_try = 0
@@ -221,20 +191,36 @@ def main():
                             if verbose: print(INAPATH+filename,tag, bucket, session, verbose, filesize)
                             if filesize < 5400000000: # ~ 5 GB
                                 dtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                                print('{:s} Uploading file: {:s}'.format(dtime, filename), flush = True)
+                                print('{:s} Uploading file: {:s}'.format(dtime, filename))
                                 try:
-                                    s3.upload_file(INAPATH+filename, Bucket=bucket, Key=key+filename, Config=config)
-                                    response=s3.head_object(Bucket=bucket,Key=key+filename)
-                                    remotesize = int(response['ContentLength'])
+                                   # remeber config sile in /home/.rucio.cfg
+#                                   docker run --rm -v /home/.rucio.cfg:/home/.rucio.cfg -v INAPATH+filename:/app/filename rucio-uploader \
+#                                   --file ./filename --bucket bucket --did_name key+filename --upload_rse CNAF_USERDISK --transfer_rse T1_USERTAPE --account rucio-daq
+                                   docker_command = [ "docker", "run", "--rm",
+                                                      "-v", "/home/.rucio.cfg:/home/.rucio.cfg",
+                                                      "-v", INAPATH+filename+":/app/"+filename,
+                                                      "rucio-uploader",  # nome dell'immagine Docker
+                                                      "--file", filename,
+                                                      "--bucket", bucket,
+                                                      "--did_name", key+filename,
+                                                      "--upload_rse", "CNAF_USERDISK",
+                                                      "--transfer_rse", "T1_USERTAPE",
+                                                      "--account", "rucio-daq"
+                                                      ]
+                                   if verbose: print(docker_command)
+                                   result = subprocess.run(docker_command, capture_output=True, text=True)
+#                                    s3.upload_file(INAPATH+filename, Bucket=bucket, Key=key+filename,Config=config)
+#                                    response=s3.head_object(Bucket=bucket,Key=key+filename)
+#                                    remotesize = int(response['ContentLength'])
                                     newupoload.append(storeStatus(filename, filesize, status, 
-                                                                      remotesize, STOROUT))
+                                                                      result.stderr, STOROUT))
                                     cy.daq_update_runlog_replica_status(connection, 
                                                                             runN, storage="cloud", 
                                                                             status=1, verbose=verbose)
                                     cy.daq_update_runlog_replica_tag(connection, runN, 
                                                                          TAG=tag, verbose=verbose)
 
-                                    print('{:s} Upload done: {:s}'.format(dtime, filename), flush = True)
+                                    print('{:s} Upload done: {:s}'.format(dtime, filename))
                                     status = True
                                     
                                 except Exception as e:

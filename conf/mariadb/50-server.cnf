@@ -121,6 +121,13 @@ log_bin                = /var/log/mysql/mysql-bin.log
 log_bin_index          = /var/log/mysql/mariadb-bin.index
 
 max_binlog_size        = 100M
+relay_log = /var/log/mysql/mysql-relay-bin
+relay_log_index = /var/log/mysql/mysql-relay-bin.index
+replicate-ignore-db = phpmyadmin
+binlog-ignore-db    = phpmyadmin
 
-relay_log              = /var/log/mysql/mysql-relay-bin
-relay_log_index        = /var/log/mysql/mysql-relay-bin.index
+replicate-ignore-db = mysql
+binlog-ignore-db    = mysql
+
+replicate-ignore-db = information_schema
+binlog-ignore-db    = information_schema

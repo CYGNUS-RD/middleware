@@ -20,14 +20,26 @@ DEFAULT_PED_VALUE   = '99'
 DEFAULT_VMIN_VALUE  = '95'
 DEFAULT_VMAX_VALUE  = '120'
 DEFAULT_FRAME_VALUE = '100' # grean frame limit
-DEFAULT_PMT_FAST_VALUE   = '3'
-DEFAULT_PMT_SLOW_VALUE   = '2'
+DEFAULT_PMT_FAST_VALUE   = '4'
+DEFAULT_PMT_SLOW_VALUE   = '5'
 
 
 def plot_iamge(bank, vmin, vmax, grid, event_number, event_time, y0=DEFAULT_FRAME_VALUE):
 
-    shape = int(np.sqrt(bank.size_bytes*8/16))
-    image = np.reshape(bank.data, (shape, shape))
+    test_size=bank.size_bytes*8/16/(5308416)      #5308416=2304*2304
+    if test_size<1.1:
+
+        #Fusion,Flash
+        shapex = shapey = int(np.sqrt(bank.size_bytes*8/16))
+    else:
+        #quest
+        shapex=4096
+        shapey=2304
+        vmin=195
+        vmax=220
+
+    image = np.reshape(bank.data, (shapey, shapex))
+
     ax = plt.imshow(image, cmap='gray', vmin=vmin, vmax=vmax)
 
 
@@ -116,7 +128,7 @@ def main(grid=False, vmin=DEFAULT_VMIN_VALUE, vmax=DEFAULT_VMAX_VALUE, ped=DEFAU
                 print("%s, banks %s" % (event_time, bank_names))
 
             #plt.ion() #sovrapone i grafici nella stessa finestra
-            plt.clf()
+            
             for bank_name, bank in event.banks.items():
 		
                 if bank_name=='INPT':
@@ -125,6 +137,7 @@ def main(grid=False, vmin=DEFAULT_VMIN_VALUE, vmax=DEFAULT_VMAX_VALUE, ped=DEFAU
                     	break
 		
                 if bank_name=='DGH0': 
+                    plt.clf()
                     waveform_header = cy.daq_dgz_full2header(bank, verbose=False)
                     if verbose: print (waveform_header)
                     waveform_fast, waveform_slow = cy.daq_dgz_full2array(event.banks['DIG0'], waveform_header, verbose=False, corrected=corrected,ch_offset=channels_offset)
@@ -135,7 +148,10 @@ def main(grid=False, vmin=DEFAULT_VMIN_VALUE, vmax=DEFAULT_VMAX_VALUE, ped=DEFAU
                     
 
                 if bank_name=='CAM0': 
-                    plt.subplot(1,2,1)
+                    if client.odb_get("/Configurations/FreeRunning") == False:
+                       plt.subplot(1,2,1)
+                    else: 
+                       plt.clf()
                     t1 = time.time()
                     plot_iamge(event.banks['CAM0'], vmin, vmax, grid, event_number, event_time, y0)
                     t2 = time.time()
@@ -144,8 +160,9 @@ def main(grid=False, vmin=DEFAULT_VMIN_VALUE, vmax=DEFAULT_VMAX_VALUE, ped=DEFAU
                 
             
             plt.title ("Event: {:d} at {:s}".format(event_number, event_time))
+            fig.canvas.draw()
             fig.canvas.flush_events()
-            time.sleep(0.05)
+            time.sleep(0.03)
             #plt.show()
             #plt.pause(0.01)
             client.communicate(10)
