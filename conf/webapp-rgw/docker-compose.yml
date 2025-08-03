@@ -1,7 +1,7 @@
 services:
 
   rgw:
-    image: baltig.infn.it:4567/infn-cloud/webapp-rgw
+    image: baltig.infn.it:4567/infn-cloud/webapp-rgw:1.1.0 # baltig.infn.it:4567/infn-cloud/webapp-rgw
     container_name: rgw
     ports:
       - "8080:80"
