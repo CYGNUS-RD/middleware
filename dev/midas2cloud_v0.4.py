@@ -50,7 +50,7 @@ def replica_sql_value(connection, connection_remote, table_name, row_element, ro
         connection_remote.commit()
         mycursor.close()
         
-        if verbose: print(mycursor.rowcount, "Update done")
+        if verbose: print(mycursor.rowcount, "SQL Update done")
 
         return row[0]
     except:
@@ -129,8 +129,8 @@ def main():
     key = tag+'/'
 
     
-    GB = 1024 ** 3
-    config = TransferConfig(multipart_threshold=5*GB)
+#    GB = 1024 ** 3
+#    config = TransferConfig(multipart_threshold=5*GB)
 
     
     connection = daq_sql_connection_local(verbose)#cy.daq_sql_cennection(verbose)
@@ -151,7 +151,7 @@ def main():
                 ipload = 1 # index of file uploaded
             except:
                 print('{:s} ERROR: Compressing files'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-                
+
             # upload statment
             for i, filename in enumerate(file_in_dir):
                 # questo if va sostituito con il check sul DB ABANDONADO IL LISI SUL FILE CHE E' LENTO
@@ -159,29 +159,29 @@ def main():
                 ('.mid.gz' in str(filename))  and \
                 (not (str(filename).split('.gz')[0] in file_in_dir)) \
                 and (not filename.startswith('.')):
-                    
+
                     runN = int(filename.split('run')[-1].split('.mid.gz')[0])
-                    
+
                     if cy.cmd.grep_file(filename, STOROUT) == "" or \
                     cy.daq_read_runlog_replica_status(connection, runN, storage="local", verbose=verbose)==0: 
-                        
+
                         dtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                        
+
                         print('{:s} Udatentig matadata for filer file: {:s}'.format(dtime, filename))
-                        
-                        filesize = os.path.getsize(INAPATH+filename)               
+
+                        filesize = os.path.getsize(INAPATH+filename)
                         md5sum = cy.cmd.file_md5sum(INAPATH+filename)
 
                         # upadete sql with new file local status
-                        cy.daq_update_runlog_replica_status(connection, 
-                                                            runN, storage="local", 
+                        cy.daq_update_runlog_replica_status(connection,
+                                                            runN, storage="local",
                                                             status=1, verbose=verbose)
                         cy.daq_update_runlog_replica_checksum(connection, runN, 
                                                               md5sum, verbose=verbose)
                         cy.daq_update_runlog_replica_size(connection, runN, 
                                                               filesize, verbose=verbose)
 
-                        dtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
                         print('{:s} Transferring file: {:s}'.format(dtime, filename))
                         if compressing_files > 0:
                             compressing_files -= 1
@@ -192,50 +192,54 @@ def main():
                             if filesize < 5400000000: # ~ 5 GB
                                 dtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                                 print('{:s} Uploading file: {:s}'.format(dtime, filename))
-                                try:
+
                                    # remeber config sile in /home/.rucio.cfg
-#                                   docker run --rm -v /home/.rucio.cfg:/home/.rucio.cfg -v INAPATH+filename:/app/filename rucio-uploader \
-#                                   --file ./filename --bucket bucket --did_name key+filename --upload_rse CNAF_USERDISK --transfer_rse T1_USERTAPE --account rucio-daq
-                                   docker_command = [ "docker", "run", "--rm",
+                                docker_command = [ "docker", "run", "--rm",
                                                       "-v", "/home/.rucio.cfg:/home/.rucio.cfg",
                                                       "-v", INAPATH+filename+":/app/"+filename,
-                                                      "rucio-uploader",  # nome dell'immagine Docker
-                                                      "--file", filename,
+                                                      "gmazzitelli/rucio-uploader:v0.1",  # nome dell'immagine Docker
+                                                      "--file", "/app/"+filename,
                                                       "--bucket", bucket,
                                                       "--did_name", key+filename,
                                                       "--upload_rse", "CNAF_USERDISK",
                                                       "--transfer_rse", "T1_USERTAPE",
                                                       "--account", "rucio-daq"
                                                       ]
-                                   if verbose: print(docker_command)
-                                   result = subprocess.run(docker_command, capture_output=True, text=True)
-#                                    s3.upload_file(INAPATH+filename, Bucket=bucket, Key=key+filename,Config=config)
-#                                    response=s3.head_object(Bucket=bucket,Key=key+filename)
-#                                    remotesize = int(response['ContentLength'])
-                                    newupoload.append(storeStatus(filename, filesize, status, 
-                                                                      result.stderr, STOROUT))
-                                    cy.daq_update_runlog_replica_status(connection, 
+                                print(docker_command)
+                                result = subprocess.run(docker_command, capture_output=True, text=True)
+                                exit_code = result.returncode
+#| Exit Code | Meaning                                            |
+#| --------- | -------------------------------------------------- |
+#| 0         | Upload and replica created (or both already exist) |
+#| 1         | File already uploaded, replica just created        |
+#| 2         | Upload failed                                      |
+#| 3         | Upload done, replica failed                        |
+                                newupoload.append(storeStatus(filename, filesize, status, exit_code, STOROUT))
+                                if (exit_code==0 or exit_code==1):
+
+                                     cy.daq_update_runlog_replica_status(connection, 
                                                                             runN, storage="cloud", 
                                                                             status=1, verbose=verbose)
-                                    cy.daq_update_runlog_replica_tag(connection, runN, 
+                                     cy.daq_update_runlog_replica_status(connection, runN, 
+                                                        storage="tape", status=1, verbose=verbose)
+                                     cy.daq_update_runlog_replica_tag(connection, runN, 
                                                                          TAG=tag, verbose=verbose)
 
-                                    print('{:s} Upload done: {:s}'.format(dtime, filename))
-                                    status = True
-                                    
-                                except Exception as e:
+                                     print('{:s} Upload done: {:s}'.format(dtime, filename))
+                                     status = True
+                                else:
+
                                     current_try = current_try+1
+
                                     print('{:s} ERROR: Uploading file: {:s}'.format(dtime, filename))
-                                    print(e)
                                     if current_try==max_tries:
                                         print('ERROR: Max try number reached: '+str(current_try))
                                         status = True
                             else:
                                 storeStatus(filename, filesize, status, 0,  STOROUT)
                                 print('{:s} ERROR: File too large, not uploaded: {:s}'.format(dtime,filename))
-                                status=True                                      
-                                      
-                
+                                status=True
+
             if len(newupoload)==0:
                 dtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 print('{:s} WARNING: No new file uploaded'.format(dtime))
