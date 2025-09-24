@@ -2,7 +2,7 @@ services:
   rucio:
     image: harbor.cloud.infn.it/testbed-dm/rucio-client-cygno:v3
 #    build: .
-    container_name: rucio
+    container_name: rucio-mazzitel
     environment:
       RUCIO_ACCOUNT: mazzitel
       REFRESH_TOKEN: ${REFRESH_TOKEN}

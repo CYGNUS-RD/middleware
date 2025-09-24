@@ -1,28 +1,34 @@
 services:
   rucio-shell:
     image: gmazzitelli/rucio-shell
-    container_name: rucio-shell
+    container_name: rucio-daq
     env_file: .env
     volumes:
       - /root/.rucio.cfg:/app/.rucio.cfg
       - ./:/app
+      - /tmp:/tmp
     stdin_open: true     # equivalente a -it
     tty: true            # equivalente a -itx
 
-  tokener_s3:
-    image: gmazzitelli/tokener:v0.2
-    container_name: tokener_s3
-    env_file: .env
-    environment:
-      REFRESH_TOKEN: ${REFRESH_TOKEN}
-      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
-      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
-      IAM_TOKEN_ENDPOINT: ${IAM_TOKEN_ENDPOINT}
-      SCOPES: ${SCOPES}
-      TOKEN_FILE: '/app/token'
-
-    volumes:
-      - ./:/app
+# NB:
+# il token s3 e' gia' creato da un'atro servizio nella /tmp. 
+# ma se serve si puo' abilitare per un uso standalone del container
+# servizo 'tokener' su macchina backend 
+#
+#  tokener_s3:
+#    image: gmazzitelli/tokener:v0.2
+#    container_name: tokener_s3
+#    env_file: .env
+#    environment:
+#      REFRESH_TOKEN: ${REFRESH_TOKEN}
+#      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+#      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+#      IAM_TOKEN_ENDPOINT: ${IAM_TOKEN_ENDPOINT}
+#      SCOPES: ${SCOPES}
+#      TOKEN_FILE: '/app/token'
+#
+#    volumes:
+#      - /tmp:/app
 
   tokener_tape:
     image: gmazzitelli/tokener:v0.2
@@ -37,4 +43,4 @@ services:
       TOKEN_FILE: '/app/tape_token'
 
     volumes:
-       - ./:/app
+       - /tmp:/app
