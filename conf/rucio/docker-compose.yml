@@ -14,5 +14,6 @@ services:
     volumes:
       - ./rucio_cmd_script:/home/user/rucio_cmd_script
       - /tmp/token:/tmp/token
+      - /tmp/tape_token/:/tmp/tape_token/
     tty: true
     stdin_open: true

@@ -155,8 +155,8 @@ if __name__ == "__main__":
     parser.add_argument('--bucket', required=True)
     parser.add_argument('--prefix', required=True) #usere TAG/ oppure '' per tutto il bucket
     parser.add_argument('--scope', required=True)
-    parser.add_argument('--tape_token_file', default='./tape_token')
-    parser.add_argument('--s3_token_file', default='./token')
+    parser.add_argument('--tape_token_file', default='/tmp/tape_token')
+    parser.add_argument('--s3_token_file', default='/tmp/token')
     parser.add_argument('--tape_rse', default='T1_USERTAPE')
     parser.add_argument('--temp_dir', default='/tmp')
     parser.add_argument('--log_file', default='register_to_tape.log')

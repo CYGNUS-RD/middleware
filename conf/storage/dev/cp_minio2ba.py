@@ -69,18 +69,21 @@ def main(filename, bucket_in, tag_in, bucket_out, tag_out, rm, verbose):
             sys.exit(1)
     else:
         try:
-            print("downloading file: ", filename, bucket_in, tag_in)
+            print("downloading file:", filename, bucket_in, tag_in)
             download2file(BASE_URL+bucket_in+"/"+tag_in+"/"+filename,tmpout, verbose)
+            try:
+                print("coping file:", filename, bucket_out, key)
+                s3.upload_file(tmpout, Bucket=bucket_out, Key=key, Config=config)
+                print("upload ok:", filename)
+                cy.cmd.rm_file(tmpout)
+            except Exception as e:
+                print("ERROR: upload faliure: ", e)
+                cy.cmd.rm_file(tmpout)
+                sys.exit(1)
+
         except Exception as e:
             print("ERROR: Download faliure: ", e)
             sys.exit(1)
-        try:
-            print("coping file: ", filename, bucket_out, key)
-            s3.upload_file(tmpout, Bucket=bucket_out, Key=key, Config=config)
-        except Exception as e:
-            print("ERROR: upload faliure: ", e)
-            sys.exit(1)
-        cy.cmd.rm_file(tmpout)
     sys.exit(0)
 
 if __name__ == "__main__":

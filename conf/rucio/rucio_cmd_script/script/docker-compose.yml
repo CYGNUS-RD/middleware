@@ -10,6 +10,18 @@ services:
     stdin_open: true     # equivalente a -it
     tty: true            # equivalente a -itx
 
+
+  rucio-shell2:
+    image: gmazzitelli/rucio-shell
+    container_name: rucio-daq2
+    env_file: .env
+    volumes:
+      - /root/.rucio.cfg:/app/.rucio.cfg
+      - ./:/app
+      - /tmp:/tmp
+    stdin_open: true     # equivalente a -it
+    tty: true            # equivalente a -itx
+
 # NB:
 # il token s3 e' gia' creato da un'atro servizio nella /tmp. 
 # ma se serve si puo' abilitare per un uso standalone del container

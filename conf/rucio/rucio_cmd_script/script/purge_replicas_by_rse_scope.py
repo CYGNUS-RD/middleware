@@ -1,126 +1,108 @@
 #!/usr/bin/env python3
-# purge_replicas_by_scope_rse.py
-#
-# Elenca tutti i FILE (DID) di uno scope (con eventuale prefix) che hanno
-# una replica su un RSE specifico e ne cancella l’esistenza su quell’RSE.
-#
-# NOTA: usa rse_expression=<RSE> in list_replicas (correzione al posto di rses=).
-
-import os
-import sys
-import argparse
-import logging
+import argparse, sys, logging
 from itertools import islice
-
+from rucio.client import Client
+from rucio.client.ruleclient import RuleClient
 from rucio.client.didclient import DIDClient
-from rucio.client.replicaclient import ReplicaClient
-from rucio.client.client import Client
-from rucio.common.exception import DataIdentifierNotFound, RucioException
+from rucio.common.exception import RucioException
 
-LOG = logging.getLogger("purge")
+LOG = logging.getLogger("purge-rules")
 
-def chunked(iterable, size):
-    it = iter(iterable)
+def chunked(it, n):
+    it = iter(it)
     while True:
-        batch = list(islice(it, size))
-        if not batch:
-            break
+        batch = list(islice(it, n))
+        if not batch: break
         yield batch
 
 def main():
-    parser = argparse.ArgumentParser(description="Cancella repliche su un RSE per tutti i file in uno scope (opz. prefix).")
-    parser.add_argument("--rse", required=True, help="RSE di cui rimuovere le repliche (es. T1_USERTAPE)")
-    parser.add_argument("--scope", required=True, help="Scope (es. cygno-data)")
-    parser.add_argument("--prefix", default="", help="Prefisso dei nomi (p.es. 'LNF/' ; vuoto per tutto lo scope)")
-    parser.add_argument("--rucio_config", default=None, help="Path a file .rucio.cfg (opzionale)")
-    parser.add_argument("--dry-run", action="store_true", help="Mostra cosa verrebbe cancellato, senza cancellare")
-    parser.add_argument("--chunk", type=int, default=500, help="Dimensione batch per le chiamate (default: 500)")
-    parser.add_argument("--log-file", default="purge_replicas.log", help="File di log")
-    parser.add_argument("-v", "--verbose", action="store_true", help="Log più verboso")
-    args = parser.parse_args()
+    ap = argparse.ArgumentParser("Purge delle regole per RSE e scope (opz. prefix)")
+    ap.add_argument("--rse", required=True)
+    ap.add_argument("--scope", required=True)
+    ap.add_argument("--prefix", default="")
+    ap.add_argument("--chunk", type=int, default=200)
+    ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("-v", "--verbose", action="store_true")
+    args = ap.parse_args()
 
-    logging.basicConfig(
-        filename=args.log_file,
-        level=logging.DEBUG if args.verbose else logging.INFO,
-        format="[%(asctime)s] %(levelname)s: %(message)s"
+    logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO,
+                        format="[%(asctime)s] %(levelname)s: %(message)s")
+
+    client = Client()
+    rulec  = RuleClient()
+    didc   = DIDClient()
+
+    name_pat = f"{args.prefix}*" if args.prefix else "*"
+
+    LOG.info("[START] rse_expr=%s scope=%s name~='%s' dry=%s",
+         args.rse, args.scope, name_pat, getattr(args, "dry_run", None))
+
+    total = deleted = 0
+
+    # 1) enumeriamo i DIDs (file/dataset/containers a scelta; qui tutto)
+
+# fare la lista dei dids dinamicamente
+    name_pattern = f"{args.prefix}*" if args.prefix else "*"
+
+    dids = didc.list_dids(
+        scope=args.scope,
+        filters={"name": name_pattern, "type": "file"},  # <-- usa il filtro
+        long=False
     )
 
-    if args.rucio_config:
-        os.environ["RUCIO_CONFIG"] = args.rucio_config
+# fare la ista su file e prenderla da li.
+# rucio list-dids ${SCOPE}:"${PREFIX}" --filter type=FILE | awk -F'|' 'NR>3 && NF>=2 { s=$2; gsub(/^[ \t]+|[ \t]+$/,"",s); if(s!="") print s }' > /tmp/files.txt
 
-    rse = args.rse
-    scope = args.scope
-    prefix = args.prefix
+#    with open("/tmp/files.txt") as fh:
+#        def did_lines():
+#            for line in fh:
+#                did = line.strip()
+#                if did and ":" in did:
+#                    yield did.split(":", 1)[1]  # solo name
+#
+#    dids = []
+#    with open("/tmp/files.txt") as fh:
+#        for line in fh:
+#            did = line.strip()
+#            if did and ":" in did:
+#               scope, name = did.split(":", 1)
+#            dids.append({"scope": scope, "name": name})
 
-    LOG.info(f"[START] RSE={rse}, scope={scope}, prefix='{prefix}', dry-run={args.dry_run}")
 
-    did_client = DIDClient()
-    replica_client = ReplicaClient()
-    core_client = Client()
+    for batch in chunked(dids, args.chunk):
+        # 2) recupera le regole per ognuno dei DIDs
+        for name in batch:
+            try:
+                # filtra per rse_expression e DID
+                rules = rulec.list_replication_rules(filters={
+                    "rse_expression": args.rse,
+                    "scope": args.scope,
+                    "name": name,
+                })
+                rules = list(rules)
+            except Exception as e:
+                LOG.error(f"[WARN] list_replication_rules failed for {args.scope}:{name}: {e}")
+                continue
 
-    # 1) Lista DIDs (solo FILE) nello scope con l'eventuale prefisso.
-    try:
-        filters = {"type": "file"}
-        # Il filtro per nome è espresso come pattern (glob)
-        name_pattern = f"{prefix}*" if prefix else "*"
-        dids_iter = did_client.list_dids(scope=scope, filters={"name": name_pattern, "type": "file"}, long=False)
-        did_names = list(dids_iter)
-        LOG.info(f"[INFO] Trovati {len(did_names)} DIDs nello scope con prefix.")
-    except DataIdentifierNotFound:
-        LOG.error("[FATAL] Scope o prefisso non trovati.")
-        sys.exit(1)
-    except Exception as e:
-        LOG.error(f"[FATAL] Errore durante list_dids: {e}")
-        sys.exit(1)
+            if not rules:
+                continue
 
-    to_delete_total = 0
-    deleted_total = 0
+            for ru in rules:
+                rid = ru.get("id")
+                total += 1
+                if args.dry_run:
+                    LOG.info(f"[DRY-RUN] cancellerei rule {rid} on {args.rse} for {args.scope}:{name}")
+                    continue
+                try:
+                    rulec.delete_replication_rule(rid)
+                    deleted += 1
+                    LOG.info(f"[OK] deleted rule {rid} ({args.scope}:{name})")
+                except RucioException as e:
+                    LOG.error(f"[ERROR] delete rule {rid}: {e}")
+                except Exception as e:
+                    LOG.error(f"[ERROR] unexpected on {rid}: {e}")
 
-    # 2) Per chunk, trova le repliche presenti su quell'RSE e prepara la lista da cancellare
-    for names_chunk in chunked(did_names, args.chunk):
-        dids_chunk = [{"scope": scope, "name": n} for n in names_chunk]
-
-        try:
-            # >>> Correzione qui: rse_expression=rse (NON 'rses')
-            replicas = list(replica_client.list_replicas(
-                dids=dids_chunk,
-                rse_expression=rse,
-                all_states=True  # include AVAILABLE/UNAVAILABLE/…
-            ))
-        except Exception:
-            LOG.error("Errore in list_replicas. Controlla i log.")
-            sys.exit(1)
-
-        files_on_rse = []
-        for rep in replicas:
-            states = rep.get("states") or {}
-            # Se l'RSE compare negli stati, consideriamo la replica da cancellare
-            if rse in states:
-                files_on_rse.append({"scope": rep["scope"], "name": rep["name"]})
-
-        if not files_on_rse:
-            continue
-
-        to_delete_total += len(files_on_rse)
-
-        if args.dry_run:
-            for f in files_on_rse:
-                LOG.info(f"[DRY-RUN] Cancellerei replica su {rse}: {f['scope']}:{f['name']}")
-            continue
-
-        # 3) Cancellazione delle repliche su quell'RSE
-        try:
-            core_client.delete_replicas(rse=rse, files=files_on_rse)
-            deleted_total += len(files_on_rse)
-            for f in files_on_rse:
-                LOG.info(f"[OK] Cancellata replica su {rse}: {f['scope']}:{f['name']}")
-        except RucioException as e:
-            LOG.error(f"[ERROR] delete_replicas fallita per un batch ({len(files_on_rse)} files): {e}")
-        except Exception as e:
-            LOG.error(f"[ERROR] delete_replicas – eccezione inattesa: {e}")
-
-    LOG.info(f"[END] Totale trovate su {rse}: {to_delete_total} – Cancellate: {deleted_total} – dry-run={args.dry_run}")
+    LOG.info(f"[END] regole trovate: {total} – cancellate: {deleted} – dry-run={args.dry_run}")
 
 if __name__ == "__main__":
     main()
-
