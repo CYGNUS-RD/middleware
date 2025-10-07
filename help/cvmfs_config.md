@@ -19,8 +19,11 @@ WARNING: Be careful not to have the /cvmfs resource in use by any process. This 
 - ```docker-compose down ; cvmfs_server publish sft-cygno.infn.it```
 
 ### expert
+- [client configuration](https://confluence.infn.it/spaces/INFNCLOUD/pages/638124033/Configuration+of+clients+for+.infn.it+repos+hosted+on+the+production+managed+by+WP1+infrastructure+sharing+the+same+public+key)
+- [publisher configuration WP6/WP1](https://confluence.infn.it/spaces/INFNCLOUD/pages/112428477/CVMFS+publisher+howto+create+an+host+publisher) 
 - WP6 test: ```cvmfs_server mkfs -w https://rgw.cloud.infn.it:443/cvmfs/sft-cygno.infn.it -u gw,/srv/cvmfs/sft-cygno.infn.it/data/txn,http://cvmfs.wp6.cloud.infn.it:4929/api/v1 -k /home/mazzitel/keys_w6_publisher/ -o `whoami` sft-cygno.infn.it```
-- WP1 pruduction: ```cvmfs_server mkfs -w https://rgw.cloud.infn.it:443/cvmfs/sft-cygno.infn.it -u gw,/srv/cvmfs/sft-cygno.infn.it/data/txn,http://cvmfs.wp6.cloud.infn.it:4929/api/v1 -k /home/mazzitel/keys_w1_publisher/ -o `whoami` sft-cygno.infn.it```
+- WP1 pruduction: ```cvmfs_server mkfs -w https://rgw.cloud.infn.it:443/cvmfs-prod/sft-cygno.infn.it -u gw,/srv/cvmfs/sft-cygno.infn.it/data/txn,http://cvmfs.cloud.infn.it:4929/api/v1 -k /home/mazzitel/cvmfs_key/keys_w1_publisher/ -o `whoami` sft-cygno.infn.it```
+  <!--```cvmfs_server mkfs -w https://rgw.cloud.infn.it:443/cvmfs/sft-cygno.infn.it -u gw,/srv/cvmfs/sft-cygno.infn.it/data/txn,http://cvmfs.wp6.cloud.infn.it:4929/api/v1 -k /home/mazzitel/keys_w1_publisher/ -o `whoami` sft-cygno.infn.it``` -->
 - ```cvmfs_server transaction sft-cygno.infn.it```
 - make your change 
 - ```cvmfs_server publish sft-cygno.infn.it```
