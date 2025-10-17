@@ -20,7 +20,7 @@ from rucio.common.exception import DataIdentifierAlreadyExists, FileAlreadyExist
 #| 1         | File already uploaded, replica just created        |
 #| 2         | Upload failed                                      |
 #| 3         | Upload done, replica failed                        |
-
+#| 4         | Client creation failed                             |
 
 # Config file path from ENV or default
 rucio_cfg = os.environ.get('RUCIO_CONFIG', '/home/.rucio.cfg')
@@ -38,8 +38,12 @@ parser.add_argument('--account', required=True, help="Rucio account")
 args = parser.parse_args()
 
 # Initialize clients
-upload_client = UploadClient()
-transfer_client = Client()
+try:
+     upload_client = UploadClient()
+     transfer_client = Client()
+except Exception as e:
+    print(f"[ERROR] Client creation failed: {str(e)}")
+    sys.exit(4)
 
 # Define upload item
 item = [{
