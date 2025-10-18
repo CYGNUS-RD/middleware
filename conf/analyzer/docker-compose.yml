@@ -2,33 +2,6 @@
 
 services:
 
-#  analyzer3:
-#    image: gmazzitelli/cygno-st:v2.0.5-cygno
-#    container_name: analyzer3
-#    environment:
-#      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
-#      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
-#      ENDPOINT_URL: ${ENDPOINT_URL}
-#
-#      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-#      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-#      MYSQL_IP: ${MYSQL_IP}
-#      MYSQL_USER: ${MYSQL_USER}
-#      MYSQL_DATABASE: ${MYSQL_DATABASE}
-#      MYSQL_PORT: ${MYSQL_PORT}
-# # generic queue for test
-#      HTC_IP: 131.154.99.182
-#      RECO_PATH: 'Winter23-ReReco-Run3/'
-#      SQL_LIMIT: 25000
-#      FORCE_REBUILD: 0
-
-
-#    volumes:
-#      - ${PWD}/dev/init.sh:/root/init.sh
-#      - ${PWD}/dev/.bashrc:/root/.bashrc
-#      - ${PWD}/dev/:/root/dev/
-#      - /tmp/:/tmp/
-
   analyzer1:
     image: gmazzitelli/cygno-st:v2.0.5-cygno
     container_name: analyzer
@@ -79,12 +52,23 @@ services:
       RECO_PATH: 'Run5/'
       SQL_LIMIT: 1000
       FORCE_REBUILD: 0
-
-
     volumes:
       - ${PWD}/dev/init_ped.sh:/root/init.sh
       - ${PWD}/dev/.bashrc:/root/.bashrc
       - ${PWD}/dev/:/root/dev/
       - /tmp/:/tmp/
 
-
+# sta in mariadb
+#  tokener:
+#    image: gmazzitelli/tokener:v0.2
+#    container_name: tokener
+#    environment:
+#      REFRESH_TOKEN: ${REFRESH_TOKEN}
+#      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+#      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+#      IAM_TOKEN_ENDPOINT: ${IAM_TOKEN_ENDPOINT}
+#      SCOPES: ${SCOPES}
+#      TOKEN_FILE: '/tmp/token'
+#
+#    volumes:
+#      - /tmp/:/tmp/
