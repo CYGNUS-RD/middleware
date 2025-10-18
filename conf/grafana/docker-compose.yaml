@@ -60,27 +60,23 @@ services:
 #     volumes:
 #       - ${PWD}/dev:/usr/share/nginx/html
 
-  tunnel:
+  tunnel_sentinel:
     restart: always
     image: gmazzitelli/sshtunnel
     container_name: tunnel_sentinel
-#    ports:
-#      - 80:80
-    environment: 
+    environment:
        REMOTE_PORT: 80
        REMOTE_APP_NAME: localhost
        LOCAL_PORT: 80
        USER: mazzitel
        REMOTE_IP: 90.147.174.164
     volumes:
-       - /root/.ssh/daq_id:/root/.ssh/id_rsa 
+       - /root/.ssh/daq_id:/root/.ssh/id_rsa
 
-  tunnel2:
+  tunnel_kafka:
     restart: always
     image: gmazzitelli/sshtunnel
     container_name: tunnel_kafka
-#    ports:
-#      - 80:80
     environment:
        REMOTE_PORT: 80
        REMOTE_APP_NAME: localhost
@@ -90,30 +86,29 @@ services:
     volumes:
        - /root/.ssh/daq_id:/root/.ssh/id_rsa
 
-  backupper:
+  backupper_grafana:
     restart: always
-    image: gmazzitelli/backupper:v0.1
-    container_name: backupper
+    image: gmazzitelli/backupper:v0.2
+    container_name: backupper_grafana
     environment:
        BCK_START_NAME: 'grafana'
-       IAM_CLIENT_ID: ${IAM_CLIENT_ID}
-       IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
     volumes:
        - /var/lib/docker/volumes/grafana_dbdata/_data/:/root/data/
        - /tmp/:/tmp/
 
-  tokener:
-    image: gmazzitelli/tokener:v0.2
-    container_name: tokener
-    environment:
-      REFRESH_TOKEN: ${REFRESH_TOKEN}
-      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
-      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
-      IAM_TOKEN_ENDPOINT: ${IAM_TOKEN_ENDPOINT}
-      SCOPES: ${SCOPES}
-
-    volumes:
-      - /tmp/:/tmp/
+# aggiunto dentro maria db
+#  tokener:
+#    image: gmazzitelli/tokener:v0.2
+#    container_name: tokener
+#    environment:
+#      REFRESH_TOKEN: ${REFRESH_TOKEN}
+#      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+#      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+#      IAM_TOKEN_ENDPOINT: ${IAM_TOKEN_ENDPOINT}
+#      SCOPES: ${IAM_SCOPES}
+#
+#    volumes:
+#      - /tmp/:/tmp/
 
     
 volumes:
