@@ -283,7 +283,7 @@ def main():
             if verbose : print("\n Finished!!")
 
             client.communicate(10)
-            time.sleep(10)
+            time.sleep(60)
 
         except KeyboardInterrupt:
             client.deregister_event_request(buffer_handle, request_id)
