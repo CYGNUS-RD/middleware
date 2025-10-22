@@ -21,7 +21,7 @@ docker run -v <rsa file>:/id_rsa -e REMOTE_PORT=<port> -e LOCAL_APP_NAME=<servic
        - /root/.ssh/daq_id:/id_rsa 
 
 ```
-- server side in a physical machine example using kafka on port 9092
+- client service in a physical machine example using kafka on port 9092 services
 ```
 [Unit]
     Description=SSH Tunnel for Kafka
