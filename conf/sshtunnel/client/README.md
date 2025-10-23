@@ -38,7 +38,7 @@ docker run -v <rsa file>:/id_rsa -e REMOTE_PORT=<port> -e LOCAL_APP_NAME=<servic
     [Install]
     WantedBy=multi-user.target
 ```
-- how to generate the key rsa
+- how to generate the key rsa (do not put any password when proped)
 ```
 ssh-keygen -t rsa -b 4096 -f xxx_rsa
 ```
