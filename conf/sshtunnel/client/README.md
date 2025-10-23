@@ -21,7 +21,7 @@ docker run -v <rsa file>:/id_rsa -e REMOTE_PORT=<port> -e LOCAL_APP_NAME=<servic
        - /root/.ssh/daq_id:/id_rsa 
 
 ```
-- client service in a physical machine example using kafka on port 9092 services
+- client service in a physical machine example using kafka on port 9092 services (LOCALUSER, USER@IP)
 ```
 [Unit]
     Description=SSH Tunnel for Kafka
@@ -32,9 +32,13 @@ docker run -v <rsa file>:/id_rsa -e REMOTE_PORT=<port> -e LOCAL_APP_NAME=<servic
     RestartSec=20
     User=standard
     Group=standard
-    ExecStart=/usr/bin/ssh -NTC -o ServerAliveInterval=60 -o ExitOnForwardFailure=yes -i /home/standard/.ssh/daq_id -L 0.0.0.0:9092:127.0.0.1:9092 user@ip
+    ExecStart=/usr/bin/ssh -NTC -o ServerAliveInterval=60 -o ExitOnForwardFailure=yes -i /home/LOCALUSER/.ssh/xxx_id -L 0.0.0.0:9092:127.0.0.1:9092 USER@IP
 
 
     [Install]
     WantedBy=multi-user.target
+```
+- how to generate the key rsa
+```
+ssh-keygen -t rsa -b 4096 -f xxx_rsa
 ```
