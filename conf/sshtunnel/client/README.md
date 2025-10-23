@@ -29,7 +29,7 @@ docker run -v <rsa file>:/id_rsa -e REMOTE_PORT=<port> -e LOCAL_APP_NAME=<servic
 
 ```
 - share remote port with a local client service in a physical machine example using kafka on port 9092 services (LOCALUSER, USER@IP)
-- put i in the  /etc/systemd/system/SERVICENAME.service
+- put the following line in the  /etc/systemd/system/SERVICENAME.service (define LOCALUSER, LOCALGROUP, USER@IP)
 ```
 [Unit]
     Description=SSH Tunnel for Kafka
@@ -38,17 +38,18 @@ docker run -v <rsa file>:/id_rsa -e REMOTE_PORT=<port> -e LOCAL_APP_NAME=<servic
     [Service]
     Restart=always
     RestartSec=20
-    User=standard
-    Group=standard
+    User=LACALUSER
+    Group=LOCALGROUP
     ExecStart=/usr/bin/ssh -NTC -o ServerAliveInterval=60 -o ExitOnForwardFailure=yes -i /home/LOCALUSER/.ssh/xxx_id -L 0.0.0.0:9092:127.0.0.1:9092 USER@IP
 
 
     [Install]
     WantedBy=multi-user.target
 ```
-- sudo systemctl status SERVICENAME
+- sudo systemctl status SERVICENAME.service 
 - sudo systemctl daemon-reload
-- sudo systemctl start SERVICENAME
+- sudo systemctl enable SERVICENAME.service 
+- sudo systemctl start SERVICENAME.service 
 - [help on system service](https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units)
 - to monitor port staus ```sudo lsof -i -P -n | grep LISTEN ```
 
