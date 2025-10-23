@@ -1,4 +1,9 @@
 # SSH reverse Tunnel 
+
+- how to generate the key rsa (do not put any password when proped) 
+```
+ssh-keygen -t rsa -b 4096 -f xxx_rsa
+```
 share local contaner (LOCAL_APP_NAME) port (LOCAL_PORT) to a remore port (REMOTE_PORT) via ssh tunnel, example:
 ```
 docker run -v <rsa file>:/id_rsa -e REMOTE_PORT=<port> -e LOCAL_APP_NAME=<service name> -e LOCAL_PORT=<port> \
@@ -38,7 +43,9 @@ docker run -v <rsa file>:/id_rsa -e REMOTE_PORT=<port> -e LOCAL_APP_NAME=<servic
     [Install]
     WantedBy=multi-user.target
 ```
-- how to generate the key rsa (do not put any password when proped)
-```
-ssh-keygen -t rsa -b 4096 -f xxx_rsa
-```
+- put i in the  /etc/systemd/system/SERVICENAME.service
+- sudo systemctl status SERVICENAME
+- sudo systemctl daemon-reload
+- sudo systemctl start SERVICENAME
+- [help on system service](https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units)
+
