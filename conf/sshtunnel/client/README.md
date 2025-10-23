@@ -1,9 +1,11 @@
 # SSH reverse Tunnel 
 
-- how to generate the key rsa (do not put any password when proped) 
+- howto generate the key rsa (do not put any password when proped) 
 ```
 ssh-keygen -t rsa -b 4096 -f xxx_rsa
 ```
+- put the public string xxx_rsa.pub in the remote IP /home/USER/.ssh/authorized_keys
+
 share local contaner (LOCAL_APP_NAME) port (LOCAL_PORT) to a remore port (REMOTE_PORT) via ssh tunnel, example:
 ```
 docker run -v <rsa file>:/id_rsa -e REMOTE_PORT=<port> -e LOCAL_APP_NAME=<service name> -e LOCAL_PORT=<port> \
@@ -21,12 +23,13 @@ docker run -v <rsa file>:/id_rsa -e REMOTE_PORT=<port> -e LOCAL_APP_NAME=<servic
        LOCAL_APP_NAME: web
        LOCAL_PORT: 80 
        USER: mazzitel
-       REMOTE_IP: grafana.cygno.cloud.infn.it
+       REMOTE_IP: IP # remote ip
     volumes:
-       - /root/.ssh/daq_id:/id_rsa 
+       - /home/USER/.ssh/daq_id:/id_rsa # local user with private key 
 
 ```
-- client service in a physical machine example using kafka on port 9092 services (LOCALUSER, USER@IP)
+- share remote port with a local client service in a physical machine example using kafka on port 9092 services (LOCALUSER, USER@IP)
+- put i in the  /etc/systemd/system/SERVICENAME.service
 ```
 [Unit]
     Description=SSH Tunnel for Kafka
@@ -43,7 +46,6 @@ docker run -v <rsa file>:/id_rsa -e REMOTE_PORT=<port> -e LOCAL_APP_NAME=<servic
     [Install]
     WantedBy=multi-user.target
 ```
-- put i in the  /etc/systemd/system/SERVICENAME.service
 - sudo systemctl status SERVICENAME
 - sudo systemctl daemon-reload
 - sudo systemctl start SERVICENAME
