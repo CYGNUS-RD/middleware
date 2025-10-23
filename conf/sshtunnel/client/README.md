@@ -50,4 +50,5 @@ docker run -v <rsa file>:/id_rsa -e REMOTE_PORT=<port> -e LOCAL_APP_NAME=<servic
 - sudo systemctl daemon-reload
 - sudo systemctl start SERVICENAME
 - [help on system service](https://www.digitalocean.com/community/tutorials/how-to-use-systemctl-to-manage-systemd-services-and-units)
+- to monitor port staus ```sudo lsof -i -P -n | grep LISTEN ```
 
