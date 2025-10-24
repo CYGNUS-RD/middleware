@@ -132,7 +132,7 @@ def main():
                     # sostituisce il grep su file di cui sotto
                     # sqlFuleStatus=cy.daq_read_runlog_replica_status(connection, runN, "cloud") & cy.daq_read_runlog_replica_status(connection, runN, "tape") 
                     connection = daq_sql_connection_local(verbose)
-                    print(cy.daq_read_runlog_replica_status(connection, runN, "cloud"), cy.daq_read_runlog_replica_status(connection, runN, "local"))
+#                    print(cy.daq_read_runlog_replica_status(connection, runN, "cloud"), cy.daq_read_runlog_replica_status(connection, runN, "local"))
                     if cy.daq_read_runlog_replica_status(connection, runN, "cloud")<1 and cy.daq_read_runlog_replica_status(connection, runN, "local")==1:
 
 
