@@ -10,49 +10,6 @@ def storeStatus(filen, size, status, remotesize, outfile):
     cmd.append2file(stchar, outfile)
     return stchar
 
-def replica_sql_value(connection, connection_remote, table_name, row_element, row_element_condition, verbose=False):
-    import datetime
-    sql = "SELECT * FROM `"+table_name+"` WHERE `"+row_element+"` = "+row_element_condition+";"
-    #SELECT * FROM `Runlog` WHERE `run_number` = 1024;
-    if verbose: print(sql)
-    #try:
-    # read from local
-    mycursor = connection.cursor()
-    mycursor.execute(sql)
-    row = mycursor.fetchone()
-
-    row_list = []
-
-    for i,data in enumerate(row):
-        if isinstance(data, datetime.datetime):
-            data = data.strftime('%Y-%m-%d %H:%M:%S')
-        row_list.append(data)
-    row = tuple(row_list)
-
-    cols = mycursor.column_names
-
-    cols = "`,`".join([str(i) for i in list(cols)])
-
-    mycursor.close()
-    #except:
-    #    return 0    
-    #sql = "INSERT INTO `{}` (`" +cols+ "`) VALUES {}".format(table_name, row)
-    sql = "INSERT INTO `"+table_name+"` (`" +cols+ "`) VALUES "+str(row)
-    if verbose: print(sql)
-    try:
-        # replica on remote
-        mycursor = connection_remote.cursor()
-        #sql = "INSERT INTO `"+table_name+"` (`" +cols + "`) VALUES (" + "%s,"*(len(row)-1) + "%s)"
-        mycursor.execute(sql)
-        #mycursor.execute(sql, row.astype(str))
-        connection_remote.commit()
-        mycursor.close()
-        
-        if verbose: print(mycursor.rowcount, "Update done")
-
-        return row[0]
-    except:
-        return 0
 
 def daq_sql_connection_local(verbose=False):
     import mysql.connector
@@ -69,8 +26,8 @@ def daq_sql_connection_local(verbose=False):
         return connection
     except:
         return False
-    
-    
+
+
 def main():
     #
     from optparse import OptionParser
@@ -82,77 +39,102 @@ def main():
     import midas
     import midas.client
     import gzip
-    
+    from cygno import cmd
+
     #
     # deault parser value
     #
     TAG         = os.environ['TAG']
     INAPATH     = os.environ['INAPATH']# '/data01/data/'
     DAQPATH     = os.environ['DAQPATH']# '/home/standard/daq/'
+    verbose=False
 
-    #parser = OptionParser(usage='usage: %prog [-t [{:s}] -i [{:s}]  -d [{:s}] -n [{:d}] rv]\n'.format(TAG, INAPATH,DAQPATH, max_tries))
-    #parser.add_option('-t','--tag', dest='tag', type='string', default=TAG, help='tag where dir for data')
-    #parser.add_option('-i','--inpath', dest='inpath', type='string', default=INAPATH, help='PATH to raw data')
-    #parser.add_option('-d','--daqpath', dest='daqpath', type='string', default=DAQPATH, help='DAQ to raw data')
-    #parser.add_option('-n','--tries', dest='tries', type=int, default=max_tries, help='# of retry upload temptative')
-    #parser.add_option('-v','--verbose', dest='verbose', action="store_true", default=False, help='verbose output')
-    #parser.add_option('-m','--mail', dest='mail', type='string', default=to, help='mail allert')
-    #(options, args) = parser.parse_args()
-
-
-    #max_tries   = options.tries
-    #verbose     = options.verbose
-    #to          = options.mail
-     
-    #INAPATH    = options.inpath
-    #DAQPATH    = options.daqpath
 
     client = midas.client.MidasClient("fileCompressor")
-    
+
     compressing_files = 0
-    compressing_runs = np.array([])
-    
+    compressing_runs = []
+
+    connection = daq_sql_connection_local(verbose)#cy.daq_sql_cennection(verbose)
+    if not connection:
+        print('{:s} ERROR: Sql connetion'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
+        sys.exit(1)
+
     while True:
-        try: 
+        try:
             # compress statment
-            file_in_dir=sorted(os.listdir(INAPATH))
+
+#            file_in_dir=sorted(os.listdir(INAPATH))
+
+            files = (
+               entry for entry in os.scandir(INAPATH)
+               if entry.is_file() and entry.name.startswith("run") and entry.name.endswith(".mid")
+            )
+
+
+            # Ordinamento per nome e prendo solo gli ultimi 100
+            last_100 = sorted(files, key=lambda e: e.name)[-100:]
+
+            file_in_dir = [f.name for f in last_100]
+
             try:
-				
+
                 for i in range(0, np.size(file_in_dir)):
-                    if ('run' in str(file_in_dir[i]))   and \
-                    ('.mid' in str(file_in_dir[i]))  and \
-                    (not ('.gz' in str(file_in_dir[i]))) and \
-                    (not('.crc32c' in str(file_in_dir[i]))) and\
-                    ((str(file_in_dir[i]).split('.mid')[0] + '.crc32c') in file_in_dir) and \
-                    (not ( (str(file_in_dir[i]) + '.gz') in file_in_dir)) and \
-                    (not file_in_dir[i].startswith('.')):
+
+                    runN = int(file_in_dir[i].split('run')[-1].split('.mid')[0])
+                    connection = daq_sql_connection_local(verbose)
+                    number_of_events=cmd.read_sql_value(connection, table_name="Runlog", row_element="run_number", 
+                                       row_element_condition=str(runN), 
+                                       colum_element="number_of_events", 
+                                       verbose=False)
+                    print(runN, number_of_events, file_in_dir)
+                    if number_of_events==None: 
+                        number_of_events=0 
+                    if number_of_events>1 and not (runN in compressing_runs):
+#                    if ('run' in str(file_in_dir[i]))   and \
+#                    ('.mid' in str(file_in_dir[i]))  and \
+#                    (not ('.gz' in str(file_in_dir[i]))) and \
+#                    (not('.crc32c' in str(file_in_dir[i]))) and\
+#                    ((str(file_in_dir[i]).split('.mid')[0] + '.crc32c') in file_in_dir) and \
+#                    (not ( (str(file_in_dir[i]) + '.gz') in file_in_dir)) and \
+#                    (not file_in_dir[i].startswith('.')):
                         if compressing_files < 8:
                             dtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                             print('{:s} Compressing file: {:s}'.format(dtime, file_in_dir[i]))
                             os.system('gzip ' + INAPATH + file_in_dir[i] +' &')
                             compressing_files += 1
-                            compressing_runs = np.append(compressing_runs, int(file_in_dir[i].split('run')[-1].split('.mid')[0]))
+                            compressing_runs.append(runN)
+                            print(compressing_runs)
             except:
                 print('{:s} ERROR: Compressing files'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
             # upload statment
-            
+
             found = False
-            for i in range(0, np.size(file_in_dir)):
-                if ('run' in str(file_in_dir[i]))   and \
-                ('.mid.gz' in str(file_in_dir[i]))  and \
-                (not (str(file_in_dir[i]).split('.gz')[0] in file_in_dir)) \
-                and (not file_in_dir[i].startswith('.')):
-                
-                	runN = int(file_in_dir[i].split('run')[-1].split('.mid.gz')[0])
-                	
-                	if runN in compressing_runs:
-                		dtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                		print('{:s} File successfully compressed: {:s}'.format(dtime, file_in_dir[i]))
-                		compressing_runs = compressing_runs[compressing_runs != runN]
-                		found = True
-                		if compressing_files > 0:
-                			compressing_files -= 1
-            
+            for i, runN in enumerate(compressing_runs):
+
+                midfilename = INAPATH+"run"+str(runN)+".mid"
+                if not os.path.isfile(midfilename):
+
+
+
+#            for i in range(0, np.size(file_in_dir)):
+#                if ('run' in str(file_in_dir[i]))   and \
+#                ('.mid.gz' in str(file_in_dir[i]))  and \
+#                (not (str(file_in_dir[i]).split('.gz')[0] in file_in_dir)) \
+#                and (not file_in_dir[i].startswith('.')):
+
+#                	runN = int(file_in_dir[i].split('run')[-1].split('.mid.gz')[0])
+
+#                	if runN in compressing_runs:
+                        dtime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        print('{:s} File successfully compressed: {:s}'.format(dtime, file_in_dir[i]))
+                        compressing_runs.remove(runN)
+                        # upadete sql with new file local status
+                        cy.daq_update_runlog_replica_status(connection,runN, storage="local",status=1, verbose=verbose)
+                        found = True
+                        if compressing_files > 0:
+                           compressing_files -= 1
+ 
             if not found:
                 client.communicate(30)
                 time.sleep(30)

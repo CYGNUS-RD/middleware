@@ -12,49 +12,6 @@ def storeStatus(filen, size, status, result, outfile):
     cmd.append2file(stchar, outfile)
     return stchar
 
-def replica_sql_value(connection, connection_remote, table_name, row_element, row_element_condition, verbose=False):
-    import datetime
-    sql = "SELECT * FROM `"+table_name+"` WHERE `"+row_element+"` = "+row_element_condition+";"
-    #SELECT * FROM `Runlog` WHERE `run_number` = 1024;
-    if verbose: print(sql)
-    #try:
-    # read from local
-    mycursor = connection.cursor()
-    mycursor.execute(sql)
-    row = mycursor.fetchone()
-
-    row_list = []
-
-    for i,data in enumerate(row):
-        if isinstance(data, datetime.datetime):
-            data = data.strftime('%Y-%m-%d %H:%M:%S')
-        row_list.append(data)
-    row = tuple(row_list)
-
-    cols = mycursor.column_names
-
-    cols = "`,`".join([str(i) for i in list(cols)])
-
-    mycursor.close()
-    #except:
-    #    return 0    
-    #sql = "INSERT INTO `{}` (`" +cols+ "`) VALUES {}".format(table_name, row)
-    sql = "INSERT INTO `"+table_name+"` (`" +cols+ "`) VALUES "+str(row)
-    if verbose: print(sql)
-    try:
-        # replica on remote
-        mycursor = connection_remote.cursor()
-        #sql = "INSERT INTO `"+table_name+"` (`" +cols + "`) VALUES (" + "%s,"*(len(row)-1) + "%s)"
-        mycursor.execute(sql)
-        #mycursor.execute(sql, row.astype(str))
-        connection_remote.commit()
-        mycursor.close()
-        
-        if verbose: print(mycursor.rowcount, "SQL Update done")
-
-        return row[0]
-    except:
-        return 0
 
 def daq_sql_connection_local(verbose=False):
     import mysql.connector
@@ -71,8 +28,8 @@ def daq_sql_connection_local(verbose=False):
         return connection
     except:
         return False
-    
-    
+
+
 def main():
     #
     from optparse import OptionParser
@@ -92,7 +49,7 @@ def main():
     BARI = 1
     session  ='infncloud-wlcg'
     bucket   = 'cygno-data'
-    
+
     TAG         = os.environ['TAG']
     INAPATH     = os.environ['INAPATH']# '/data01/data/'
     DAQPATH     = os.environ['DAQPATH']# '/home/standard/daq/'
@@ -121,9 +78,9 @@ def main():
     FILELOK    = INAPATH+"analized.lok"
     newupoload = []
     print('{:s} midas2cloud started'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")))
-    
+ 
     client = midas.client.MidasClient("midas2cloud")
-    
+
     compressing_files = 0
     
     key = tag+'/'
@@ -173,9 +130,11 @@ def main():
                     runN = int(filename.split('run')[-1].split('.mid.gz')[0])
 
                     # sostituisce il grep su file di cui sotto
-                    sqlFuleStatus=cy.daq_read_runlog_replica_status(connection, runN, "cloud") & cy.daq_read_runlog_replica_status(connection, runN, "tape")
-                    if sqlFuleStatus != 1 or cy.daq_read_runlog_replica_status(connection, runN, storage="local", verbose=verbose)==0:
-			
+                    # sqlFuleStatus=cy.daq_read_runlog_replica_status(connection, runN, "cloud") & cy.daq_read_runlog_replica_status(connection, runN, "tape") 
+                    connection = daq_sql_connection_local(verbose)
+                    print(cy.daq_read_runlog_replica_status(connection, runN, "cloud"), cy.daq_read_runlog_replica_status(connection, runN, "local"))
+                    if cy.daq_read_runlog_replica_status(connection, runN, "cloud")<1 and cy.daq_read_runlog_replica_status(connection, runN, "local")==1:
+
 
 #                    if cy.cmd.grep_file(filename, STOROUT) == "" or \
 #                    cy.daq_read_runlog_replica_status(connection, runN, storage="local", verbose=verbose)==0: 
@@ -188,9 +147,9 @@ def main():
                         md5sum = cy.cmd.file_md5sum(INAPATH+filename)
 
                         # upadete sql with new file local status
-                        cy.daq_update_runlog_replica_status(connection,
-                                                            runN, storage="local",
-                                                            status=1, verbose=verbose)
+#                        cy.daq_update_runlog_replica_status(connection,
+#                                                            runN, storage="local",
+#                                                            status=1, verbose=verbose)
 
                         cy.daq_update_runlog_replica_checksum(connection, runN, 
                                                               md5sum, verbose=verbose)
