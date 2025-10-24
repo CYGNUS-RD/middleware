@@ -1,9 +1,10 @@
 # SSH reverse Tunnel 
 
-- howto generate the key rsa (do not put any password when proped) 
+- howto generate the key rsa (do not put any password when propted) 
 ```
 ssh-keygen -t rsa -b 4096 -f xxx_rsa
 ```
+### Docker
 - put the public string xxx_rsa.pub in the remote IP /home/USER/.ssh/authorized_keys
 
 share local contaner (LOCAL_APP_NAME) port (LOCAL_PORT) to a remore port (REMOTE_PORT) via ssh tunnel, example:
@@ -28,6 +29,7 @@ docker run -v <rsa file>:/id_rsa -e REMOTE_PORT=<port> -e LOCAL_APP_NAME=<servic
        - /home/USER/.ssh/daq_id:/id_rsa # local user with private key 
 
 ```
+### Syeste service
 - share remote port with a local client service in a physical machine example using kafka on port 9092 services (LOCALUSER, USER@IP)
 - put the following line in the  /etc/systemd/system/SERVICENAME.service (define LOCALUSER, LOCALGROUP, USER@IP)
 ```
