@@ -1,4 +1,4 @@
-####uso del container RUCIO dato da WP6 CANF con username privileggiata 'mazzitel'
+#### uso del container RUCIO dato da WP6 CANF con username privileggiata 'mazzitel'
 
 + to get token (script gettoken.sh) 
 
@@ -22,7 +22,7 @@ docker attach rucio-mazzitel
 
 + e poi il solito comando ```rucio whoami```
 
-####setup per accesso a shell come daq
+#### setup per accesso a shell come daq
 
 + vedi docker-compose e README file in rucio_cmd_script/script
 
