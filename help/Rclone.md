@@ -5,3 +5,4 @@ Install the following libraries:
 - Boto3 e Botocore
 ```pip install boto3==1.35.0 botocore==1.35.99```
 - rclone. See [Install rclone](https://rclone.org/install/). <br />
+Basically  ``` sudo -v ; curl https://rclone.org/install.sh | sudo bash ```
