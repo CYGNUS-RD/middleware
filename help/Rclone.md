@@ -6,3 +6,12 @@ Install the following libraries:
 ```pip install boto3==1.35.0 botocore==1.35.99```
 - rclone. See [Install rclone](https://rclone.org/install/). <br />
 Basically  ``` sudo -v ; curl https://rclone.org/install.sh | sudo bash ```
+
+# Copy files from local PC to cnaf-storage
+- Copy the file cygno_gsetup.sh from /cvmfs/sft-cygno.infn.it/config/ in the notebook into local folder
+- run ```./cygno_gsetup.sh```
+- Mount the bucket you want into a local folder you desire <br />
+```mkdir  /folder-in-desired-path-and-name```
+```rclone mount cnaf-storage:bucket ./folder-in-desired-path-and-name/ --daemon```
+for example
+```rclone mount cnaf-storage:cygno-analysis ./Mettoqui/ --daemon```
