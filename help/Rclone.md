@@ -8,10 +8,11 @@ Install the following libraries:
 Basically  ``` sudo -v ; curl https://rclone.org/install.sh | sudo bash ```
 
 # Copy files from local PC to cnaf-storage
-- Copy the file cygno_gsetup.sh from /cvmfs/sft-cygno.infn.it/config/ in the notebook into local folder
+- Copy the file cygno_gsetup.sh from /cvmfs/sft-cygno.infn.it/config/ in the notebook into local folder (Giovanni does not fully agree)
 - run ```./cygno_gsetup.sh```
 - Mount the bucket you want into a local folder you desire <br />
 ```mkdir  /folder-in-desired-path-and-name```<br />
 ```rclone mount cnaf-storage:bucket ./folder-in-desired-path-and-name/ --daemon```<br />
 for example
 ```rclone mount cnaf-storage:cygno-analysis ./Mettoqui/ --daemon```<br />
+- Now the desired bucket is mounted into a local folder and you can easily copy from terminal any file with cp command
