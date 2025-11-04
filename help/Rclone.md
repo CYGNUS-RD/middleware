@@ -11,7 +11,7 @@ Basically  ``` sudo -v ; curl https://rclone.org/install.sh | sudo bash ```
 - Copy the file cygno_gsetup.sh from /cvmfs/sft-cygno.infn.it/config/ in the notebook into local folder
 - run ```./cygno_gsetup.sh```
 - Mount the bucket you want into a local folder you desire <br />
-```mkdir  /folder-in-desired-path-and-name```
-```rclone mount cnaf-storage:bucket ./folder-in-desired-path-and-name/ --daemon```
+```mkdir  /folder-in-desired-path-and-name```<br />
+```rclone mount cnaf-storage:bucket ./folder-in-desired-path-and-name/ --daemon```<br />
 for example
-```rclone mount cnaf-storage:cygno-analysis ./Mettoqui/ --daemon```
+```rclone mount cnaf-storage:cygno-analysis ./Mettoqui/ --daemon```<br />
