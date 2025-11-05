@@ -24,3 +24,4 @@ Warning:<br />
   -  Use ```oidc-add --reathenticate cygno``` and follow the instructions and just press enter when asked about password. <br/>
   [//]: -  Use ```oidc-add cygno``` and follow the instructions and just press enter when asked about password.
   -  After you get a success do ```oidc-token > ~/.cygno_token ```
+  -  <!--- Comments are Fun --->
