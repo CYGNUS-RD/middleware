@@ -20,4 +20,4 @@ for example
 
 Warning:<br />
 - If you turn off your PC, the mount will command will have to be repeated at restart (EXPERT: unless you play with fstab or bash_profile files)
-- The token generated during ```./cygno_gsetup.sh``` expires in 20 days. After expiration, you do not need to repeat everything, but just use ```oidc-gen --reauthenticate cygno``` and follow the instructions.
+- The token generated during ```./cygno_gsetup.sh``` expires in 20 days. After expiration, you do not need to repeat everything, but just use ```oidc-gen --reauthenticate cygno``` and follow the instructions and just press enter when asked about password.
