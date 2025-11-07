@@ -17,7 +17,7 @@ WARNING: Be careful not to have the /cvmfs resource in use by any process. This 
 - ```cvmfs_server transaction sft-cygno.infn.it; docker-compose up -d; docker exec -it py_assets bash```
 - Now you have some options: <br />
     - To install new package: add the package name into /tmp/requirements.txt and then ```pip install -r /tmp/requirements.txt --no-deps -t $PYTHONPATH/ ``` <br />
-    - To reinstall existing package `pip install --force-reinstall -v "MySQL_python==1.2.2" --no-deps`
+    - To reinstall existing package `pip install --force-reinstall -v "MySQL_python==1.2.2" --no-deps` (MySQL_python==1.2.2 is an example)
 - ```docker-compose down ; cvmfs_server publish sft-cygno.infn.it```
 
 ### expert
