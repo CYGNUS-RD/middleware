@@ -15,7 +15,9 @@ WARNING: Be careful not to have the /cvmfs resource in use by any process. This 
 - change user as root ```sudo su```
 - ```cd /home/mazzitel/jupyterhub/CYGNO/package```
 - ```cvmfs_server transaction sft-cygno.infn.it; docker-compose up -d; docker exec -it py_assets bash```
-- `pip install ... -t $PYTHONPATH/ or pip install --force-reinstall -v "MySQL_python==1.2.2" or batter pip install -r /tmp/requirements.txt --no-deps --target=/mnt/py/Ubuntu22.04_Py3.11.9/
+- Now you have some options: <br />
+    - To install new package: add the package name into /tmp/requirements.txt and then ```pip install -r /tmp/requirements.txt --no-deps -t $PYTHONPATH/ ``` <br />
+    - To reinstall existing package `pip install --force-reinstall -v "MySQL_python==1.2.2" --no-deps`
 - ```docker-compose down ; cvmfs_server publish sft-cygno.infn.it```
 
 ### expert
