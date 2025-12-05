@@ -499,45 +499,49 @@ def reco2cloud(recofilename, recofolder, run_number, TAG, verbose=False):
     #if verbose:              
     print('{:s} Transferring file: {:s}'.format(dtime, file_in_dir))
     ## Get Token
-    s3 = s3_session(verbose=verbose)
+    try:
+        s3 = s3_session(verbose=verbose)
+        
+        current_try = 0
+        aux         = 0
+        status, isthere = False, False # flag to know if to go to next run
+        while(not status):   
+            #tries many times for errors of connection or others that may be worth another try
+            if verbose: 
+                print(INAPATH+file_in_dir,TAG, bucket, session, verbose, filesize)
     
-    current_try = 0
-    aux         = 0
-    status, isthere = False, False # flag to know if to go to next run
-    while(not status):   
-        #tries many times for errors of connection or others that may be worth another try
-        if verbose: 
-            print(INAPATH+file_in_dir,TAG, bucket, session, verbose, filesize)
-
-        try:
-            s3.upload_file(INAPATH+file_in_dir, Bucket=bucket, Key=TAG+'/'+file_in_dir)
-            s3.upload_file(INAPATH+file_in_dir_txt, Bucket=bucket, Key=TAG+'/'+file_in_dir_txt)
-
-            remotesize = s3.head_object(Bucket=bucket, Key=TAG+'/'+file_in_dir)['ContentLength']
-
-            if remotesize == filesize:
-                cy.cmd.rm_file(INAPATH+file_in_dir)
-                cy.cmd.rm_file(INAPATH+file_in_dir_txt)
-                cy.cmd.rm_file(INAPATH + 'reconstruction_' + str(run_number) + '.log')
-                cy.cmd.rm_file(INAPATH + 'reconstruction_' + str(run_number) + '.out')
-                cy.cmd.rm_file(INAPATH + 'reconstruction_' + str(run_number) + '.error')
-
-                if verbose:              
-                    print('{:s} file removed: {:s}'.format(dtime, file_in_dir))
-
-                ##############################
-                if verbose: 
-                    print('{:s} Upload done: {:s}'.format(dtime, file_in_dir))
-                aux = 1
-                
-            status = True
-        except Exception as e:
-            print('ERROR file: {:s} --> '.format(INAPATH+file_in_dir), e)
-            current_try = current_try+1
-            if current_try==max_tries:
-                print('{:s} ERROR: Max try number reached: {:d}'.format(dtime, current_try))
+            try:
+                s3.upload_file(INAPATH+file_in_dir, Bucket=bucket, Key=TAG+'/'+file_in_dir)
+                s3.upload_file(INAPATH+file_in_dir_txt, Bucket=bucket, Key=TAG+'/'+file_in_dir_txt)
+    
+                remotesize = s3.head_object(Bucket=bucket, Key=TAG+'/'+file_in_dir)['ContentLength']
+    
+                if remotesize == filesize:
+                    cy.cmd.rm_file(INAPATH+file_in_dir)
+                    cy.cmd.rm_file(INAPATH+file_in_dir_txt)
+                    cy.cmd.rm_file(INAPATH + 'reconstruction_' + str(run_number) + '.log')
+                    cy.cmd.rm_file(INAPATH + 'reconstruction_' + str(run_number) + '.out')
+                    cy.cmd.rm_file(INAPATH + 'reconstruction_' + str(run_number) + '.error')
+    
+                    if verbose:              
+                        print('{:s} file removed: {:s}'.format(dtime, file_in_dir))
+    
+                    ##############################
+                    if verbose: 
+                        print('{:s} Upload done: {:s}'.format(dtime, file_in_dir))
+                    aux = 1
+                    
                 status = True
-                aux = 0            
+            except Exception as e:
+                print('ERROR file: {:s} --> '.format(INAPATH+file_in_dir), e)
+                current_try = current_try+1
+                if current_try==max_tries:
+                    print('{:s} ERROR: Max try number reached: {:d}'.format(dtime, current_try))
+                    status = True
+                    aux = 0
+    except Exception as e:
+        print('{:s} ERROR: S3 Session')
+        aux = 0
     return aux
 
 
@@ -565,7 +569,7 @@ def create_json_with_date_time(outname):
     current_date_time = datetime.datetime.now()
 
     # Add two hours to the current date and time
-    new_date_time = current_date_time + datetime.timedelta(hours=2)
+    new_date_time = current_date_time #+ datetime.timedelta(hours=1)
 
     # Create a dictionary containing the modified date and time information
     data = {
@@ -717,7 +721,7 @@ def main(run_number_start, run_number_end, nproc, maxidle, TAG, recopath = 'reco
         savetables(df_condor, outname)
         
         
-        nheld = 20
+        nheld = 2
         if aux_held >= nheld:
             if verbose:
                 print("Checking completed Jobs on Queue\n", end='\r')

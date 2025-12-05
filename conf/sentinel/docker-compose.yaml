@@ -16,21 +16,22 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_PORT: ${MYSQL_PORT}
 
-      HTC_IP: 131.154.98.50
-      STARTRUN: 75000
-      ENDRUN: 99999
+      HTC_IP: 131.154.99.11
+      STARTRUN: 114003
+      ENDRUN: 299999
       NCORE: 8
       DFPANDAS: df_condor_coda1
       RECOPATH: reconstruction
       TAG: RECO/Run5
       WAITTIME: 0
-      MAXIDLE: 11
-      DRAIN: 0
+      MAXIDLE: 15
+      DRAIN: 1
 
     volumes:
       - ${PWD}/dev/init.sh:/root/init.sh
       - ${PWD}/dev/.bashrc:/root/.bashrc
       - ${PWD}/dev/:/root/dev/
+      - ${PWD}/submitJobs/:/root/submitJobs/
       - /tmp/:/tmp/
 
   sentinel2:
@@ -49,16 +50,16 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_PORT: ${MYSQL_PORT}
 
-      HTC_IP: 131.154.98.168
-      STARTRUN: 48055
-      ENDRUN: 50892
-      NCORE: 4
+      HTC_IP: 131.154.99.11
+      STARTRUN: 106000
+      ENDRUN: 107897
+      NCORE: 8
       DFPANDAS: df_condor_coda2
-      RECOPATH: reconstruction_Run4_PMT
-      TAG: RECO/ReRun4_PMT
+      RECOPATH: reconstruction
+      TAG: RECO/Run5
       WAITTIME: 10
-      MAXIDLE: 2
-      DRAIN: 0
+      MAXIDLE: 15
+      DRAIN: 1
 
     volumes:
       - ${PWD}/dev/init.sh:/root/init.sh
@@ -82,7 +83,7 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_PORT: ${MYSQL_PORT}
 
-      HTC_IP: 131.154.99.82
+      HTC_IP: 131.154.98.168
       STARTRUN: 40781
       ENDRUN: 43515
       NCORE: 4
@@ -115,7 +116,7 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_PORT: ${MYSQL_PORT}
 
-      HTC_IP: 131.154.99.82
+      HTC_IP: 131.154.98.46
       STARTRUN: 11302
       ENDRUN: 11329
       NCORE: 4
@@ -135,14 +136,16 @@ services:
 
 
   tokener:
-    image: gmazzitelli/tokener:v0.1
+    image: gmazzitelli/tokener:v0.3
     container_name: tokener
     environment:
+#      CREDENTIAL: True
       REFRESH_TOKEN: ${REFRESH_TOKEN}
       IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
       IAM_CLIENT_ID: ${IAM_CLIENT_ID}
       IAM_TOKEN_ENDPOINT: ${IAM_TOKEN_ENDPOINT}
-      SCOPES: ${SCOPES}
+      SCOPES: ${IAM_SCOPES}
+#      IAM_AUDINCE: ${IAM_AUDIENCE}
 
     volumes:
       - /tmp/:/tmp/
