@@ -1,3 +1,4 @@
 - https://baltig.infn.it/infn-cloud/webapp-rgw
 - https://servicedesk.infn.it/plugins/servlet/desk/portal/50/INFNCLOUD-540
-- '''docker run --rm -d --name s3webui -p 9023:80 --env-file .env   baltig.infn.it:4567/infn-cloud/webapp-rgw'''
+- `docker run --rm -d --name s3webui -p 9023:80 --env-file .env   baltig.infn.it:4567/infn-cloud/webapp-rgw`
+
