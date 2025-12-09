@@ -1,0 +1,19 @@
+services:
+  cvmfs:
+    image: gmazzitelli/cvmfs-client:wp1-v0.2
+    container_name: cvmfs-client
+    privileged: true
+    devices:
+      - /dev/fuse
+    cap_add:
+      - SYS_ADMIN
+    volumes:
+      - /cvmfs:/cvmfs:shared
+    environment:
+      - REPO_LIST=sft.cern.ch datacloud.infn.it sft-cygno.infn.it
+    restart: unless-stopped
+    logging:
+      driver: local
+      options:
+        max-size: "100m"
+        max-file: "5"

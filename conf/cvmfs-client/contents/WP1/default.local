@@ -1,0 +1,6 @@
+# cat /etc/cvmfs/default.local
+#CVMFS_HTTP_PROXY="http://squid-01.pd.infn.it:3128|http://squid-02.pd.infn.it:3128"
+CVMFS_HTTP_PROXY=DIRECT
+X509_CERT_BUNDLE=/etc/ssl/certs/ca-certificates.crt # /etc/pki/tls/certs/ca-bundle.crt you migh need to change this
+CVMFS_CACHE_BASE=/data/cvmfs_cache
+CVMFS_QUOTA_LIMIT=35000

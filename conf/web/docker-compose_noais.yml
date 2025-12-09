@@ -1,0 +1,50 @@
+version: '3'
+services:
+
+  orchestratore:
+#    image: gmazzitelli/cygno-webserver:v1.0.0
+#    image: gmazzitelli/cygno-webserver:v7.4-1.18.8 
+    image: gmazzitelli/cygno-webserver:v8.3-2.1.3
+    container_name: webserver
+    ports:
+#      - "8080:80"
+      - "443:443"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_IP: ${MYSQL_IP}
+      MYSQL_IP_LNF: ${MYSQL_IP_LNF}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_PORT: ${MYSQL_PORT}
+
+    volumes:
+      - ${PWD}/apache/html:/var/www/html
+      - /etc/letsencrypt/:/var/www/letsencrypt/
+      - ${PWD}/apache/000-default.conf:/etc/apache2/sites-available/000-default.conf
+      - ${PWD}/apache/php.ini:/usr/local/etc/php/php.ini
+      - ${PWD}/ssl/ssl.conf:/etc/apache2/mods-available/ssl.conf
+      - ${PWD}/saml/saml.crt:/var/simplesamlphp/cert/saml.crt
+      - ${PWD}/saml/saml.key:/var/simplesamlphp/cert/saml.key
+      - ${PWD}/saml/config.php:/var/simplesamlphp/config/config.php
+      - ${PWD}/saml/authsources.php:/var/simplesamlphp/config/authsources.php
+
+
+  tunnel:
+    restart: always
+    image: gmazzitelli/sshtunnel
+    container_name: tunnel_kafka
+#    ports:
+#      - 80:80
+    environment:
+       REMOTE_PORT: 27017
+       REMOTE_APP_NAME: localhost
+       LOCAL_PORT: 27017
+       USER: mazzitel
+       REMOTE_IP: kafka.cygno.cloud.infn.it
+    volumes:
+       - /root/.ssh/daq_id:/root/.ssh/id_rsa
+
+
+volumes:
+  dbweb:

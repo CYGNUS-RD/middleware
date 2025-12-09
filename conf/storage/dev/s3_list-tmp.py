@@ -22,7 +22,7 @@ print("listening: ", S3_ENDPOINT)
 
 def my_creds(url, verbose):
 
-    with open("/tmp/token","r") as f:
+    with open("/tmp/token_2","r") as f:
         IAM_TOKEN = f.read().strip()
     
     sts_client = boto3.client('sts',

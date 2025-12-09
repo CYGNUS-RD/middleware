@@ -1,0 +1,19 @@
+services:
+  rucio:
+    image: harbor.cloud.infn.it/testbed-dm/rucio-client-cygno:v3
+#    build: .
+    container_name: rucio-mazzitel
+    environment:
+      RUCIO_ACCOUNT: mazzitel
+      REFRESH_TOKEN: ${REFRESH_TOKEN}
+      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+      IAM_TOKEN_ENDPOINT: ${IAM_TOKEN_ENDPOINT}
+      SCOPES: ${SCOPES}
+      TOKEN: 'cat /tmp/token'
+    volumes:
+      - ./rucio_cmd_script:/home/user/rucio_cmd_script
+      - /tmp/token:/tmp/token
+      - /tmp/tape_token/:/tmp/tape_token/
+    tty: true
+    stdin_open: true

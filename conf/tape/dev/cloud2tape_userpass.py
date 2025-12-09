@@ -66,7 +66,7 @@ def main(bucket, tag, fcopy, fsql, fforce, verbose):
     endpoint_url  = os.environ['ENDPOINT_URL']
     tape_token_file  = os.environ['TAPE_TOKEN_FILE']
     
-    runs = cy.daq_not_on_tape_runs(connection, verbose=verbose) 
+    runs = cy.daq_not_on_tape_runs(connection, days=30*6, verbose=verbose) 
     print("missing runs:", len(runs), runs)    
     
     key = tag+'/'

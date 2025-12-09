@@ -5,9 +5,27 @@ from rucio.client.client import Client
 from rucio.client.uploadclient import UploadClient
 from rucio.common.exception import DataIdentifierAlreadyExists, FileAlreadyExists, DuplicateRule, NoFilesUploaded, RucioException
 
+# RUCIO tool
+# G. Mazzitelli 2025
+# copia i file da DAQ (o comunque da locale) in CLOUD e li replica su TAPE
+# usage
+#                          "--bucket", bucket,
+#                          "--did_name", key+filename,
+#                          "--upload_rse", "CNAF_USERDISK",
+#                          "--transfer_rse", "T1_USERTAPE",
+#                          "--account", "rucio-daq"
+#| Exit Code | Meaning                                            |
+#| --------- | -------------------------------------------------- |
+#| 0         | Upload and replica created (or both already exist) |
+#| 1         | File already uploaded, replica just created        |
+#| 2         | Upload failed                                      |
+#| 3         | Upload done, replica failed                        |
+#| 4         | Client creation failed                             |
+
 # Config file path from ENV or default
 rucio_cfg = os.environ.get('RUCIO_CONFIG', '/home/.rucio.cfg')
 os.environ['RUCIO_CONFIG'] = rucio_cfg
+
 
 # Parse arguments
 parser = argparse.ArgumentParser()
@@ -20,8 +38,12 @@ parser.add_argument('--account', required=True, help="Rucio account")
 args = parser.parse_args()
 
 # Initialize clients
-upload_client = UploadClient()
-transfer_client = Client()
+try:
+     upload_client = UploadClient()
+     transfer_client = Client()
+except Exception as e:
+    print(f"[ERROR] Client creation failed: {str(e)}")
+    sys.exit(4)
 
 # Define upload item
 item = [{

@@ -7,8 +7,9 @@ file2s3_fromHTTPtoken.py <filename> $IAM_CLIENT_ID $IAM_CLIENT_SECRET
 exploit tocken in /tmp/token obtained by tokener service, example:
 
 ``` 
-docker run -d --name backupper  -e BCK_START_NAME='sql' -e IAM_CLIENT_ID=${IAM_CLIENT_ID} -e IAM_CLIENT_SECRET=${IAM_CLIENT_SECRET} -v /var/lib/docker/volumes/sql_dbdata/_data/:/root/data/ -v /tmp/:/tmp/ gmazzitelli/backupper:v0.1
-docker run -d --name backupper -e BCK_START_NAME='grafana' -e IAM_CLIENT_ID=${IAM_CLIENT_ID} -e IAM_CLIENT_SECRET=${IAM_CLIENT_SECRET} -v /var/lib/docker/volumes/grafana_dbdata/_data/:/root/data/ -v /tmp/:/tmp/ gmazzitelli/backupper:v0.1
+# docker run -d --name backupper  -e BCK_START_NAME='sql' -e IAM_CLIENT_ID=${IAM_CLIENT_ID} -e IAM_CLIENT_SECRET=${IAM_CLIENT_SECRET} -v /var/lib/docker/volumes/sql_dbdata/_data/:/root/data/ -v /tmp/:/tmp/ gmazzitelli/backupper:v0.1
+# docker run -d --name backupper -e BCK_START_NAME='grafana' -e IAM_CLIENT_ID=${IAM_CLIENT_ID} -e IAM_CLIENT_SECRET=${IAM_CLIENT_SECRET} -v /var/lib/docker/volumes/grafana_dbdata/_data/:/root/data/ -v /tmp/:/tmp/ gmazzitelli/backupper:v0.1
+docker run -d --name backupper  -e BCK_START_NAME='sql' -v /var/lib/docker/volumes/sql_dbdata/_data/:/root/data/ -v /tmp/:/tmp/ gmazzitelli/backupper:v0.2
 ```
 # tips
 exploiting VM eviroument:

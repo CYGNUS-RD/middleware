@@ -1,14 +1,11 @@
-FROM alpine:latest
-RUN apk --update add python3
-RUN apk add curl \
-	bash && rm -rf /var/cache/apk/*
-RUN apk add py3-pip
-RUN pip3 install --no-cache-dir -U \
-    mysql-connector==2.2.9 \
-    numpy \
-    pandas \
-    boto3 
-
+FROM alpine:3.20
+RUN apk add --no-cache python3 py3-pip curl bash
+RUN pip3 install --no-cache-dir --break-system-packages -U \
+      mysql-connector-python==8.0.33 \
+      numpy \
+      pandas \
+      boto3==1.35.0 \
+      botocore==1.35.99
 COPY startup.sh /opt/startup.sh
 COPY file2s3_fromHTTPtoken.py /opt/file2s3_fromHTTPtoken.py
 WORKDIR /root/

@@ -22,7 +22,7 @@ do
     echo "$d backupping date $i"
     file=${BCK_START_NAME}_`date +%Y%m%d`.tar.gz
     /bin/tar -zcvf /root/$file /root/data/
-    /opt/file2s3_fromHTTPtoken.py /root/$file ${IAM_CLIENT_ID} ${IAM_CLIENT_SECRET} -f ${TOKEN_FILE}
+    /opt/file2s3_fromHTTPtoken.py /root/$file -f ${TOKEN_FILE} 
     if [ $? -ne 0 ]; then 
         echo "ERROR: no file copied"
     else
