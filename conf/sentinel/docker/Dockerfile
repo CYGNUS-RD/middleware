@@ -1,14 +1,15 @@
-FROM dodasts/mini-htc:v0
+#FROM dodasts/mini-htc:v0
+FROM htcondor/mini
 
-COPY assets/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo
+#COPY assets/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo
 
-RUN yum-config-manager --save --setopt=htcondor-development.skip_if_unavailable=true
+#RUN yum-config-manager --save --setopt=htcondor-development.skip_if_unavailable=true
 
 RUN yum -y clean metadata \
     && yum -y install \
               git \
               gcc \
-              python36-devel \
+#              python36-devel \
               numpy \
     && yum -y clean all 
 

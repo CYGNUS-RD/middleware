@@ -1,7 +1,6 @@
-version: '2'
 services:
   sentinel1:
-    image: gmazzitelli/cygno-st:v2.0.6-cygno
+    image: gmazzitelli/cygno-st:v3.1
     container_name: sentinel1
     environment:
       PYTHONUNBUFFERED: 1
@@ -16,16 +15,22 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_PORT: ${MYSQL_PORT}
 
-      HTC_IP: 131.154.99.11
-      STARTRUN: 114003
-      ENDRUN: 299999
+      HTC_IP: ce01-htc.cr.cnaf.infn.it
+      _condor_SEC_CLIENT_AUTHENTICATION_METHODS: SCITOKENS
+      _condor_CONDOR_HOST: ce01-htc.cr.cnaf.infn.it:9619
+      _condor_SCHEDD_HOST: ce01-htc.cr.cnaf.infn.it
+      BEARER_TOKEN: "$(`cat /tmp/token`)"
+      SINGULARITY: True
+      STARTRUN: 60000
+      ENDRUN: 60005
       NCORE: 8
       DFPANDAS: df_condor_coda1
-      RECOPATH: reconstruction
-      TAG: RECO/Run5
-      WAITTIME: 0
+      RECOPATH: /root/dev/reconstruction
+      TAG_RECO: RECO/Run5_Saladin
+      USERNAME: autoreco
+      WAITTIME: 30
       MAXIDLE: 15
-      DRAIN: 1
+      DRAIN: 0
 
     volumes:
       - ${PWD}/dev/init.sh:/root/init.sh
@@ -33,107 +38,7 @@ services:
       - ${PWD}/dev/:/root/dev/
       - ${PWD}/submitJobs/:/root/submitJobs/
       - /tmp/:/tmp/
-
-  sentinel2:
-    image: gmazzitelli/cygno-st:v2.0.6-cygno
-    container_name: sentinel2
-    environment:
-      PYTHONUNBUFFERED: 1
-      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
-      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
-      ENDPOINT_URL: ${ENDPOINT_URL}
-
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_IP: ${MYSQL_IP}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_PORT: ${MYSQL_PORT}
-
-      HTC_IP: 131.154.99.11
-      STARTRUN: 106000
-      ENDRUN: 107897
-      NCORE: 8
-      DFPANDAS: df_condor_coda2
-      RECOPATH: reconstruction
-      TAG: RECO/Run5
-      WAITTIME: 10
-      MAXIDLE: 15
-      DRAIN: 1
-
-    volumes:
-      - ${PWD}/dev/init.sh:/root/init.sh
-      - ${PWD}/dev/.bashrc:/root/.bashrc
-      - ${PWD}/dev/:/root/dev/
-      - /tmp/:/tmp/
-      
-  sentinel3:
-    image: gmazzitelli/cygno-st:v2.0.6-cygno
-    container_name: sentinel3
-    environment:
-      PYTHONUNBUFFERED: 1
-      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
-      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
-      ENDPOINT_URL: ${ENDPOINT_URL}
-
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_IP: ${MYSQL_IP}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_PORT: ${MYSQL_PORT}
-
-      HTC_IP: 131.154.98.168
-      STARTRUN: 40781
-      ENDRUN: 43515
-      NCORE: 4
-      DFPANDAS: df_condor_coda3
-      RECOPATH: reconstruction
-      TAG: RECO/Run4
-      WAITTIME: 17
-      MAXIDLE: 10
-      DRAIN: 1
-
-    volumes:
-      - ${PWD}/dev/init.sh:/root/init.sh
-      - ${PWD}/dev/.bashrc:/root/.bashrc
-      - ${PWD}/dev/:/root/dev/
-      - /tmp/:/tmp/
-
-  sentinel4:
-    image: gmazzitelli/cygno-st:v2.0.6-cygno
-    container_name: sentinel4
-    environment:
-      PYTHONUNBUFFERED: 1
-      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
-      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
-      ENDPOINT_URL: ${ENDPOINT_URL}
-
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_IP: ${MYSQL_IP_LNF}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_PORT: ${MYSQL_PORT}
-
-      HTC_IP: 131.154.98.46
-      STARTRUN: 11302
-      ENDRUN: 11329
-      NCORE: 4
-      DFPANDAS: df_condor_codaGIN
-      RECOPATH: reconstruction_GIN
-      CONFIGFILE: configFile_LNF.txt
-      TAG: Gin/
-      WAITTIME: 23
-      MAXIDLE: 10
-      DRAIN: 1
-
-    volumes:
-      - ${PWD}/dev/init.sh:/root/init.sh
-      - ${PWD}/dev/.bashrc:/root/.bashrc
-      - ${PWD}/dev/:/root/dev/
-      - /tmp/:/tmp/
-
+      - /mnt/cvmfs:/cvmfs:ro,shared
 
   tokener:
     image: gmazzitelli/tokener:v0.3
@@ -167,6 +72,26 @@ services:
      volumes:
        - ${PWD}/dev:/usr/share/nginx/html
 
+  cvmfs:
+    image: gmazzitelli/cvmfs-client:wp1-v0.2
+    container_name: cvmfs-client
+    privileged: true
+    devices:
+      - /dev/fuse
+    cap_add:
+      - SYS_ADMIN
+    volumes:
+      - /mnt/cvmfs:/cvmfs:shared
+    environment:
+      - REPO_LIST=sft.cern.ch datacloud.infn.it sft-cygno.infn.it geant4.cern.ch
+    restart: unless-stopped
+    logging:
+      driver: local
+      options:
+        max-size: "100m"
+        max-file: "5"
+
+
 #  tunnel:
 #    restart: always
 #    image: gmazzitelli/sshtunnel
@@ -179,3 +104,4 @@ services:
 #       REMOTE_IP: grafana.cygno.cloud.infn.it
 #    volumes:
 #       - /root/.ssh/daq_id:/id_rsa 
+
