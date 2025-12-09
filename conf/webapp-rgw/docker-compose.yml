@@ -1,15 +1,10 @@
 services:
 
-#<<<<<<< HEAD
-#  rgw:
-#    image: baltig.infn.it:4567/infn-cloud/webapp-rgw:1.1.0 # baltig.infn.it:4567/infn-cloud/webapp-rgw
-#    container_name: rgw
-#=======
   webapp-rgw:
 #    image: baltig.infn.it:4567/infn-cloud/webapp-rgw
-    image: baltig.infn.it:4567/infn-cloud/webapp-rgw:pagination
+#    image: baltig.infn.it:4567/infn-cloud/webapp-rgw:1.1.0 # baltig.infn.it:4567/infn-cloud/webapp-rgw:pagination 
+    image: indigopaas/webapp-rgw:v1.2.1
     container_name: webapp-rgw
-#>>>>>>> 56149fd4b3764deec3a230ccb702b0e4280ab1e2
     ports:
       - "9023:80"
     env_file:
