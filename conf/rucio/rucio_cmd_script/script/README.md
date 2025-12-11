@@ -54,9 +54,8 @@ RID=$(rucio list-rules `tail -1 /tmp/files.txt` | awk -v rse="$RSE" 'NR>2 && $5 
 while read -r DID; do RID=$(rucio list-rules "$DID" | awk -v rse="$RSE" 'NR>2 && $5 ~ rse {print $1}'); rucio rule remove "$RID";   echo ">> $RID $DID REMOUVED!"; done < /tmp/files.txt
 ```
 
-### scarica file dal TAPE su CNAF_USERDISK
+### replica file dal TAPE su CNAF_USERDISK
 - `docker attach rucio-daq`
-
 - se non si e' sicuri del path del file eventualemnte controllare lo stato del file by name, 
 con il comando:
 ```
