@@ -29,6 +29,8 @@ python3 copy_register_s3_to_tape.py --bucket cygno-data --prefix LNF/ --scope cy
 se i file esistono su tape, o sono gia' registrati lo script non fa nulla (ovvero riscontrolla solamente); altrimenti se non sono registrati ma presenti, li registra; se non sono presenti li scarica e li copia sul tape e li registra. se vuoi copiare tuttto il bucket usare ''
 ```
 python3 copy_register_s3_to_tape.py --bucket cygno-analysis --prefix '' --scope cygno-analysis --minio --log_file register_to_tape_analysis_MINIO.log
+```
+```
 python3 copy_register_s3_to_tape.py --bucket cygno-sim --prefix '' --scope cygno-sim --minio --log_file register_to_tape_sim_MINIO.log
 ```
 ###replica i file tra 2 rse a partire da una lista
