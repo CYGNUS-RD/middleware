@@ -58,15 +58,20 @@ while read -r DID; do RID=$(rucio list-rules "$DID" | awk -v rse="$RSE" 'NR>2 &&
 - `docker attach rucio-daq`
 
 - se non si e' sicuri del path del file eventualemnte controllare lo stato del file by name, 
-con il comando: `python3 find_file_in_rucio.py --filename run00143.mid.gz` e quindi trovare il 
-did corretto che definira' anche dove il file verra' replicato.
+con il comando:
+```
+python3 find_file_in_rucio.py --filename run00143.mid.gz
+```
+e quindi trovare il did corretto che definira' anche dove il file verra' replicato.
 
 - richidere di scaricare la replica su CNAF_USERDISK da T1_USERTAPE con il comando: 
-`rucio rule add --copies 1 --rse-exp CNAF_USERDISK --lifetime 7776000 cygno-data:MAN/run26737.mid.gz` 
-(ricopia un file da tape a CNAF_USERDISK per 3 mesi, oppure mettere quello che si vuole o rimuovere)
-
+```
+# ricopia un file da tape a CNAF_USERDISK per 3 mesi, oppure mettere quello che si vuole o rimuovere
+rucio rule add --copies 1 --rse-exp CNAF_USERDISK --lifetime 7776000 cygno-data:MAN/run26737.mid.gz
+``` 
 - fare eventualemnte una lista di file per un determinato TAG o di did e eseguire il loop:
-`while read fname; do rucio rule add --copies 1 --rse-exp CNAF_USERDISK cygno-data:TAG/$fname; done < list.txt`  
-
+```
+while read fname; do rucio rule add --copies 1 --rse-exp CNAF_USERDISK cygno-data:TAG/$fname; done < list.txt
+```  
 - ricordarsi di disconnetrsi con la sequenza Crtl-P Ctrl-Q, e non con exit
 
