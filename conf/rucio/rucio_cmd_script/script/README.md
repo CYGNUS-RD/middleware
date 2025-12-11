@@ -1,13 +1,20 @@
-shell per varie applicazioni di script offline/RUCIO
-lanciare il docker compose 
-```docker compose up -d```
-
-che fa partre la shell e i tokenr per s3/tape, poi connettersi al docker 
-```docker attach rucio-shell```
-
-caricare il token per gfal
+### istruzioni per gestione file con RUCIO ###
+- collegarsi alla macchina di backend (notebook.cygno.cloud.infn.it)
+- far partire la shell per varie applicazioni di script offline/RUCIO 
+- se non e' gia' attivo (`myps` controllare che siano in esecuzione rucio-daq, tokener e tokener_tape) lanciare il docker compose
+```
+sudo su
+cd middleware/conf/rucio/rucio_cmd_script/script/
+docker compose up -d
+```
+- che fa partre la shell e i tokener per s3/tape, poi connettersi al docker 
+```
+docker attach rucio-daq
+```
+- se serve di accedere con gfal ai file del TAPE caricare il token ()
 ```
 export BEARER_TOKEN=$(cat /tmp/token)
+# controllare se tutto funziona con
 gfal-ls davs://xfer-archive.cr.cnaf.infn.it:8443/cygno
 ```
 ### copy su TAPE e registrazione da S3 ####
