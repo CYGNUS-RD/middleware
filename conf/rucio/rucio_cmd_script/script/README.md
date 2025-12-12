@@ -17,26 +17,7 @@ export BEARER_TOKEN=$(cat /tmp/token)
 # controllare se tutto funziona con
 gfal-ls davs://xfer-archive.cr.cnaf.infn.it:8443/cygno
 ```
-### copia su TAPE e registrazione da S3 ####
-ad esempio per controllare e compiare i file da S3 (bari) su TAPE
-```
-python3 copy_register_s3_to_tape.py --bucket cygno-data --prefix LNF/ --scope cygno-data --log_file register_to_tape_LNF_BA.log
-```
-per minio
-```
-python3 copy_register_s3_to_tape.py --bucket cygno-data --prefix LNF/ --scope cygno-data --minio --log_file register_to_tape_LNF_MINIO.log
-```
-se i file esistono su tape, o sono gia' registrati lo script non fa nulla (ovvero riscontrolla solamente); altrimenti se non sono registrati ma presenti, li registra; se non sono presenti li scarica e li copia sul tape e li registra. se vuoi copiare tuttto il bucket usare ''
-```
-python3 copy_register_s3_to_tape.py --bucket cygno-analysis --prefix '' --scope cygno-analysis --minio --log_file register_to_tape_analysis_MINIO.log
-```
-```
-python3 copy_register_s3_to_tape.py --bucket cygno-sim --prefix '' --scope cygno-sim --minio --log_file register_to_tape_sim_MINIO.log
-```
-###replica i file tra 2 rse a partire da una lista
-```
-python3 replicate_files_source_to_dest.py --scope cygno-data --prefix LNGS --source_rse T1_USERTAPE --dest_rse CNAF_USERDISK --account rucio-daq   --file_list LNGS.txt --log_file replicate_files_LNGS.log
-```
+
 ### Mostra tutti di did (data identyfier di una scope) che possono essere su varie RSE
 - `rucio list-dids cygno-sim:"*" --filter type=FILE`
 - `rucio list-dids cygno-data:'LNF/*' --filter type=FILE | wc` (per sapere quanti did sono impostati per uno specifico scope)
@@ -76,3 +57,23 @@ while read fname; do rucio rule add --copies 1 --rse-exp CNAF_USERDISK cygno-dat
 ```  
 - ricordarsi di disconnetrsi con la sequenza Crtl-P Ctrl-Q, e non con exit
 
+### copia su TAPE e registrazione da S3 ####
+ad esempio per controllare e compiare i file da S3 (bari) su TAPE
+```
+python3 copy_register_s3_to_tape.py --bucket cygno-data --prefix LNF/ --scope cygno-data --log_file register_to_tape_LNF_BA.log
+```
+per minio
+```
+python3 copy_register_s3_to_tape.py --bucket cygno-data --prefix LNF/ --scope cygno-data --minio --log_file register_to_tape_LNF_MINIO.log
+```
+se i file esistono su tape, o sono gia' registrati lo script non fa nulla (ovvero riscontrolla solamente); altrimenti se non sono registrati ma presenti, li registra; se non sono presenti li scarica e li copia sul tape e li registra. se vuoi copiare tuttto il bucket usare ''
+```
+python3 copy_register_s3_to_tape.py --bucket cygno-analysis --prefix '' --scope cygno-analysis --minio --log_file register_to_tape_analysis_MINIO.log
+```
+```
+python3 copy_register_s3_to_tape.py --bucket cygno-sim --prefix '' --scope cygno-sim --minio --log_file register_to_tape_sim_MINIO.log
+```
+###replica i file tra 2 rse a partire da una lista
+```
+python3 replicate_files_source_to_dest.py --scope cygno-data --prefix LNGS --source_rse T1_USERTAPE --dest_rse CNAF_USERDISK --account rucio-daq   --file_list LNGS.txt --log_file replicate_files_LNGS.log
+```
