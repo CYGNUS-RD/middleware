@@ -63,12 +63,14 @@ services:
 #
   backupper_sql:
     restart: always
-    image: gmazzitelli/backupper:v0.2
+    image: gmazzitelli/backupper:v0.3
     container_name: backupper_sql
     environment:
        BCK_START_NAME: 'sql_${VM_SERVICE}'
     volumes:
-       - /var/lib/docker/volumes/mariadb_mariadb/_data/:/root/data/
+       - /root/.rucio.cfg:/app/.rucio.cfg
+#       - /var/lib/docker/volumes/mariadb_mariadb/_data/:/root/data/ #era root per v0.2 
+       - /var/lib/docker/volumes/mariadb_mariadb/_data/:/app/data/ 
        - /tmp/:/tmp/
 
 #
@@ -77,40 +79,40 @@ services:
 
   backupper_sql_mango:
     restart: always
-    image: gmazzitelli/backupper:v0.2
+    image: gmazzitelli/backupper:v0.3
     profiles: ["grafana"]
     container_name: backupper_sql_mango
     environment:
        BCK_START_NAME: 'sql_mango_${VM_SERVICE}'
     volumes:
-       - /var/lib/docker/volumes/mariadb_mango_db/_data/:/root/data/
+       - /root/.rucio.cfg:/app/.rucio.cfg
+       - /var/lib/docker/volumes/mariadb_mango_db/_data/:/app/data/ #era root per v0.2
        - /tmp/:/tmp/
 
-  tokener:
-    image: gmazzitelli/tokener:v0.2
-    container_name: tokener
-    environment:
-      REFRESH_TOKEN: ${REFRESH_TOKEN}
-      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
-      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
-      IAM_TOKEN_ENDPOINT: ${IAM_TOKEN_ENDPOINT}
-      SCOPES: ${SCOPES}
+#  tokener:
+#    image: gmazzitelli/tokener:v0.2
+#    container_name: tokener
+#    environment:
+#      REFRESH_TOKEN: ${REFRESH_TOKEN}
+#      IAM_CLIENT_SECRET: ${IAM_CLIENT_SECRET}
+#      IAM_CLIENT_ID: ${IAM_CLIENT_ID}
+#      IAM_TOKEN_ENDPOINT: ${IAM_TOKEN_ENDPOINT}
+#      SCOPES: ${SCOPES}
+#    volumes:
+#      - /tmp/:/tmp/
 
-    volumes:
-      - /tmp/:/tmp/
-
-  tokener_tape:
-    image: gmazzitelli/tokener:v0.2
-    container_name: tokener_tape
-    environment:
-      REFRESH_TOKEN: ${TAPE_REFRESH_TOKEN}
-      IAM_CLIENT_SECRET: ${TAPE_IAM_CLIENT_SECRET}
-      IAM_CLIENT_ID: ${TAPE_IAM_CLIENT_ID}
-      IAM_TOKEN_ENDPOINT: ${TAPE_IAM_TOKEN_ENDPOINT}
-      SCOPES: ${TAPE_SCOPES}
-      TOKEN_FILE: '/tmp/tape_token'
-    volumes:
-      - /tmp/:/tmp/
+#  tokener_tape:
+#    image: gmazzitelli/tokener:v0.2
+#    container_name: tokener_tape
+#    environment:
+#      REFRESH_TOKEN: ${TAPE_REFRESH_TOKEN}
+#      IAM_CLIENT_SECRET: ${TAPE_IAM_CLIENT_SECRET}
+#      IAM_CLIENT_ID: ${TAPE_IAM_CLIENT_ID}
+#      IAM_TOKEN_ENDPOINT: ${TAPE_IAM_TOKEN_ENDPOINT}
+#      SCOPES: ${TAPE_SCOPES}
+#      TOKEN_FILE: '/tmp/tape_token'
+#    volumes:
+#      - /tmp/:/tmp/
 
 volumes:
   mariadb:
