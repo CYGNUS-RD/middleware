@@ -88,12 +88,13 @@ services:
 
   backupper_grafana:
     restart: always
-    image: gmazzitelli/backupper:v0.2
+    image: gmazzitelli/backupper:v0.3
     container_name: backupper_grafana
     environment:
-       BCK_START_NAME: 'grafana'
+       BCK_START_NAME: 'grafana_${VM_SERVICE}'
     volumes:
-       - /var/lib/docker/volumes/grafana_dbdata/_data/:/root/data/
+       - /root/.rucio.cfg:/app/.rucio.cfg
+       - /var/lib/docker/volumes/grafana_dbdata/_data/:/app/data/ #era root per la v0.2
        - /tmp/:/tmp/
 
 # aggiunto dentro maria db
