@@ -1,3 +1,6 @@
+### WARNING: this docker use profile 
+- by setting ~/.bashrc export COMPOSE_PROFILES=grafana 
+- docker compose --profile grafana up
 # How to install MariaDB and Useful links
 
 ## Installation and Configuration Maria DB
