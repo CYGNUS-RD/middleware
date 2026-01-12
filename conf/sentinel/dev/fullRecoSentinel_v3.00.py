@@ -305,12 +305,12 @@ def forOverPandasCloud(df,connection):# Define the two filters
             
             recoStatus, uploadStatus = statusReco(recofolder + recofilename)
             
-            if recoStatus:
+            if recoStatus and uploadStatus:
                 sql_update_reco_status(row['Run_number'],1,connection) #Update the online_reco variable to 1, which means "reconstructed"
-
-            if uploadStatus:          
                 #Update dataFrame
                 df.loc[df['Cluster_ID'] == cluster_ID_row, 'Cloud_storage'] = 1
+            else:
+                df.loc[df['Cluster_ID'] == cluster_ID_row, 'Status'] = 'held'
                 
     return df
 
@@ -345,12 +345,12 @@ def forOverPandasCloud_rm(df):# Define the two filters
 
 def forOverPandasHeld(df, connection):# Define the two filters
     filter1 = df['Status'] == 'held'
-    filter2 = df['Data_transfered'] == 0
+#    filter2 = df['Data_transfered'] == 0
     filter3 = df['Cloud_storage'] == 0   
 
     # Loop over the rows of the DataFrame and apply the filters
     for index, row in df.iterrows():
-        if filter1[index] and filter2[index] and filter3[index]:
+        if filter1[index]  and filter3[index]:
             cluster_ID_row = row['Cluster_ID']
             print("Removing Job %s from the condor queue" %cluster_ID_row)
             try:
@@ -503,6 +503,7 @@ def main(run_number_start, run_number_end, nproc, maxidle, TAG, recopath = 'reco
     
                     cluster_id = sendjob(PATH_DEV,submit_run,autoreconame)
                     if cluster_id:
+                        df_condor  = update_job_status(df_condor, cluster_id, "idle")
                         status = sql_update_reco_status(submit_run,0,connection) #Update the online_reco variable to 0, which means "reconstructing"
                         if verbose:
                             print("Update Table: %d" %status, end='\r')
@@ -513,8 +514,8 @@ def main(run_number_start, run_number_end, nproc, maxidle, TAG, recopath = 'reco
                         if verbose:
                             print("Run " + str(submit_run)+ "submitted with Cluster_ID: " + str(cluster_id) + "\n", end='\r')
     
-                        status     = getJobStatus(cluster_id)
-                        df_condor  = update_job_status(df_condor, cluster_id, status)
+                        jobStatus  = getJobStatus(cluster_id)
+                        df_condor  = update_job_status(df_condor, cluster_id, jobStatus)
                         # Insert run_number information to the dataframe
                         df_condor.loc[df_condor['Cluster_ID'] == cluster_id, 'Run_number'] = submit_run           
     
@@ -553,7 +554,7 @@ def main(run_number_start, run_number_end, nproc, maxidle, TAG, recopath = 'reco
         savetables(df_condor, outname)
         
         
-        nheld = 20
+        nheld = 15
         if aux_held >= nheld:
             if verbose:
                 print("Checking completed Jobs on Queue\n", end='\r')
