@@ -1,6 +1,7 @@
 imagine per upoload dati dal DAQ
-v0.3 controllo del "register_after_upload": True, eliminato il warning
-v0.2 controllo degli errori
+- v0.3 controllo del "register_after_upload": True, eliminato il warning
+- v0.2 controllo degli errori
+- v0.1 base
 ```
 docker build -t gmazzitelli/rucio-uploader:v0.X .
 ```
