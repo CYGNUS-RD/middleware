@@ -367,7 +367,8 @@ def forOverPandasHeld(df, connection):# Define the two filters
                     raise Exception(f"Error in executing condor_rm: {error}")
                 print("Restoring the job to the Queue")
                 sql_update_reco_status(row['Run_number'],-1,connection)
-                df = df.drop(df.loc[df['Cluster_ID'] == cluster_ID_row].index)                
+                df = df.drop(df.loc[df['Cluster_ID'] == cluster_ID_row].index)
+                df = df.reset_index(drop=True)
             except:
                 print("Retry")
     return df
@@ -385,7 +386,8 @@ def forOverPandasUnknown(df, connection):# Define the two filters
             try:
                 print("Restoring the job to the Queue")
                 sql_update_reco_status(row['Run_number'],-1,connection)
-                df = df.drop(df.loc[df['Cluster_ID'] == cluster_ID_row].index)                
+                df = df.drop(df.loc[df['Cluster_ID'] == cluster_ID_row].index)
+                df = df.reset_index(drop=True)
             except:
                 print("Retry")
     return df
