@@ -1,5 +1,5 @@
 # docker per il DAQ 
-# docker build -t gmazzitelli/rucio-uploader:v0.1 .
+# docker build -t gmazzitelli/rucio-uploader:v0.3 .
 #
 FROM rucio/rucio-clients:latest
 

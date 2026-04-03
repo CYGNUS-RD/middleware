@@ -24,4 +24,4 @@ Warning:<br />
   <!----  Use ```oidc-add --reauthenticate cygno``` and follow the instructions and just press enter when asked about password. <br/>--->
   -  Use ```eval $(oidc-agent)``` 
   -  Use ```oidc-add cygno``` and follow the instructions and just press enter when asked about password.
-  -  After you get a success do ```oidc-token > ~/.cygno_token ```
+  -  After you get a success do ```oidc-token cygno > ~/.cygno_token ```
