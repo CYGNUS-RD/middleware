@@ -51,6 +51,11 @@ e quindi trovare il did corretto che definira' anche dove il file verra' replica
 # ricopia un file da tape a CNAF_USERDISK per 3 mesi, oppure mettere quello che si vuole o rimuovere
 rucio rule add --copies 1 --rse-exp CNAF_USERDISK --lifetime 7776000 cygno-data:MAN/run26737.mid.gz
 ``` 
+una volta lanciato il comando di sopra, uno può controllare lo stato della replication dal comando:
+```
+rucio rule list --did cygno-data:MAN/run26737.mid.gz`
+```
+
 - fare eventualemnte una lista di file per un determinato TAG o di did e eseguire il loop:
 ```
 while read fname; do rucio rule add --copies 1 --rse-exp CNAF_USERDISK cygno-data:TAG/$fname; done < list.txt

@@ -32,6 +32,19 @@ from rucio.common.exception import DuplicateRule, NoFilesUploaded
 rucio_cfg = os.environ.get('RUCIO_CONFIG', '/home/.rucio.cfg')
 os.environ['RUCIO_CONFIG'] = rucio_cfg
 
+#
+bearer_token = os.environ.get("BEARER_TOKEN")
+#
+# 27/4/26 aggiunto caricamento del TOKEN se necessario per l'accesso allo storage (FLASH) non dovrebbe cambiare per CYGNO
+# comunque in linea con rucio-uploader:v0.4 
+#
+if bearer_token:
+    os.environ["RUCIO_AUTH_TOKEN"] = bearer_token
+    print("[INFO] BEARER_TOKEN/RUCIO_AUTH_TOKEN environment variable setted")
+else:
+    print("[WARNING/ERROR] Missing BEARER_TOKEN/RUCIO_AUTH_TOKEN environment variable")
+
+
 # Parse arguments
 parser = argparse.ArgumentParser()
 parser.add_argument('--file', required=True, help="File to upload")
