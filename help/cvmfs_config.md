@@ -10,7 +10,7 @@
 
 WARNING: Be careful not to have the /cvmfs resource in use by any process. This means you should either exit the /cvmfs directory if you have entered it, or ensure the Docker container is removed. Using the --rm option will automatically remove the container upon exit.
 
-### publishing python library for a specific os relese (ex export PYTHONPATH="/mnt/py/Ubuntu22.04_Py3.11.9")
+### publishing python library for a specific os release (ex export PYTHONPATH="/mnt/py/Ubuntu22.04_Py3.11.9")
 - connenct to ```ssh mazzitel@2notebook00.cygno.cloud.infn.it```
 - change user as root ```sudo su```
 - ```cd /home/mazzitel/jupyterhub/CYGNO/package```
