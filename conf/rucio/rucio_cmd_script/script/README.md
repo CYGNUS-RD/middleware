@@ -77,3 +77,19 @@ python3 copy_register_s3_to_tape.py --bucket cygno-sim --prefix '' --scope cygno
 ```
 python3 replicate_files_source_to_dest.py --scope cygno-data --prefix LNGS --source_rse T1_USERTAPE --dest_rse CNAF_USERDISK --account rucio-daq   --file_list LNGS.txt --log_file replicate_files_LNGS.log
 ```
+### Deleting runs from cloud
+
+```
+rucio delete-rule rucio rule list --did cygno-data:WC/run00065.mid.gz | grep CNAF_USERDISK | awk '{print $1}' (remove copy from CNAF_USERDISK)
+```
+```
+for did in $(python3 did_list.py --pattern WC/*); do rucio rule list --did $did; done
+```
+```
+for did in $(python3 did_list.py --pattern WC/*); do rucio delete-rule rucio rule list --did $did | grep CNAF_USERDISK | awk '{print $1}'; done
+```
+
+### How to remove a series of did from CNAF
+```
+while read fname; do echo $fname; rucio did remove $fname ; done < BCK.txt (lo rimunove dal disco e come did)
+```
