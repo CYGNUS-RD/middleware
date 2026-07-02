@@ -73,7 +73,7 @@ python3 copy_register_s3_to_tape.py --bucket cygno-analysis --prefix '' --scope 
 ```
 python3 copy_register_s3_to_tape.py --bucket cygno-sim --prefix '' --scope cygno-sim --minio --log_file register_to_tape_sim_MINIO.log
 ```
-###replica i file tra 2 rse a partire da una lista
+### Replicate files between 2 rse from list
 ```
 python3 replicate_files_source_to_dest.py --scope cygno-data --prefix LNGS --source_rse T1_USERTAPE --dest_rse CNAF_USERDISK --account rucio-daq   --file_list LNGS.txt --log_file replicate_files_LNGS.log
 ```
