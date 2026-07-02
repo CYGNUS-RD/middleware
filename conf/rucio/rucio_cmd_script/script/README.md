@@ -66,7 +66,7 @@ rucio rule remove `rucio rule list --did cygno-data:WC/run00065.mid.gz | grep CN
 for did in $(python3 did_list.py --pattern WC/*); do rucio rule list --did $did; done
 ```
 ```
-for did in $(python3 did_list.py --pattern WC/*); do rucio delete-rule rucio rule list --did $did | grep CNAF_USERDISK | awk '{print $1}'; done
+for did in $(python3 did_list.py --pattern WC/*); do rucio rule remove `rucio rule list --did $did | grep CNAF_USERDISK | awk '{print $1}'`; done
 ```
 If you want to remove a list, then
 ```
