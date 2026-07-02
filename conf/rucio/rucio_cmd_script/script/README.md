@@ -58,9 +58,9 @@ while read fname; do rucio rule add --copies 1 --rse-exp CNAF_USERDISK cygno-dat
 - ricordarsi di disconnetrsi con la sequenza Crtl-P Ctrl-Q, e non con exit
 
 ### Deleting runs from CNAF_USERDISK
-
+ (remove copy from CNAF_USERDISK)
 ```
-rucio delete-rule rucio rule list --did cygno-data:WC/run00065.mid.gz | grep CNAF_USERDISK | awk '{print $1}' (remove copy from CNAF_USERDISK)
+rucio delete-rule rucio rule list --did cygno-data:WC/run00065.mid.gz | grep CNAF_USERDISK | awk '{print $1}'
 ```
 ```
 for did in $(python3 did_list.py --pattern WC/*); do rucio rule list --did $did; done
