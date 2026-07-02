@@ -68,6 +68,10 @@ for did in $(python3 did_list.py --pattern WC/*); do rucio rule list --did $did;
 ```
 for did in $(python3 did_list.py --pattern WC/*); do rucio delete-rule rucio rule list --did $did | grep CNAF_USERDISK | awk '{print $1}'; done
 ```
+If you want to remove a list, then
+```
+while read fname; do echo $fname; rucio did remove $fname ; done < BCK.txt (lo rimunove dal disco e come did)
+```
 
 
 ### copia su TAPE e registrazione da S3 ####
@@ -89,8 +93,4 @@ python3 copy_register_s3_to_tape.py --bucket cygno-sim --prefix '' --scope cygno
 ### Replicate files between 2 rse from list
 ```
 python3 replicate_files_source_to_dest.py --scope cygno-data --prefix LNGS --source_rse T1_USERTAPE --dest_rse CNAF_USERDISK --account rucio-daq   --file_list LNGS.txt --log_file replicate_files_LNGS.log
-```
-### How to remove a series of did from CNAF
-```
-while read fname; do echo $fname; rucio did remove $fname ; done < BCK.txt (lo rimunove dal disco e come did)
 ```
