@@ -64,18 +64,35 @@ while read fname; do rucio rule add --copies 1 --rse-exp CNAF_USERDISK cygno-dat
 
 ### Deleting runs from CNAF_USERDISK
  (remove copy from CNAF_USERDISK)
+
+In rucio the did is the path-like string, while the rule is a hash value which depends on the rule (CNAF or tape). Unsure yet if removing CNAF rule is enough to remove from CNAF disk the files or if the did needs to be removed after the rule protecting it disappears (stronger maneuver).
+
+To one file through rule use:
 ```
 rucio rule remove `rucio rule list --did cygno-data:WC/run00065.mid.gz | grep CNAF_USERDISK | awk '{print $1}'`
 ```
+The following uses the python code to transform a pattern (55{6..9} does not work as pattern) into a list of did. The rest of the command lists the rules for each did
 ```
 for did in $(python3 did_list.py --pattern WC/*); do rucio rule list --did $did; done
 ```
+
+The following uses the same python script and rucio command to extract the rules for CNAF disk and remove the rules.
 ```
 for did in $(python3 did_list.py --pattern WC/*); do rucio rule remove `rucio rule list --did $did | grep CNAF_USERDISK | awk '{print $1}'`; done
 ```
-If you want to remove a list, then
+
+If you want to remove a list, then (here it is written remove did... still debating if using rule is enough)
 ```
 while read fname; do echo $fname; rucio did remove $fname ; done < BCK.txt (lo rimunove dal disco e come did)
+```
+
+To create the list you can use the following for a list of did
+```
+python3 did_list.py --pattern WC/* >> list_did.txt
+```
+Or the following for a list of rules for CNAF based on did
+```
+for did in $(python3 did_list.py --pattern WC/*); do echo `rucio rule list --did $did | grep CNAF_USERDISK | awk '{print $1}'>>list_rules.txt`; done
 ```
 
 
