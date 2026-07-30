@@ -67,11 +67,11 @@ while read fname; do rucio rule add --copies 1 --rse-exp CNAF_USERDISK cygno-dat
 
 In rucio the did is the path-like string, while the rule is a hash value which depends on the rule (CNAF or tape). Unsure yet if removing CNAF rule is enough to remove from CNAF disk the files or if the did needs to be removed after the rule protecting it disappears (stronger maneuver).
 
-To one file through rule use:
+To remove one file through rule use:
 ```
 rucio rule remove `rucio rule list --did cygno-data:WC/run00065.mid.gz | grep CNAF_USERDISK | awk '{print $1}'`
 ```
-The following uses the python code to transform a pattern (55{6..9} does not work as pattern) into a list of did. The rest of the command lists the rules for each did
+The following uses the python code to transform a pattern (55{6..9} does not work as pattern) into a list of did. The rest of the command lists the rules for each did (lots of info from this line!)
 ```
 for did in $(python3 did_list.py --pattern WC/*); do rucio rule list --did $did; done
 ```
