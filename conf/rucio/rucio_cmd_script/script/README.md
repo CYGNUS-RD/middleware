@@ -65,7 +65,7 @@ while read fname; do rucio rule add --copies 1 --rse-exp CNAF_USERDISK cygno-dat
 ### Deleting runs from CNAF_USERDISK
  (remove copy from CNAF_USERDISK)
 
-In rucio the did is the path-like string, while the rule is a hash value which depends on the rule (CNAF or tape). Unsure yet if removing CNAF rule is enough to remove from CNAF disk the files or if the did needs to be removed after the rule protecting it disappears (stronger maneuver).
+In rucio the did is the path-like string, while the rule is a hash value which depends on the rule (CNAF or tape). It appears that removing the rule is enough to remove files from CNAF. The removal of the did, will remove it from the database (stronger maneuver required if the data does not disappear).
 
 To remove one file through rule use:
 ```
@@ -81,9 +81,9 @@ The following uses the same python script and rucio command to extract the rules
 for did in $(python3 did_list.py --pattern WC/*); do rucio rule remove `rucio rule list --did $did | grep CNAF_USERDISK | awk '{print $1}'`; done
 ```
 
-If you want to remove a list, then (here it is written remove did... still debating if using rule is enough)
+If you want to remove a list
 ```
-while read fname; do echo $fname; rucio did remove $fname ; done < BCK.txt (lo rimunove dal disco e come did)
+while read fname; do echo $fname; rucio rule remove $fname ; done < BCK.txt (lo rimunove dal disco e come did)
 ```
 
 To create the list you can use the following for a list of did
@@ -95,7 +95,7 @@ Or the following for a list of rules for CNAF based on did
 for did in $(python3 did_list.py --pattern WC/*); do echo `rucio rule list --did $did | grep CNAF_USERDISK | awk '{print $1}'>>list_rules.txt`; done
 ```
 
-
+If then the data are not getting canceled you need to do the same replacing ```rucio rule remove``` with ```rucio did remove```
 ### copia su TAPE e registrazione da S3 ####
 ad esempio per controllare e compiare i file da S3 (bari) su TAPE
 ```
