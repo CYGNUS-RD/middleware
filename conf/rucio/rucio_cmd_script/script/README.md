@@ -95,6 +95,12 @@ Or the following for a list of rules for CNAF based on did
 for did in $(python3 did_list.py --pattern WC/*); do echo `rucio rule list --did $did | grep CNAF_USERDISK | awk '{print $1}'>>list_rules.txt`; done
 ```
 
+If instead you have a list of run numbers, the list of rules can be created as 
+```
+for run in {19909..19912}; do did=$(python3 did_list.py --pattern LNGS/run$run*); echo `rucio rule list --did $did | gr
+ep CNAF_USERDISK | awk '{print $1}'>>list_rules.txt`; done
+```
+
 If then the data are not getting canceled you need to do the same replacing ```rucio rule remove``` with ```rucio did remove```
 ### copia su TAPE e registrazione da S3 ####
 ad esempio per controllare e compiare i file da S3 (bari) su TAPE
