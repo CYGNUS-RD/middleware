@@ -83,7 +83,7 @@ for did in $(python3 did_list.py --pattern WC/*); do rucio rule remove `rucio ru
 
 If you want to remove a list
 ```
-while read fname; do echo $fname; rucio rule remove $fname ; done < BCK.txt (lo rimunove dal disco e come did)
+while read fname; do echo $fname; rucio rule remove $fname ; done < BCK.txt 
 ```
 
 To create the list you can use the following for a list of did
